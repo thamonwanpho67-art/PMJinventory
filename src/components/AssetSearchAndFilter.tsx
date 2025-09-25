@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaSearch, FaFilter, FaTh, FaList, FaSort } from 'react-icons/fa';
+import { FaSearch, FaSort } from 'react-icons/fa';
 
 type UserAsset = {
   id: string;
@@ -58,7 +58,7 @@ export default function AssetSearchAndFilter({
     }
 
     // Sort
-    filtered.sort((a, b) => {
+    filtered.sort((a: UserAsset, b: UserAsset) => {
       let aValue: string | number, bValue: string | number;
       
       switch (sortBy) {
@@ -193,7 +193,7 @@ export default function AssetSearchAndFilter({
       <div className="flex flex-wrap gap-2">
         {searchTerm && (
           <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-kanit">
-            ค้นหา: &quot;{searchTerm}&quot;
+            ค้นหา: &ldquo;{searchTerm}&rdquo;
           </span>
         )}
         {selectedCategory !== 'all' && (
