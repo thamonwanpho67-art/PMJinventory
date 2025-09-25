@@ -45,7 +45,8 @@ class AlertService {
     const Swal = await this.getSwal();
     return Swal.fire({
       ...commonConfig,
-      ...config
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...config as any
     });
   }
 
@@ -56,7 +57,8 @@ class AlertService {
       title,
       text,
       confirmButtonText: 'ตกลง',
-      ...options
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...options as any
     });
   }
 
@@ -67,7 +69,8 @@ class AlertService {
       title,
       text,
       confirmButtonText: 'ตกลง',
-      ...options
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...options as any
     });
   }
 
@@ -78,7 +81,8 @@ class AlertService {
       title,
       text,
       confirmButtonText: 'ตกลง',
-      ...options
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...options as any
     });
   }
 
@@ -89,7 +93,8 @@ class AlertService {
       title,
       text,
       confirmButtonText: 'ตกลง',
-      ...options
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...options as any
     });
   }
 
@@ -102,7 +107,8 @@ class AlertService {
       showCancelButton: true,
       confirmButtonText: 'ยืนยัน',
       cancelButtonText: 'ยกเลิก',
-      ...options
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...options as any
     });
   }
 

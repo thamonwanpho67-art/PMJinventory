@@ -48,15 +48,16 @@ export async function PUT(request: NextRequest) {
     }
 
     // ตรวจสอบจำนวนที่ถูกยืมอยู่
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const borrowedCount = await prisma.loan.aggregate({
       where: {
         assetId: assetId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         status: 'BORROWED' as any
       },
       _sum: {
         quantity: true
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -139,7 +140,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newQuantity = asset.quantity + adjustment;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newQuantity = (asset as any).quantity + adjustment;
 
     if (newQuantity < 0) {
       return NextResponse.json(
@@ -181,7 +183,8 @@ export async function POST(request: NextRequest) {
       data: { 
         quantity: newQuantity,
         updatedAt: new Date()
-      }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any
     });
 
     // คำนวณจำนวนที่พร้อมใช้งาน
