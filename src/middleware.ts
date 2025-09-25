@@ -2,39 +2,45 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export default auth((req) => {
-  const token = req.auth;
-  const isAuth = !!token;
-  const isAuthPage = req.nextUrl.pathname.startsWith("/login");
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
+  const isAuthPage = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
 
-  if (isAuthPage) {
-    if (isAuth) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return null;
+  // Allow auth API routes
+  if (nextUrl.pathname.startsWith("/api/auth")) {
+    return NextResponse.next();
   }
 
-  if (!isAuth) {
-    let from = req.nextUrl.pathname;
-    if (req.nextUrl.search) {
-      from += req.nextUrl.search;
+  // Redirect to login if not authenticated and not on auth page
+  if (!isLoggedIn && !isAuthPage) {
+    let from = nextUrl.pathname;
+    if (nextUrl.search) {
+      from += nextUrl.search;
     }
-
     return NextResponse.redirect(
-      new URL(`/login?from=${encodeURIComponent(from)}`, req.url)
+      new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl)
     );
   }
 
-  // Handle role-based access
-  const role = token?.user?.role;
-  const path = req.nextUrl.pathname;
-
-  // Routes that require ADMIN role
-  if (path.startsWith("/admin") && role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+  // Redirect authenticated users from auth pages to dashboard
+  if (isLoggedIn && isAuthPage) {
+    return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
+
+  // Handle role-based access
+  if (isLoggedIn && req.auth?.user) {
+    const role = req.auth.user.role;
+    const path = nextUrl.pathname;
+
+    // Admin routes protection
+    if (path.startsWith("/admin") && role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", nextUrl));
+    }
+  }
+
+  return NextResponse.next();
 });
 
-// Protect all routes except public ones
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login|register).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

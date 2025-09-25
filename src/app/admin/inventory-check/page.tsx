@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
 import { FaQrcode, FaArrowLeft, FaBox, FaSearch, FaCheckCircle, FaTimes, FaSpinner, FaPlus, FaMinus } from 'react-icons/fa';
 import QRScanner from '@/components/QRScanner';
+import LayoutWrapper from '@/components/LayoutWrapper';
 
 interface AssetData {
   id: string;
@@ -25,12 +28,28 @@ interface InventoryCheck {
 
 export default function InventoryCheckPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [showScanner, setShowScanner] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inventoryList, setInventoryList] = useState<InventoryCheck[]>([]);
   const [currentAsset, setCurrentAsset] = useState<AssetData | null>(null);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-600 mx-auto mb-4"></div>
+          <p className="text-pink-600 font-medium">กำลังโหลดข้อมูล...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated' || session?.user?.role !== 'ADMIN') {
+    redirect('/dashboard');
+  }
 
   const handleScanResult = async (qrData: string) => {
     setLoading(true);
@@ -194,24 +213,24 @@ export default function InventoryCheckPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
-      <div className="max-w-6xl mx-auto">
+    <LayoutWrapper>
+      <div className="p-6">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-pink-100">
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => router.push('/admin')}
-              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-pink-600 hover:text-pink-800 hover:bg-pink-50 rounded-lg transition-colors"
             >
               <FaArrowLeft className="text-xl" />
             </button>
-            <h1 className="text-2xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-kanit font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
               ตรวจนับครุภัณฑ์
             </h1>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowScanner(true)}
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 font-kanit"
+                className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-600 hover:to-rose-600 transition-all duration-300 font-kanit shadow-md hover:shadow-lg"
               >
                 <FaQrcode className="inline mr-2" />
                 สแกน QR
@@ -219,7 +238,7 @@ export default function InventoryCheckPage() {
               {inventoryList.length > 0 && (
                 <button
                   onClick={exportReport}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 font-kanit"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 font-kanit shadow-md hover:shadow-lg"
                 >
                   ส่งออกรายงาน
                 </button>
@@ -227,7 +246,7 @@ export default function InventoryCheckPage() {
             </div>
           </div>
           
-          <p className="text-gray-600 font-kanit text-center">
+          <p className="text-pink-700 font-kanit text-center">
             ใช้กล้องสแกน QR Code บนครุภัณฑ์เพื่อตรวจนับจำนวนในคลัง
           </p>
         </div>
@@ -235,10 +254,10 @@ export default function InventoryCheckPage() {
         {/* Summary Cards */}
         {inventoryList.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+            <div className="bg-white rounded-xl p-4 shadow-lg border border-pink-100">
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{summary.total}</div>
-                <div className="text-sm text-gray-600 font-kanit">รายการทั้งหมด</div>
+                <div className="text-2xl font-bold text-pink-600">{summary.total}</div>
+                <div className="text-sm text-pink-600 font-kanit">รายการทั้งหมด</div>
               </div>
             </div>
             
@@ -267,15 +286,15 @@ export default function InventoryCheckPage() {
 
         {/* Search Bar */}
         {inventoryList.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-4 mb-6">
+          <div className="bg-white rounded-2xl shadow-lg p-4 mb-6 border border-pink-100">
             <div className="relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
               <input
                 type="text"
                 placeholder="ค้นหาครุภัณฑ์..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-kanit"
+                className="w-full pl-10 pr-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
               />
             </div>
           </div>
@@ -283,30 +302,30 @@ export default function InventoryCheckPage() {
 
         {/* Inventory List */}
         {filteredInventory.length > 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-kanit font-bold text-gray-900 mb-4">รายการที่ตรวจนับแล้ว</h2>
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-pink-100">
+            <h2 className="text-xl font-kanit font-bold text-pink-800 mb-4">รายการที่ตรวจนับแล้ว</h2>
             
             <div className="space-y-4">
               {filteredInventory.map((item) => (
                 <div
                   key={item.assetId}
-                  className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+                  className="border border-pink-100 rounded-xl p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-pink-25 to-rose-25"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-kanit font-bold text-gray-900">{item.assetName}</h3>
+                        <h3 className="text-lg font-kanit font-bold text-pink-800">{item.assetName}</h3>
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(item.status)}`}>
                           {getStatusText(item.status)}
                         </span>
                       </div>
-                      <p className="text-gray-600 font-kanit mb-2">รหัส: {item.assetCode}</p>
+                      <p className="text-pink-600 font-kanit mb-2">รหัส: {item.assetCode}</p>
                       
                       <div className="flex items-center space-x-6 text-sm">
-                        <span className="text-gray-600 font-kanit">
+                        <span className="text-pink-600 font-kanit">
                           ควรมี: <span className="font-bold">{item.expectedQuantity}</span>
                         </span>
-                        <span className="text-gray-600 font-kanit">
+                        <span className="text-pink-600 font-kanit">
                           ตรวจนับได้: <span className="font-bold">{item.scannedQuantity}</span>
                         </span>
                         <span className={`font-kanit font-bold ${
@@ -332,7 +351,7 @@ export default function InventoryCheckPage() {
                       
                       <button
                         onClick={() => adjustQuantity(item.assetId, 1)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
                       >
                         <FaPlus />
                       </button>
@@ -350,36 +369,36 @@ export default function InventoryCheckPage() {
             </div>
           </div>
         ) : inventoryList.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaBox className="text-4xl text-blue-600" />
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-pink-100">
+            <div className="w-24 h-24 bg-gradient-to-r from-pink-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaBox className="text-4xl text-pink-600" />
             </div>
-            <h2 className="text-2xl font-kanit font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-kanit font-bold text-pink-800 mb-4">
               เริ่มต้นตรวจนับครุภัณฑ์
             </h2>
-            <p className="text-gray-600 font-kanit mb-8 max-w-md mx-auto">
+            <p className="text-pink-600 font-kanit mb-8 max-w-md mx-auto">
               คลิกปุ่ม &quot;สแกน QR&quot; เพื่อเริ่มต้นตรวจนับครุภัณฑ์ในคลัง ระบบจะบันทึกจำนวนที่ตรวจนับได้อัตโนมัติ
             </p>
             <button
               onClick={() => setShowScanner(true)}
-              className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 font-kanit font-bold transform hover:scale-105 shadow-lg"
+              className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-8 py-4 rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 font-kanit font-bold transform hover:scale-105 shadow-lg"
             >
               <FaQrcode className="inline mr-2" />
               เริ่มสแกน QR Code
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <p className="text-gray-600 font-kanit">ไม่พบรายการที่ตรงกับการค้นหา</p>
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center border border-pink-100">
+            <p className="text-pink-600 font-kanit">ไม่พบรายการที่ตรงกับการค้นหา</p>
           </div>
         )}
 
         {/* Loading State */}
         {loading && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
-            <div className="bg-white rounded-2xl p-8 shadow-2xl">
-              <FaSpinner className="text-4xl text-blue-600 mx-auto mb-4 animate-spin" />
-              <p className="text-gray-600 font-kanit">กำลังตรวจสอบข้อมูล...</p>
+            <div className="bg-white rounded-2xl p-8 shadow-2xl border border-pink-100">
+              <FaSpinner className="text-4xl text-pink-600 mx-auto mb-4 animate-spin" />
+              <p className="text-pink-600 font-kanit">กำลังตรวจสอบข้อมูล...</p>
             </div>
           </div>
         )}
@@ -409,6 +428,6 @@ export default function InventoryCheckPage() {
           description="นำกล้องไปส่องที่ QR Code บนครุภัณฑ์ที่ต้องการตรวจนับ"
         />
       </div>
-    </div>
+    </LayoutWrapper>
   );
 }

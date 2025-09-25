@@ -31,7 +31,14 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        await Alert.error('เข้าสู่ระบบไม่สำเร็จ', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+        // Handle specific NextAuth errors
+        if (result.error === 'CredentialsSignin') {
+          await Alert.error('เข้าสู่ระบบไม่สำเร็จ', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+        } else if (result.error === 'ClientFetchError') {
+          await Alert.error('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'กรุณาลองใหม่อีกครั้ง');
+        } else {
+          await Alert.error('เกิดข้อผิดพลาด', result.error);
+        }
         return;
       }
 
@@ -47,8 +54,9 @@ export default function LoginForm() {
       }
       router.refresh();
     } catch (err) {
-      console.error(err);
-      await Alert.error_messages.networkError();
+      console.error('Login error:', err);
+      // Handle network errors and other exceptions
+      await Alert.error('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่');
     } finally {
       setLoading(false);
     }
