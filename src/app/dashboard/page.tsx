@@ -4,11 +4,17 @@ import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
-import BorrowForm from '@/components/BorrowForm';
+import dynamic from 'next/dynamic';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import ClientOnly from '@/components/ClientOnly';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch } from 'react-icons/fa';
+
+// Dynamic imports to reduce chunk size
+const BorrowForm = dynamic(() => import('@/components/BorrowForm'), {
+  loading: () => <LoadingSpinner size="md" color="pink" text="กำลังโหลดฟอร์ม..." />,
+  ssr: false
+});
 
 type Asset = {
   id: string;

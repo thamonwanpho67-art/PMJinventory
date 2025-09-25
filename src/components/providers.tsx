@@ -3,6 +3,7 @@
 import { SessionProvider } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import LoadingSpinner from './LoadingSpinner';
+import ChunkErrorHandler from './ChunkErrorHandler';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false);
@@ -21,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       refetchInterval={5 * 60} // 5 minutes
       refetchOnWindowFocus={true}
     >
+      <ChunkErrorHandler />
       {children}
     </SessionProvider>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Kanit } from "next/font/google";
 import { Providers } from "@/components/providers";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 
 const kanit = Kanit({
@@ -25,7 +26,9 @@ export default function RootLayout({
       <body
         className={`${kanit.variable} font-kanit antialiased bg-gradient-to-br from-pink-50 to-rose-50`}
       >
-        <Providers>{children}</Providers>
+        <ErrorBoundary>
+          <Providers>{children}</Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );

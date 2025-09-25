@@ -6,9 +6,24 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isAuthPage = nextUrl.pathname.startsWith("/login") || nextUrl.pathname.startsWith("/register");
 
-  // Allow auth API routes
-  if (nextUrl.pathname.startsWith("/api/auth")) {
+  // Allow public assets and API routes
+  if (
+    nextUrl.pathname.startsWith("/api/auth") ||
+    nextUrl.pathname.startsWith("/_next") ||
+    nextUrl.pathname.startsWith("/favicon.ico") ||
+    nextUrl.pathname.startsWith("/images") ||
+    nextUrl.pathname.includes(".")
+  ) {
     return NextResponse.next();
+  }
+
+  // Handle root path redirect
+  if (nextUrl.pathname === "/") {
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL("/dashboard", nextUrl));
+    } else {
+      return NextResponse.redirect(new URL("/login", nextUrl));
+    }
   }
 
   // Redirect to login if not authenticated and not on auth page
@@ -42,5 +57,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*).*)", "/"],
 };
