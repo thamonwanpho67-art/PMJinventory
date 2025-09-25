@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaQrcode, FaArrowLeft, FaBox, FaEye, FaSpinner } from 'react-icons/fa';
+import { FaQrcode, FaArrowLeft, FaBox, FaEye, FaSpinner, FaBars } from 'react-icons/fa';
 import QRScanner from '@/components/QRScanner';
+import Sidebar from '@/components/Sidebar';
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
 
 interface AssetData {
   id: string;
@@ -14,12 +17,17 @@ interface AssetData {
   availableQuantity: number;
 }
 
-export default function QuickBorrowPage() {
+export default function InventoryCheckPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [loading, setLoading] = useState(false);
   const [assetData, setAssetData] = useState<AssetData | null>(null);
   const [error, setError] = useState('');
+
+  if (status === 'loading') return <div>Loading...</div>;
+  if (!session) redirect('/login');
 
   const handleScanResult = async (qrData: string) => {
     setLoading(true);
@@ -63,27 +71,44 @@ export default function QuickBorrowPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-4">
-      <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <FaArrowLeft className="text-xl" />
-            </button>
-            <h1 className="text-2xl font-kanit font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-              Quick Borrow
-            </h1>
-            <div className="w-10"></div>
-          </div>
-          
-          <p className="text-gray-600 font-kanit text-center">
-            สแกน QR Code เพื่อยืมครุภัณฑ์อย่างรวดเร็ว
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50">
+      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      
+      {/* Main Content */}
+      <div className={`min-h-screen transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : ''}`}>
+        {/* Mobile hamburger menu */}
+        <div className="md:hidden p-4 bg-white shadow-sm">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex items-center gap-2 p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <FaBars className="text-xl" />
+            <span className="font-kanit font-medium">เมนู</span>
+          </button>
         </div>
+        
+        {/* Content Container */}
+        <div className="p-4 pt-0 md:pt-4">
+          <div className="max-w-md mx-auto">
+            {/* Header */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <FaArrowLeft className="text-xl" />
+                </button>
+                <h1 className="text-2xl font-kanit font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                  ตรวจนับครุภัณฑ์
+                </h1>
+                <div className="w-10"></div>
+              </div>
+              
+              <p className="text-gray-600 font-kanit text-center">
+                สแกน QR Code เพื่อตรวจสอบและนับครุภัณฑ์
+              </p>
+            </div>
 
         {/* Content Area */}
         {!assetData && !showScanner && (
@@ -93,10 +118,10 @@ export default function QuickBorrowPage() {
                 <FaQrcode className="text-4xl text-pink-600" />
               </div>
               <h2 className="text-xl font-kanit font-bold text-gray-900 mb-2">
-                เริ่มต้นการยืม
+                เริ่มต้นตรวจนับ
               </h2>
               <p className="text-gray-600 font-kanit mb-6">
-                กดปุ่มด้านล่างเพื่อเปิดกล้องและสแกน QR Code ของครุภัณฑ์ที่ต้องการยืม
+                กดปุ่มด้านล่างเพื่อเปิดกล้องและสแกน QR Code ของครุภัณฑ์ที่ต้องการตรวจนับ
               </p>
             </div>
 
@@ -105,7 +130,7 @@ export default function QuickBorrowPage() {
               className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-kanit font-bold py-4 px-6 rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               <FaQrcode className="inline mr-2" />
-              เริ่มสแกน QR Code
+              เริ่มตรวจนับครุภัณฑ์
             </button>
           </div>
         )}
@@ -118,10 +143,10 @@ export default function QuickBorrowPage() {
                 <FaBox className="text-2xl text-emerald-600" />
               </div>
               <h2 className="text-xl font-kanit font-bold text-gray-900 mb-2">
-                ตรวจสอบข้อมูลครุภัณฑ์
+                ข้อมูลครุภัณฑ์
               </h2>
               <p className="text-gray-600 font-kanit">
-                กรุณาตรวจสอบข้อมูลก่อนยืนยันการยืม
+                ตรวจสอบข้อมูลครุภัณฑ์ที่สแกนได้
               </p>
             </div>
 
@@ -158,24 +183,15 @@ export default function QuickBorrowPage() {
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              {assetData.availableQuantity > 0 ? (
-                <button
-                  onClick={handleConfirmBorrow}
-                  className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-kanit font-bold py-4 px-6 rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                >
-                  ยืนยันการยืม
-                </button>
-              ) : (
-                <div className="w-full bg-gradient-to-r from-gray-200 to-gray-300 text-gray-600 font-kanit font-bold py-4 px-6 rounded-xl text-center">
-                  ครุภัณฑ์ไม่พร้อมให้ยืม
-                </div>
-              )}
+              <div className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-kanit font-bold py-4 px-6 rounded-xl text-center">
+                ✓ ตรวจนับเสร็จสิ้น
+              </div>
 
               <button
                 onClick={handleBackToScan}
                 className="w-full border-2 border-pink-300 text-pink-600 font-kanit font-bold py-3 px-6 rounded-xl hover:bg-pink-50 transition-colors"
               >
-                สแกน QR Code อื่น
+                ตรวจนับครุภัณฑ์อื่น
               </button>
             </div>
           </div>
@@ -214,9 +230,11 @@ export default function QuickBorrowPage() {
           isOpen={showScanner}
           onClose={() => setShowScanner(false)}
           onScanResult={handleScanResult}
-          title="สแกน QR Code เพื่อยืม"
-          description="นำกล้องไปส่องที่ QR Code บนครุภัณฑ์ที่ต้องการยืม"
+          title="สแกน QR Code เพื่อตรวจนับ"
+          description="นำกล้องไปส่องที่ QR Code บนครุภัณฑ์ที่ต้องการตรวจนับ"
         />
+          </div>
+        </div>
       </div>
     </div>
   );
