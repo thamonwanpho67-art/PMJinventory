@@ -7,6 +7,7 @@ import Image from 'next/image';
 import BorrowForm from '@/components/BorrowForm';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import ClientOnly from '@/components/ClientOnly';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch } from 'react-icons/fa';
 
 type Asset = {
@@ -113,14 +114,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <ClientOnly fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-600 mx-auto mb-4"></div>
-          <p className="text-pink-600 font-medium">กำลังโหลด...</p>
-        </div>
-      </div>
-    }>
+    <ClientOnly fallback={<LoadingSpinner fullScreen color="pink" text="กำลังโหลด..." />}>
       <LayoutWrapper>
         <div className="p-6">
           {/* Welcome Header */}

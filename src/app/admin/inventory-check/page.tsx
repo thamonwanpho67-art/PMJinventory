@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { FaQrcode, FaArrowLeft, FaBox, FaSearch, FaCheckCircle, FaTimes, FaSpinner, FaPlus, FaMinus } from 'react-icons/fa';
 import QRScanner from '@/components/QRScanner';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface AssetData {
   id: string;
@@ -37,14 +38,7 @@ export default function InventoryCheckPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-600 mx-auto mb-4"></div>
-          <p className="text-pink-600 font-medium">กำลังโหลดข้อมูล...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen color="pink" text="กำลังโหลดข้อมูล..." />;
   }
 
   if (status === 'unauthenticated' || session?.user?.role !== 'ADMIN') {
@@ -397,8 +391,7 @@ export default function InventoryCheckPage() {
         {loading && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
             <div className="bg-white rounded-2xl p-8 shadow-2xl border border-pink-100">
-              <FaSpinner className="text-4xl text-pink-600 mx-auto mb-4 animate-spin" />
-              <p className="text-pink-600 font-kanit">กำลังตรวจสอบข้อมูล...</p>
+              <LoadingSpinner size="lg" color="pink" text="กำลังตรวจสอบข้อมูล..." />
             </div>
           </div>
         )}
