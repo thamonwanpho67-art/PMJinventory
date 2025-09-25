@@ -29,6 +29,7 @@ model Asset {
   description String?
   category    String?
   location    String?
+  quantity    Int         @default(1)
   status      AssetStatus @default(AVAILABLE)
   imageUrl    String?
   createdAt   DateTime    @default(now())
@@ -40,6 +41,7 @@ model Loan {
   id         String     @id @default(cuid())
   assetId    String
   userId     String
+  quantity   Int        @default(1)
   status     LoanStatus @default(PENDING)
   borrowedAt DateTime?
   dueAt      DateTime

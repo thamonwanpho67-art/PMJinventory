@@ -31,7 +31,13 @@ export async function PUT(request: NextRequest) {
 
     // ตรวจสอบว่าครุภัณฑ์มีอยู่จริง
     const asset = await prisma.asset.findUnique({
-      where: { id: assetId }
+      where: { id: assetId },
+      select: {
+        id: true,
+        name: true,
+        quantity: true,
+        status: true
+      }
     });
 
     if (!asset) {
@@ -42,17 +48,19 @@ export async function PUT(request: NextRequest) {
     }
 
     // ตรวจสอบจำนวนที่ถูกยืมอยู่
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const borrowedCount = await prisma.loan.aggregate({
       where: {
         assetId: assetId,
-        status: 'BORROWED'
+        status: 'BORROWED' as any
       },
       _sum: {
         quantity: true
       }
-    });
+    } as any);
 
-    const currentBorrowed = borrowedCount._sum.quantity || 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentBorrowed = (borrowedCount as any)._sum.quantity || 0;
 
     // ตรวจสอบว่าจำนวนใหม่ไม่น้อยกว่าจำนวนที่ถูกยืมอยู่
     if (newQuantity < currentBorrowed) {
@@ -144,14 +152,17 @@ export async function POST(request: NextRequest) {
     const borrowedCount = await prisma.loan.aggregate({
       where: {
         assetId: assetId,
-        status: 'BORROWED'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        status: 'BORROWED' as any
       },
       _sum: {
         quantity: true
       }
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
-    const currentBorrowed = borrowedCount._sum.quantity || 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentBorrowed = (borrowedCount as any)._sum.quantity || 0;
 
     // ตรวจสอบว่าจำนวนใหม่ไม่น้อยกว่าจำนวนที่ถูกยืมอยู่
     if (newQuantity < currentBorrowed) {
