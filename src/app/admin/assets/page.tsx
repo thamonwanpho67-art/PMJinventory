@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaDownload, FaBox, FaExclamationTriangle, FaCheckCircle, FaCog } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaDownload, FaBox, FaExclamationTriangle, FaCheckCircle, FaCog, FaQrcode, FaCamera } from 'react-icons/fa';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import QRCode from 'react-qr-code';
+import QRScanner from '@/components/QRScanner';
 
 interface Asset {
   id: string;
@@ -75,6 +77,9 @@ export default function AdminAssetsPage() {
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [selectedAssetForAction, setSelectedAssetForAction] = useState<Asset | null>(null);
+  const [showAssetModal, setShowAssetModal] = useState(false);
 
   useEffect(() => {
     fetchAssets();
@@ -154,6 +159,59 @@ export default function AdminAssetsPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // QR Code functions
+  const generateQRUrl = (assetId: string) => {
+    return `${window.location.origin}/public/asset/${assetId}`;
+  };
+
+  const handleQRScan = (data: string) => {
+    console.log('QR Code scanned:', data);
+    
+    // Extract asset ID from QR code URL
+    const urlParts = data.split('/');
+    const assetId = urlParts[urlParts.length - 1];
+    
+    // Find asset by ID
+    const asset = assets.find(a => a.id === assetId);
+    
+    if (asset) {
+      setSelectedAssetForAction(asset);
+      setShowAssetModal(true);
+      setShowQRScanner(false);
+    } else {
+      alert('ไม่พบข้อมูลครุภัณฑ์นี้');
+      setShowQRScanner(false);
+    }
+  };
+
+  const handleBorrowAsset = async (assetId: string) => {
+    try {
+      // This would typically create a loan request
+      const response = await fetch('/api/loans', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          assetId: assetId,
+          requestDate: new Date().toISOString(),
+          // Add other required fields
+        }),
+      });
+
+      if (response.ok) {
+        alert('สร้างคำขอยืมสำเร็จ');
+        setShowAssetModal(false);
+        setSelectedAssetForAction(null);
+      } else {
+        throw new Error('Failed to create loan request');
+      }
+    } catch (error) {
+      console.error('Error creating loan:', error);
+      alert('เกิดข้อผิดพลาดในการสร้างคำขอยืม');
+    }
   };
 
   if (loading) {
@@ -276,6 +334,15 @@ export default function AdminAssetsPage() {
             </div>
 
             <div className="flex gap-3">
+              {/* QR Scanner Button */}
+              <button
+                onClick={() => setShowQRScanner(true)}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
+              >
+                <FaCamera />
+                สแกน QR
+              </button>
+
               {/* Export Button */}
               <button
                 onClick={exportToCSV}
@@ -368,6 +435,23 @@ export default function AdminAssetsPage() {
                     </div>
                   </div>
 
+                  {/* QR Code Section */}
+                  <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FaQrcode className="text-gray-600" />
+                        <span className="text-sm font-kanit text-gray-700">QR Code</span>
+                      </div>
+                      <div className="w-16 h-16 bg-white p-2 rounded border">
+                        <QRCode
+                          value={generateQRUrl(asset.id)}
+                          size={48}
+                          level="M"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {asset.description && (
                     <p className="text-sm text-gray-600 mb-4 font-kanit">
                       {asset.description}
@@ -430,6 +514,100 @@ export default function AdminAssetsPage() {
           )}
         </div>
       </div>
+
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-96 max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-kanit font-bold text-gray-900">สแกน QR Code</h3>
+              <button
+                onClick={() => setShowQRScanner(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="mb-4">
+              <QRScanner
+                onScan={handleQRScan}
+                onError={(error) => console.error('QR Scanner Error:', error)}
+                onClose={() => setShowQRScanner(false)}
+              />
+            </div>
+            
+            <p className="text-sm text-gray-600 font-kanit text-center">
+              วางกล้องให้อยู่เหนือ QR Code เพื่อสแกน
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Asset Action Modal */}
+      {showAssetModal && selectedAssetForAction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-96 max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-kanit font-bold text-gray-900">ข้อมูลครุภัณฑ์</h3>
+              <button
+                onClick={() => {
+                  setShowAssetModal(false);
+                  setSelectedAssetForAction(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-kanit font-bold text-gray-900">{selectedAssetForAction.name}</h4>
+                <p className="text-sm text-gray-600 font-kanit">รหัส: {selectedAssetForAction.code}</p>
+              </div>
+
+              {selectedAssetForAction.description && (
+                <div>
+                  <p className="text-sm font-kanit text-gray-700">{selectedAssetForAction.description}</p>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                {getStatusIcon(selectedAssetForAction.status)}
+                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusClass(selectedAssetForAction.status)} font-kanit`}>
+                  {getStatusText(selectedAssetForAction.status)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t">
+                <span className="text-sm font-kanit text-gray-600">จำนวนคงเหลือ:</span>
+                <span className="font-kanit font-bold">{selectedAssetForAction.quantity || 0}</span>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <button
+                  onClick={() => handleBorrowAsset(selectedAssetForAction.id)}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-medium py-2 px-4 rounded-lg transition duration-300"
+                  disabled={selectedAssetForAction.status !== 'AVAILABLE' || selectedAssetForAction.quantity === 0}
+                >
+                  ยืมครุภัณฑ์
+                </button>
+                <button
+                  onClick={() => window.location.href = `/public/asset/${selectedAssetForAction.id}`}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-kanit font-medium py-2 px-4 rounded-lg transition duration-300"
+                >
+                  ดูรายละเอียด
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </LayoutWrapper>
   );

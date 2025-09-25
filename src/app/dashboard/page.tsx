@@ -55,45 +55,73 @@ export default function DashboardPage() {
   const [groupedAssets, setGroupedAssets] = useState<Record<string, UserAsset[]>>({});
   const [summary, setSummary] = useState<AssetSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // ดึงข้อมูลอุปกรณ์สำหรับ user
   useEffect(() => {
-    if (status === 'authenticated' && session) {
-      const fetchUserAssets = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch('/api/user-assets');
-          if (response.ok) {
-            const data = await response.json();
-            setUserAssets(data.data.assets);
-            setGroupedAssets(data.data.groupedAssets);
-            setSummary(data.data.summary);
-          }
-        } catch (error) {
-          console.error('Error fetching user assets:', error);
-        } finally {
-          setLoading(false);
+    const fetchUserAssets = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch('/api/user-assets');
+        if (response.ok) {
+          const data = await response.json();
+          setUserAssets(data.data.assets || []);
+          setGroupedAssets(data.data.groupedAssets || {});
+          setSummary(data.data.summary || null);
+        } else {
+          throw new Error('Failed to fetch user assets');
         }
-      };
+      } catch (error) {
+        console.error('Error fetching user assets:', error);
+        setError('ไม่สามารถโหลดข้อมูลได้');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (session) {
       fetchUserAssets();
     }
-  }, [status, session]);
+  }, [session]);
 
+  // Loading state for session
   if (status === 'loading') {
+    return <LoadingSpinner fullScreen color="pink" text="กำลังตรวจสอบสิทธิ์..." size="xl" />;
+  }
+
+  // Redirect if not authenticated
+  if (!session) {
+    redirect('/login');
+    return null;
+  }
+
+  // Error state
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-600 mx-auto mb-4"></div>
-          <p className="text-pink-600 font-medium">กำลังโหลด...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-rose-50 p-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="w-16 h-16 bg-gradient-to-r from-pink-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaExclamationCircle className="text-2xl text-pink-600" />
+          </div>
+          <h2 className="text-xl font-kanit font-bold text-pink-800 mb-2">เกิดข้อผิดพลาด</h2>
+          <p className="text-pink-600 font-kanit mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-2 rounded-lg hover:from-pink-600 hover:to-rose-600 transition-colors font-kanit font-bold"
+          >
+            ลองใหม่อีกครั้ง
+          </button>
         </div>
       </div>
     );
   }
 
-  if (status === 'unauthenticated') {
-    redirect('/login');
+  // Loading state  
+  if (loading) {
+    return <LoadingSpinner fullScreen color="pink" text="กำลังโหลดข้อมูล..." size="xl" />;
   }
 
   // กรองข้อมูลตามการค้นหาและหมวดหมู่

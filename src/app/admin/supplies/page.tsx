@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import AlertService from '@/lib/alert';
+import QRCode from 'react-qr-code';
+import QRScanner from '@/components/QRScanner';
 import { 
   FaPlus, 
   FaEdit, 
@@ -16,7 +18,9 @@ import {
   FaFilter,
   FaEye,
   FaArrowUp,
-  FaArrowDown
+  FaArrowDown,
+  FaQrcode,
+  FaCamera
 } from 'react-icons/fa';
 
 type Supply = {
@@ -59,6 +63,9 @@ export default function SuppliesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [selectedSupplyForAction, setSelectedSupplyForAction] = useState<Supply | null>(null);
+  const [showSupplyModal, setShowSupplyModal] = useState(false);
 
   const [formData, setFormData] = useState<SupplyFormData>({
     name: '',
@@ -191,6 +198,60 @@ export default function SuppliesPage() {
     setShowModal(false);
   };
 
+  // QR Code functions
+  const generateSupplyQRUrl = (supplyId: string) => {
+    return `${window.location.origin}/public/supply/${supplyId}`;
+  };
+
+  const handleQRScan = (data: string) => {
+    console.log('QR Code scanned:', data);
+    
+    // Extract supply ID from QR code URL
+    const urlParts = data.split('/');
+    const supplyId = urlParts[urlParts.length - 1];
+    
+    // Find supply by ID
+    const supply = supplies.find(s => s.id === supplyId);
+    
+    if (supply) {
+      setSelectedSupplyForAction(supply);
+      setShowSupplyModal(true);
+      setShowQRScanner(false);
+    } else {
+      alert('ไม่พบข้อมูลวัสดุนี้');
+      setShowQRScanner(false);
+    }
+  };
+
+  const handleWithdrawSupply = async (supplyId: string, quantity: number) => {
+    try {
+      const response = await fetch('/api/supply-transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          supplyId: supplyId,
+          type: 'OUT',
+          quantity: quantity,
+          notes: 'เบิกผ่าน QR Scanner',
+        }),
+      });
+
+      if (response.ok) {
+        alert('เบิกวัสดุสำเร็จ');
+        setShowSupplyModal(false);
+        setSelectedSupplyForAction(null);
+        fetchSupplies(); // Refresh supplies list
+      } else {
+        throw new Error('Failed to withdraw supply');
+      }
+    } catch (error) {
+      console.error('Error withdrawing supply:', error);
+      alert('เกิดข้อผิดพลาดในการเบิกวัสดุ');
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       AVAILABLE: { color: 'bg-green-100 text-green-800', text: 'พร้อมใช้งาน' },
@@ -232,13 +293,22 @@ export default function SuppliesPage() {
               จัดการวัสดุอุปกรณ์ที่ใช้แล้วหมดไป เช่น หมึกปริ้นเตอร์ กระดาษ อุปกรณ์สำนักงาน
             </p>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3 rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
-          >
-            <FaPlus />
-            <span>เพิ่มวัสดุใหม่</span>
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowQRScanner(true)}
+              className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
+            >
+              <FaCamera />
+              <span>สแกน QR</span>
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3 rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
+            >
+              <FaPlus />
+              <span>เพิ่มวัสดุใหม่</span>
+            </button>
+          </div>
         </div>
 
         {/* Summary Cards */}
@@ -341,6 +411,7 @@ export default function SuppliesPage() {
                 <thead className="bg-gradient-to-r from-pink-50 to-rose-50">
                   <tr>
                     <th className="px-6 py-4 text-left font-kanit font-bold text-pink-800">ชื่อวัสดุ</th>
+                    <th className="px-6 py-4 text-left font-kanit font-bold text-pink-800">QR Code</th>
                     <th className="px-6 py-4 text-left font-kanit font-bold text-pink-800">หมวดหมู่</th>
                     <th className="px-6 py-4 text-left font-kanit font-bold text-pink-800">จำนวน</th>
                     <th className="px-6 py-4 text-left font-kanit font-bold text-pink-800">หน่วย</th>
@@ -358,6 +429,15 @@ export default function SuppliesPage() {
                           {supply.description && (
                             <div className="text-sm text-gray-600 font-kanit">{supply.description}</div>
                           )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="w-12 h-12 bg-white p-1 rounded border">
+                          <QRCode
+                            value={generateSupplyQRUrl(supply.id)}
+                            size={40}
+                            level="M"
+                          />
                         </div>
                       </td>
                       <td className="px-6 py-4 font-kanit">{supply.category}</td>
@@ -575,6 +655,108 @@ export default function SuppliesPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* QR Scanner Modal */}
+        {showQRScanner && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-96 max-w-md mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-kanit font-bold text-gray-900">สแกน QR Code</h3>
+                <button
+                  onClick={() => setShowQRScanner(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <QRScanner
+                  onScan={handleQRScan}
+                  onError={(error) => console.error('QR Scanner Error:', error)}
+                  onClose={() => setShowQRScanner(false)}
+                />
+              </div>
+              
+              <p className="text-sm text-gray-600 font-kanit text-center">
+                วางกล้องให้อยู่เหนือ QR Code เพื่อสแกน
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Supply Action Modal */}
+        {showSupplyModal && selectedSupplyForAction && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-96 max-w-md mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-kanit font-bold text-gray-900">ข้อมูลวัสดุ</h3>
+                <button
+                  onClick={() => {
+                    setShowSupplyModal(false);
+                    setSelectedSupplyForAction(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-kanit font-bold text-gray-900">{selectedSupplyForAction.name}</h4>
+                  <p className="text-sm text-gray-600 font-kanit">หมวดหมู่: {selectedSupplyForAction.category}</p>
+                </div>
+
+                {selectedSupplyForAction.description && (
+                  <div>
+                    <p className="text-sm font-kanit text-gray-700">{selectedSupplyForAction.description}</p>
+                  </div>
+                )}
+
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="grid grid-cols-2 gap-4 text-sm font-kanit">
+                    <div>
+                      <span className="text-gray-600">จำนวนคงเหลือ:</span>
+                      <span className="font-bold ml-2">{selectedSupplyForAction.quantity} {selectedSupplyForAction.unit}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">สต็อกต่ำสุด:</span>
+                      <span className="font-bold ml-2">{selectedSupplyForAction.minStock} {selectedSupplyForAction.unit}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>{getStatusBadge(selectedSupplyForAction.status)}</div>
+
+                <div className="flex gap-2 pt-4">
+                  <button
+                    onClick={() => {
+                      const quantity = prompt(`กรุณาระบุจำนวนที่ต้องการเบิก (${selectedSupplyForAction.unit}):`, '1');
+                      if (quantity && parseInt(quantity) > 0) {
+                        handleWithdrawSupply(selectedSupplyForAction.id, parseInt(quantity));
+                      }
+                    }}
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-kanit font-medium py-2 px-4 rounded-lg transition duration-300"
+                    disabled={selectedSupplyForAction.quantity === 0 || selectedSupplyForAction.status === 'OUT_OF_STOCK'}
+                  >
+                    เบิกวัสดุ
+                  </button>
+                  <button
+                    onClick={() => window.location.href = `/public/supply/${selectedSupplyForAction.id}`}
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-kanit font-medium py-2 px-4 rounded-lg transition duration-300"
+                  >
+                    ดูรายละเอียด
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

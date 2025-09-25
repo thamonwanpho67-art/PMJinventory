@@ -4,12 +4,18 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    console.log('User assets API called');
+    
     const session = await auth();
+    console.log('Session check:', !!session);
     
     if (!session) {
+      console.log('No session found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('Fetching assets from database...');
+    
     // ดึงข้อมุลอุปกรณ์ทั้งหมดพร้อมจำนวนคงเหลือ
     const assets = await prisma.asset.findMany({
       select: {
@@ -33,6 +39,8 @@ export async function GET() {
         name: 'asc'
       }
     });
+
+    console.log(`Found ${assets.length} assets`);
 
     // คำนวณจำนวนที่ว่างและสถานะ
     const assetsWithAvailability = assets.map((asset) => {
@@ -68,6 +76,8 @@ export async function GET() {
       categories: Object.keys(groupedAssets).length
     };
 
+    console.log('API response prepared successfully');
+
     return NextResponse.json({
       success: true,
       data: {
@@ -79,8 +89,12 @@ export async function GET() {
 
   } catch (error) {
     console.error('Error fetching user assets:', error);
+    console.error('Error details:', error instanceof Error ? error.stack : error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
+      },
       { status: 500 }
     );
   }
