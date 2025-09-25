@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     
@@ -10,21 +10,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // ดึงข้อมูลอุปกรณ์ทั้งหมดพร้อมจำนวนคงเหลือ
+    // ดึงข้อมุลอุปกรณ์ทั้งหมดพร้อมจำนวนคงเหลือ
     const assets = await prisma.asset.findMany({
       select: {
         id: true,
         name: true,
         category: true,
-        quantity: true,
         status: true,
-        image: true,
+        imageUrl: true,
         description: true,
         _count: {
           select: {
             loans: {
               where: {
-                status: 'PENDING'
+                status: 'APPROVED'
               }
             }
           }
@@ -36,26 +35,24 @@ export async function GET(request: NextRequest) {
     });
 
     // คำนวณจำนวนที่ว่างและสถานะ
-    const assetsWithAvailability = assets.map((asset: any) => {
-      const pendingLoans = asset._count.loans;
-      const available = Math.max(0, asset.quantity - pendingLoans);
+    const assetsWithAvailability = assets.map((asset) => {
+      const borrowedCount = asset._count.loans;
+      const isAvailable = asset.status === 'AVAILABLE';
       
       return {
         id: asset.id,
         name: asset.name,
-        category: asset.category,
-        quantity: asset.quantity,
-        available,
-        borrowed: pendingLoans,
+        category: asset.category || 'ไม่ระบุ',
+        borrowed: borrowedCount,
         status: asset.status,
-        image: asset.image,
+        imageUrl: asset.imageUrl,
         description: asset.description,
-        canBorrow: available > 0 && asset.status === 'AVAILABLE'
+        canBorrow: isAvailable && borrowedCount === 0
       };
     });
 
     // จัดกลุ่มตามหมวดหมู่
-    const groupedAssets = assetsWithAvailability.reduce((acc: any, asset: any) => {
+    const groupedAssets = assetsWithAvailability.reduce((acc: Record<string, typeof assetsWithAvailability>, asset) => {
       if (!acc[asset.category]) {
         acc[asset.category] = [];
       }
@@ -66,9 +63,8 @@ export async function GET(request: NextRequest) {
     // สถิติรวม
     const summary = {
       totalAssets: assets.length,
-      totalQuantity: assets.reduce((sum: number, asset: any) => sum + asset.quantity, 0),
-      totalAvailable: assetsWithAvailability.reduce((sum: number, asset: any) => sum + asset.available, 0),
-      totalBorrowed: assetsWithAvailability.reduce((sum: number, asset: any) => sum + asset.borrowed, 0),
+      totalBorrowed: assetsWithAvailability.reduce((sum: number, asset) => sum + asset.borrowed, 0),
+      totalAvailable: assetsWithAvailability.filter(asset => asset.canBorrow).length,
       categories: Object.keys(groupedAssets).length
     };
 

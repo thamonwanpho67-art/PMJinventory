@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { SupplyStatus } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,14 +19,21 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    const where: any = {};
+    const where: {
+      supplyId?: string;
+      transactionType?: 'IN' | 'OUT';
+      createdAt?: {
+        gte?: Date;
+        lte?: Date;
+      };
+    } = {};
 
     if (supplyId) {
       where.supplyId = supplyId;
     }
 
     if (transactionType && ['IN', 'OUT'].includes(transactionType)) {
-      where.transactionType = transactionType;
+      where.transactionType = transactionType as 'IN' | 'OUT';
     }
 
     if (startDate || endDate) {
@@ -152,7 +160,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create transaction and update supply in a transaction
-    const result = await prisma.$transaction(async (tx: any) => {
+    const result = await prisma.$transaction(async (tx) => {
       // Create transaction record
       const transaction = await tx.supplyTransaction.create({
         data: {
@@ -190,7 +198,7 @@ export async function POST(request: NextRequest) {
         where: { id: supplyId },
         data: {
           quantity: newQuantity,
-          status: newStatus
+          status: newStatus as SupplyStatus
         }
       });
 

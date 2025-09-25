@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { LoanStatus } from '@prisma/client';
 
 export async function PATCH(
   request: NextRequest,
@@ -9,7 +9,7 @@ export async function PATCH(
 ) {
   const { id } = await params;
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json({ message: 'ไม่ได้รับอนุญาต' }, { status: 401 });
@@ -24,8 +24,8 @@ export async function PATCH(
     const loanId = id;
 
     // ตรวจสอบว่าสถานะที่ส่งมาถูกต้อง
-    const validStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'RETURNED'];
-    if (!validStatuses.includes(status)) {
+    const validStatuses: LoanStatus[] = ['PENDING', 'APPROVED', 'REJECTED', 'RETURNED'];
+    if (!validStatuses.includes(status as LoanStatus)) {
       return NextResponse.json({ message: 'สถานะไม่ถูกต้อง' }, { status: 400 });
     }
 
@@ -39,7 +39,7 @@ export async function PATCH(
     }
 
     // เตรียมข้อมูลสำหรับอัพเดท
-    const updateData: any = { status };
+    const updateData: { status: LoanStatus; borrowedAt?: Date; returnedAt?: Date } = { status: status as LoanStatus };
 
     // ถ้าเปลี่ยนเป็น APPROVED ให้บันทึกเวลาที่ยืม
     if (status === 'APPROVED' && existingLoan.status !== 'APPROVED') {
@@ -62,7 +62,7 @@ export async function PATCH(
       loan: updatedLoan
     }, { status: 200 });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating loan status:', error);
     return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
   }
