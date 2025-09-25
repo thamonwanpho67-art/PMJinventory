@@ -358,7 +358,7 @@ export default function InventoryCheckPage() {
               เริ่มต้นตรวจนับครุภัณฑ์
             </h2>
             <p className="text-gray-600 font-kanit mb-8 max-w-md mx-auto">
-              คลิกปุ่ม "สแกน QR" เพื่อเริ่มต้นตรวจนับครุภัณฑ์ในคลัง ระบบจะบันทึกจำนวนที่ตรวจนับได้อัตโนมัติ
+              คลิกปุ่ม &quot;สแกน QR&quot; เพื่อเริ่มต้นตรวจนับครุภัณฑ์ในคลัง ระบบจะบันทึกจำนวนที่ตรวจนับได้อัตโนมัติ
             </p>
             <button
               onClick={() => setShowScanner(true)}

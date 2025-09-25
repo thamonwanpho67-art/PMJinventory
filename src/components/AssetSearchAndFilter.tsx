@@ -59,7 +59,7 @@ export default function AssetSearchAndFilter({
 
     // Sort
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: string | number, bValue: string | number;
       
       switch (sortBy) {
         case 'name':
@@ -112,7 +112,7 @@ export default function AssetSearchAndFilter({
         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
         <input
           type="text"
-          placeholder="ค้นหาอุปกรณ์ จากชื่อ, รายละเอียด, หรือหมวดหมู่..."
+                        placeholder="ค้นหาด้วยชื่อ รหัส หรือ &quot;ยี่ห้อ&quot; ของครุภัณฑ์"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-lg"
@@ -193,7 +193,7 @@ export default function AssetSearchAndFilter({
       <div className="flex flex-wrap gap-2">
         {searchTerm && (
           <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-kanit">
-            ค้นหา: "{searchTerm}"
+            ค้นหา: &quot;{searchTerm}&quot;
           </span>
         )}
         {selectedCategory !== 'all' && (

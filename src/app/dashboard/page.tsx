@@ -50,6 +50,29 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  // ดึงข้อมูลอุปกรณ์สำหรับ user
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      const fetchUserAssets = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch('/api/user-assets');
+          if (response.ok) {
+            const data = await response.json();
+            setUserAssets(data.data.assets);
+            setGroupedAssets(data.data.groupedAssets);
+            setSummary(data.data.summary);
+          }
+        } catch (error) {
+          console.error('Error fetching user assets:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchUserAssets();
+    }
+  }, [status, session]);
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-100">
@@ -64,30 +87,6 @@ export default function DashboardPage() {
   if (status === 'unauthenticated') {
     redirect('/login');
   }
-
-  // ดึงข้อมูลอุปกรณ์สำหรับ user
-  useEffect(() => {
-    const fetchUserAssets = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/user-assets');
-        if (response.ok) {
-          const data = await response.json();
-          setUserAssets(data.data.assets);
-          setGroupedAssets(data.data.groupedAssets);
-          setSummary(data.data.summary);
-        }
-      } catch (error) {
-        console.error('Error fetching user assets:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (session) {
-      fetchUserAssets();
-    }
-  }, [session]);
 
   // กรองข้อมูลตามการค้นหาและหมวดหมู่
   const filteredAssets = userAssets.filter(asset => {
