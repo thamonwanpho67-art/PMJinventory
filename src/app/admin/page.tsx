@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import ClientOnly from '@/components/ClientOnly';
 import { 
   FaChartBar, 
   FaUsers, 

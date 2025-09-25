@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import Image from 'next/image';
 import BorrowForm from '@/components/BorrowForm';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import ClientOnly from '@/components/ClientOnly';
 import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch } from 'react-icons/fa';
 
 type Asset = {
@@ -112,20 +113,28 @@ export default function DashboardPage() {
   };
 
   return (
-    <LayoutWrapper>
-      <div className="p-6">
-        {/* Welcome Header */}
-        <div className="mb-8 p-6 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl border border-pink-200">
-          <div className="flex items-center space-x-3 mb-2">
-            <FaUserCircle className="text-pink-600 text-3xl" />
-            <h1 className="text-3xl font-kanit font-black bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-              ยินดีต้อนรับ, {session?.user?.name}
-            </h1>
-          </div>
-          <p className="text-pink-700 font-kanit font-medium">
-            ดูอุปกรณ์ที่มีให้ยืมและจำนวนคงเหลือ
-          </p>
+    <ClientOnly fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-600 mx-auto mb-4"></div>
+          <p className="text-pink-600 font-medium">กำลังโหลด...</p>
         </div>
+      </div>
+    }>
+      <LayoutWrapper>
+        <div className="p-6">
+          {/* Welcome Header */}
+          <div className="mb-8 p-6 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl border border-pink-200">
+            <div className="flex items-center space-x-3 mb-2">
+              <FaUserCircle className="text-pink-600 text-3xl" />
+              <h1 className="text-3xl font-kanit font-black bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                ยินดีต้อนรับ, {session?.user?.name}
+              </h1>
+            </div>
+            <p className="text-pink-700 font-kanit font-medium">
+              ดูอุปกรณ์ที่มีให้ยืมและจำนวนคงเหลือ
+            </p>
+          </div>
 
         {/* Summary Cards */}
         {summary && (
@@ -294,6 +303,7 @@ export default function DashboardPage() {
         )}
       </div>
     </LayoutWrapper>
+    </ClientOnly>
   );
 }
 

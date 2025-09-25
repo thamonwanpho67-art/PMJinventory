@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import ClientOnly from '@/components/ClientOnly';
 import AssetList from '@/components/AssetList';
 import BorrowForm from '@/components/BorrowForm';
 import { FaStar, FaClipboardList } from 'react-icons/fa';
