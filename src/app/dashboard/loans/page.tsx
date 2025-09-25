@@ -87,7 +87,7 @@ export default function LoansPage() {
       } else {
         setError('ไม่สามารถโหลดข้อมูลได้');
       }
-    } catch (err) {
+    } catch {
       setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
     } finally {
       setLoading(false);

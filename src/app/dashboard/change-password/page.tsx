@@ -113,7 +113,7 @@ export default function ChangePasswordPage() {
       } else {
         setError(data.message || 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน');
       }
-    } catch (error) {
+    } catch {
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
     } finally {
       setLoading(false);

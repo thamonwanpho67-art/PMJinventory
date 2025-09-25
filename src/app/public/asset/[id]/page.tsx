@@ -15,6 +15,12 @@ interface AssetData {
   updatedAt: string;
 }
 
+interface Loan {
+  id: string;
+  status: string;
+  quantity: number;
+}
+
 export default function PublicAssetInfoPage() {
   const params = useParams();
   const assetId = params.id as string;
@@ -41,8 +47,8 @@ export default function PublicAssetInfoPage() {
         const loansData = await loansResponse.json();
         
         const borrowedCount = loansData
-          .filter((loan: any) => loan.status === 'BORROWED')
-          .reduce((sum: number, loan: any) => sum + loan.quantity, 0);
+          .filter((loan: Loan) => loan.status === 'BORROWED')
+          .reduce((sum: number, loan: Loan) => sum + loan.quantity, 0);
         
         const availableQuantity = data.quantity - borrowedCount;
         

@@ -79,12 +79,14 @@ export async function GET(request: NextRequest) {
     ]);
 
     // แปลงข้อมูลสำหรับกราฟ
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const categoryData = assetsByCategory.map((item: any) => ({
       name: item.category || 'ไม่ระบุ',
       value: item._count.id,
       fill: getCategoryColor(item.category)
     }));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statusData = assetsByStatus.map((item: any) => ({
       name: getStatusLabel(item.status),
       value: item._count.id,
@@ -105,6 +107,7 @@ export async function GET(request: NextRequest) {
     }
     
     // นับจำนวนการยืมในแต่ละเดือน
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (monthlyLoans as any[]).forEach(loan => {
       const date = new Date(loan.createdAt);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -129,6 +132,7 @@ export async function GET(request: NextRequest) {
         assetsByStatus: statusData,
         monthlyLoans: monthlyLoansData
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recentLoans: recentLoans.map((loan: any) => ({
         id: loan.id,
         userName: loan.user.name,

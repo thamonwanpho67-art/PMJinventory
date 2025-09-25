@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,8 +13,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const supply = await prisma.supply.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         transactions: {
           include: {
@@ -52,7 +53,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -60,6 +61,8 @@ export async function PUT(
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const { id } = await params;
 
     const body = await request.json();
     const {
@@ -77,7 +80,7 @@ export async function PUT(
     } = body;
 
     const currentSupply = await prisma.supply.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!currentSupply) {
@@ -100,7 +103,7 @@ export async function PUT(
     }
 
     const supply = await prisma.supply.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: name || currentSupply.name,
         description: description !== undefined ? description : currentSupply.description,
@@ -132,7 +135,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -141,9 +144,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Check if supply has any transactions
     const transactionCount = await prisma.supplyTransaction.count({
-      where: { supplyId: params.id }
+      where: { supplyId: id }
     });
 
     if (transactionCount > 0) {
@@ -154,7 +159,7 @@ export async function DELETE(
     }
 
     await prisma.supply.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({

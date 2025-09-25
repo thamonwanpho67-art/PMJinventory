@@ -1,6 +1,26 @@
 // Alert types for consistent styling
 export type AlertType = 'success' | 'error' | 'warning' | 'info' | 'question';
 
+// Interface for SweetAlert2 options
+interface SwalOptions {
+  icon?: 'success' | 'error' | 'warning' | 'info' | 'question';
+  title?: string;
+  text?: string;
+  html?: string;
+  confirmButtonText?: string;
+  cancelButtonText?: string;
+  showCancelButton?: boolean;
+  allowOutsideClick?: boolean;
+  allowEscapeKey?: boolean;
+  showConfirmButton?: boolean;
+  timer?: number;
+  timerProgressBar?: boolean;
+  confirmButtonColor?: string;
+  cancelButtonColor?: string;
+  didOpen?: () => void;
+  [key: string]: unknown;
+}
+
 // Common alert configurations
 const commonConfig = {
   confirmButtonColor: '#ec4899',
@@ -21,7 +41,7 @@ class AlertService {
   }
 
   // Show basic alert
-  async show(config: any) {
+  async show(config: SwalOptions) {
     const Swal = await this.getSwal();
     return Swal.fire({
       ...commonConfig,
@@ -30,7 +50,7 @@ class AlertService {
   }
 
   // Success alert
-  async success(title: string, text?: string, options?: any) {
+  async success(title: string, text?: string, options?: SwalOptions) {
     return this.show({
       icon: 'success',
       title,
@@ -41,7 +61,7 @@ class AlertService {
   }
 
   // Error alert
-  async error(title: string, text?: string, options?: any) {
+  async error(title: string, text?: string, options?: SwalOptions) {
     return this.show({
       icon: 'error',
       title,
@@ -52,7 +72,7 @@ class AlertService {
   }
 
   // Warning alert
-  async warning(title: string, text?: string, options?: any) {
+  async warning(title: string, text?: string, options?: SwalOptions) {
     return this.show({
       icon: 'warning',
       title,
@@ -63,7 +83,7 @@ class AlertService {
   }
 
   // Info alert
-  async info(title: string, text?: string, options?: any) {
+  async info(title: string, text?: string, options?: SwalOptions) {
     return this.show({
       icon: 'info',
       title,
@@ -74,7 +94,7 @@ class AlertService {
   }
 
   // Confirmation dialog
-  async confirm(title: string, text?: string, options?: any) {
+  async confirm(title: string, text?: string, options?: SwalOptions) {
     return this.show({
       icon: 'question',
       title,
@@ -94,8 +114,8 @@ class AlertService {
       allowOutsideClick: false,
       allowEscapeKey: false,
       showConfirmButton: false,
-      didOpen: () => {
-        const Swal = require('sweetalert2');
+      didOpen: async () => {
+        const Swal = await this.getSwal();
         Swal.showLoading();
       }
     });

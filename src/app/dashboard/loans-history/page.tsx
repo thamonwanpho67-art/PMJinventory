@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
-import { FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaClipboardList, FaStar, FaHourglass, FaCalendarAlt, FaBox, FaSearch, FaFilter, FaCalendar } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaClipboardList, FaCalendarAlt, FaBox, FaSearch, FaFilter, FaCalendar } from 'react-icons/fa';
 
 type Loan = {
   id: string;
@@ -61,7 +61,7 @@ const statusConfig = {
 };
 
 export default function LoansAndHistoryPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [activeTab, setActiveTab] = useState<'current' | 'history'>('current');
   const [loans, setLoans] = useState<Loan[]>([]);
   const [filteredLoans, setFilteredLoans] = useState<Loan[]>([]);
@@ -85,7 +85,7 @@ export default function LoansAndHistoryPage() {
     }
   };
 
-  const filterLoans = () => {
+  const filterLoans = useCallback(() => {
     let filtered = loans;
 
     // แยกตาม tab
@@ -130,16 +130,16 @@ export default function LoansAndHistoryPage() {
       });
     }
 
-    return filtered;
-  };
+    setFilteredLoans(filtered);
+  }, [loans, activeTab, searchTerm, statusFilter, startDate, endDate]);
 
   useEffect(() => {
     fetchLoans();
   }, []);
 
   useEffect(() => {
-    setFilteredLoans(filterLoans());
-  }, [loans, activeTab, searchTerm, statusFilter, startDate, endDate]);
+    filterLoans();
+  }, [filterLoans]);
 
   if (status === 'loading' || loading) {
     return (

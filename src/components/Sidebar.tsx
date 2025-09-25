@@ -10,6 +10,18 @@ interface SidebarProps {
   setIsOpen: (open: boolean) => void;
 }
 
+interface SubNavItem {
+  name: string;
+  href: string;
+}
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+  children?: SubNavItem[];
+}
+
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -273,7 +285,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 {/* Submenu items */}
                 {hasSubmenu && isExpanded && (
                   <div className="ml-4 mt-1 space-y-1">
-                    {item.children!.map((subItem: any) => {
+                    {item.children!.map((subItem: SubNavItem) => {
                       const subIsActive = pathname === subItem.href;
                       return (
                         <Link

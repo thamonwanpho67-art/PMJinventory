@@ -25,6 +25,7 @@ type AssetSummary = {
 };
 
 interface UserAssetListProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSelectAsset?: (asset: any) => void;
 }
 

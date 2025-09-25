@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Update status based on quantity and minStock
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const suppliesWithStatus = supplies.map((supply: any) => {
       let status = supply.status;
       if (supply.quantity <= 0) {
@@ -105,7 +106,8 @@ export async function POST(request: NextRequest) {
         supplier,
         location,
         imageUrl,
-        status
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        status: status as any
       }
     });
 

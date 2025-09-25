@@ -1,9 +1,9 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { redirect } from 'next/navigation';
-import AssetList from '@/components/AssetList';
+import Image from 'next/image';
 import BorrowForm from '@/components/BorrowForm';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch } from 'react-icons/fa';
@@ -203,11 +203,12 @@ export default function DashboardPage() {
             {filteredAssets.map((asset) => (
               <div key={asset.id} className="bg-white rounded-2xl shadow-lg border border-pink-100 overflow-hidden hover:shadow-xl transition-shadow">
                 {asset.image && (
-                  <div className="h-48 bg-gray-100 flex items-center justify-center">
-                    <img 
+                  <div className="h-48 bg-gray-100 flex items-center justify-center relative">
+                    <Image 
                       src={asset.image} 
                       alt={asset.name}
-                      className="max-h-full max-w-full object-contain"
+                      fill
+                      className="object-contain"
                     />
                   </div>
                 )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { FaClock, FaCheckCircle, FaTimesCircle, FaHourglass, FaCalendarAlt, FaBox, FaSearch, FaFilter } from 'react-icons/fa';
@@ -31,6 +31,48 @@ export default function UserHistoryPage() {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [dateFilter, setDateFilter] = useState<string>('ALL');
 
+  const filterLoans = useCallback(() => {
+    let filtered = loans;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (loan) =>
+          loan.asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          loan.asset.code.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by status
+    if (statusFilter !== 'ALL') {
+      filtered = filtered.filter((loan) => loan.status === statusFilter);
+    }
+
+    // Filter by date
+    if (dateFilter !== 'ALL') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      filtered = filtered.filter((loan) => {
+        const loanDate = new Date(loan.createdAt);
+        switch (dateFilter) {
+          case 'TODAY':
+            return loanDate >= today;
+          case 'WEEK':
+            return loanDate >= weekAgo;
+          case 'MONTH':
+            return loanDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    setFilteredLoans(filtered);
+  }, [loans, searchTerm, statusFilter, dateFilter]);
+
   useEffect(() => {
     if (session?.user?.id) {
       fetchLoans();
@@ -39,7 +81,7 @@ export default function UserHistoryPage() {
 
   useEffect(() => {
     filterLoans();
-  }, [loans, searchTerm, statusFilter, dateFilter]);
+  }, [loans, searchTerm, statusFilter, dateFilter, filterLoans]);
 
   if (status === 'loading') {
     return (
@@ -66,51 +108,6 @@ export default function UserHistoryPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterLoans = () => {
-    let filtered = loans;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (loan) =>
-          loan.asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          loan.asset.code.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by status
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter((loan) => loan.status === statusFilter);
-    }
-
-    // Filter by date
-    if (dateFilter !== 'ALL') {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-      filtered = filtered.filter((loan) => {
-        const loanDate = new Date(loan.createdAt);
-        switch (dateFilter) {
-          case 'TODAY':
-            return loanDate >= today;
-          case 'YESTERDAY':
-            return loanDate >= yesterday && loanDate < today;
-          case 'WEEK':
-            return loanDate >= weekAgo;
-          case 'MONTH':
-            return loanDate >= monthAgo;
-          default:
-            return true;
-        }
-      });
-    }
-
-    setFilteredLoans(filtered);
   };
 
   const getStatusIcon = (status: string) => {

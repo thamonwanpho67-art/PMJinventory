@@ -63,11 +63,13 @@ export async function POST(request: NextRequest) {
     }
 
     // คำนวณจำนวนที่ยืมอยู่
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const borrowedCount = asset.loans.reduce((total: number, loan: any) => {
       return total + (loan.quantity || 1);
     }, 0);
 
-    const availableCount = asset.quantity - borrowedCount;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const availableCount = (asset as any).quantity - borrowedCount;
 
     // ส่งข้อมูลตาม type ที่ร้องขอ
     const response = {
@@ -80,7 +82,8 @@ export async function POST(request: NextRequest) {
         category: asset.category,
         location: asset.location,
         status: asset.status,
-        quantity: asset.quantity,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        quantity: (asset as any).quantity,
         available: availableCount,
         borrowed: borrowedCount,
         imageUrl: asset.imageUrl,
