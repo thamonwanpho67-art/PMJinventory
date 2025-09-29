@@ -8,7 +8,8 @@ import dynamic from 'next/dynamic';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import ClientOnly from '@/components/ClientOnly';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch } from 'react-icons/fa';
+import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch, FaQrcode, FaClipboardList, FaPlus } from 'react-icons/fa';
+import Link from 'next/link';
 
 // Dynamic imports to reduce chunk size
 const BorrowForm = dynamic(() => import('@/components/BorrowForm'), {
@@ -162,6 +163,54 @@ export default function DashboardPage() {
             <p className="text-pink-700 font-kanit font-medium">
               ดูอุปกรณ์ที่มีให้ยืมและจำนวนคงเหลือ
             </p>
+          </div>
+
+          {/* Quick Action Cards */}
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Link 
+              href="/dashboard/borrow"
+              className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
+                  <FaPlus className="text-blue-600 text-xl" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-kanit font-bold text-blue-800">ยื่นคำขอยืม</h3>
+                  <p className="text-blue-600 text-sm font-kanit">ยื่นคำขอยืมอุปกรณ์</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link 
+              href="/dashboard/inventory-check"
+              className="bg-white rounded-2xl shadow-lg border border-green-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-100 to-green-200 rounded-full flex items-center justify-center">
+                  <FaQrcode className="text-green-600 text-xl" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-kanit font-bold text-green-800">ตรวจนับครุภัณฑ์</h3>
+                  <p className="text-green-600 text-sm font-kanit">สแกน QR เพื่อตรวจนับ</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link 
+              href="/dashboard/loans-history"
+              className="bg-white rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                  <FaClipboardList className="text-purple-600 text-xl" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-kanit font-bold text-purple-800">ประวัติการยืม</h3>
+                  <p className="text-purple-600 text-sm font-kanit">ดูประวัติการยืม-คืน</p>
+                </div>
+              </div>
+            </Link>
           </div>
 
         {/* Summary Cards */}

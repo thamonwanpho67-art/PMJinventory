@@ -114,7 +114,6 @@ export default function LoginForm() {
                   autoComplete="current-password"
                   required
                   className="w-full px-4 py-3 pr-12 border border-pink-300 rounded-xl shadow-sm placeholder-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-pink-50/50 font-kanit text-gray-800 font-medium"
-                  placeholder="••••••••"
                 />
                 <button
                   type="button"
