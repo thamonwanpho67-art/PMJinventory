@@ -201,7 +201,7 @@ export default function SupplyDistributePage() {
           </div>
           <button
             onClick={() => window.location.href = '/admin/supplies/history'}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
+            className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3 rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
           >
             <FaHistory />
             <span>ประวัติการเบิก</span>

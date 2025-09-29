@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaDownload, FaBox, FaExclamationTriangle, FaCheckCircle, FaCog, FaQrcode, FaCamera } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaDownload, FaBox, FaExclamationTriangle, FaCheckCircle, FaCog, FaQrcode, FaCamera, FaClock } from 'react-icons/fa';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import QRCode from 'react-qr-code';
 import QRScanner from '@/components/QRScanner';
@@ -72,11 +72,21 @@ const getQuantityIcon = (quantity: number) => {
   return <FaCheckCircle className="text-green-500" />;
 };
 
+// Function to check if asset is older than 7 years
+const isAssetOld = (createdAt: string) => {
+  const assetDate = new Date(createdAt);
+  const currentDate = new Date();
+  const diffTime = currentDate.getTime() - assetDate.getTime();
+  const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+  return diffYears > 7;
+};
+
 export default function AdminAssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showOldOnly, setShowOldOnly] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [selectedAssetForAction, setSelectedAssetForAction] = useState<Asset | null>(null);
   const [showAssetModal, setShowAssetModal] = useState(false);
@@ -87,7 +97,7 @@ export default function AdminAssetsPage() {
 
   useEffect(() => {
     filterAssets();
-  }, [assets, searchTerm]);
+  }, [assets, searchTerm, showOldOnly]);
 
   const fetchAssets = async () => {
     try {
@@ -111,6 +121,10 @@ export default function AdminAssetsPage() {
           asset.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
           asset.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
+    }
+
+    if (showOldOnly) {
+      filtered = filtered.filter(asset => isAssetOld(asset.createdAt));
     }
 
     setFilteredAssets(filtered);
@@ -241,7 +255,7 @@ export default function AdminAssetsPage() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-400">
             <div className="flex items-center">
               <FaBox className="text-blue-500 text-2xl mr-3" />
@@ -289,6 +303,18 @@ export default function AdminAssetsPage() {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-400">
+            <div className="flex items-center">
+              <FaClock className="text-orange-500 text-2xl mr-3" />
+              <div>
+                <p className="text-sm text-gray-600 font-kanit">เก่าเกิน 7 ปี</p>
+                <p className="text-2xl font-bold text-gray-900 font-kanit">
+                  {assets.filter(asset => isAssetOld(asset.createdAt)).length}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Actions Bar */}
@@ -331,6 +357,20 @@ export default function AdminAssetsPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Old Assets Filter */}
+              <button
+                onClick={() => setShowOldOnly(!showOldOnly)}
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg font-kanit font-medium transition-colors ${
+                  showOldOnly 
+                    ? 'bg-orange-500 text-white shadow-lg' 
+                    : 'bg-white border border-orange-300 text-orange-600 hover:bg-orange-50'
+                }`}
+                title="แสดงเฉพาะครุภัณฑ์เก่าเกิน 7 ปี"
+              >
+                <FaClock />
+                <span>{showOldOnly ? 'แสดงทั้งหมด' : 'เก่าเกิน 7 ปี'}</span>
+              </button>
             </div>
 
             <div className="flex gap-3">
@@ -365,6 +405,11 @@ export default function AdminAssetsPage() {
 
           <div className="mt-4 text-sm text-gray-600 font-kanit">
             แสดงผล {filteredAssets.length} รายการจากทั้งหมด {assets.length} รายการ
+            {showOldOnly && (
+              <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-600 rounded-md text-xs">
+                (กรองเฉพาะครุภัณฑ์เก่าเกิน 7 ปี)
+              </span>
+            )}
           </div>
         </div>
 
@@ -451,6 +496,18 @@ export default function AdminAssetsPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Age Warning Badge */}
+                  {isAssetOld(asset.createdAt) && (
+                    <div className="bg-orange-100 border border-orange-200 rounded-lg p-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <FaClock className="text-orange-500" />
+                        <span className="text-sm font-kanit text-orange-800 font-medium">
+                          ครุภัณฑ์เก่าเกิน 7 ปี (จัดหาเมื่อ: {new Date(asset.createdAt).toLocaleDateString('th-TH')})
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {asset.description && (
                     <p className="text-sm text-gray-600 mb-4 font-kanit">
