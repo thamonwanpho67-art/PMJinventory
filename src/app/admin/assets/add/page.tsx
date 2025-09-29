@@ -14,9 +14,11 @@ export default function AddAssetPage() {
   const [formData, setFormData] = useState({
     name: '',
     code: '',
+    assetCode: '',
     description: '',
     category: '',
-    location: '',
+    price: '',
+    costCenter: '',
     status: 'AVAILABLE',
     imageUrl: ''
   });
@@ -169,23 +171,55 @@ export default function AddAssetPage() {
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น คอมพิวเตอร์"
                   />
                 </div>
 
-                {/* Location */}
+                {/* Price */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    สถานที่
+                    ราคา (บาท)
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น 25000"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                {/* Asset Code */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    รหัสสินทรัพย์
                   </label>
                   <input
                     type="text"
-                    name="location"
-                    value={formData.location}
+                    name="assetCode"
+                    value={formData.assetCode}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
-                    placeholder="เช่น ห้องทำงาน"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น AS-2025-001"
+                  />
+                </div>
+
+                {/* Cost Center */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    ศูนย์ต้นทุน
+                  </label>
+                  <input
+                    type="text"
+                    name="costCenter"
+                    value={formData.costCenter}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น CC-IT-001"
                   />
                 </div>
 
@@ -198,7 +232,7 @@ export default function AddAssetPage() {
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white text-gray-900"
                   >
                     <option value="AVAILABLE">ว่าง</option>
                     <option value="DAMAGED">ชำรุด</option>
@@ -243,7 +277,7 @@ export default function AddAssetPage() {
                       name="imageUrl"
                       value={formData.imageUrl}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                       placeholder="หรือใส่ URL รูปภาพ"
                     />
                   </div>
@@ -260,7 +294,7 @@ export default function AddAssetPage() {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                   placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับครุภัณฑ์..."
                 />
               </div>

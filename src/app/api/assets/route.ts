@@ -33,8 +33,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { code, name, description, category, location, status, imageUrl } = body;
+    const formData = await request.formData();
+    const code = formData.get('code') as string;
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const category = formData.get('category') as string;
+    const location = formData.get('location') as string;
+    const assetCode = formData.get('assetCode') as string;
+    const costCenter = formData.get('costCenter') as string;
+    const price = formData.get('price') as string;
+    const status = formData.get('status') as string;
+    const imageFile = formData.get('image') as File;
 
     // Validation
     if (!code || !name) {
@@ -65,6 +74,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let imageUrl = null;
+    if (imageFile && imageFile.size > 0) {
+      // Handle file upload here - you'll need to implement this based on your storage solution
+      // For now, we'll just skip the image upload functionality
+    }
+
     const asset = await prisma.asset.create({
       data: {
         code,
@@ -72,7 +87,10 @@ export async function POST(request: NextRequest) {
         description: description || null,
         category: category || null,
         location: location || null,
-        status: status || 'AVAILABLE',
+        assetCode: assetCode || null,
+        costCenter: costCenter || null,
+        price: price ? parseFloat(price) : null,
+        status: (status as any) || 'AVAILABLE',
         imageUrl: imageUrl || null
       }
     });

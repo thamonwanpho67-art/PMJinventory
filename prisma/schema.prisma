@@ -29,6 +29,9 @@ model Asset {
   description String?
   category    String?
   location    String?
+  assetCode   String?
+  costCenter  String?
+  price       Float?
   status      AssetStatus @default(AVAILABLE)
   imageUrl    String?
   createdAt   DateTime    @default(now())
