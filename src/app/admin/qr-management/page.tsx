@@ -52,7 +52,7 @@ export default function QRManagementPage() {
         const response = await fetch('/api/assets');
         if (response.ok) {
           const data = await response.json();
-          setAssets(data || []);
+          setAssets(data);
           
           const uniqueCategories = [...new Set(data?.map((asset: Asset) => asset.category).filter(Boolean))] as string[];
           setCategories(uniqueCategories);

@@ -11,11 +11,11 @@ model User {
   id                 String              @id @default(cuid())
   email              String              @unique
   name               String
-  phone              String?
   password           String
   role               Role                @default(USER)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  phone              String?
   loans              Loan[]
   supplyTransactions SupplyTransaction[]
 
@@ -29,11 +29,11 @@ model Asset {
   description String?
   category    String?
   location    String?
-  quantity    Int         @default(1)
   status      AssetStatus @default(AVAILABLE)
   imageUrl    String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  quantity    Int         @default(1)
   loans       Loan[]
 }
 
@@ -41,7 +41,6 @@ model Loan {
   id         String     @id @default(cuid())
   assetId    String
   userId     String
-  quantity   Int        @default(1)
   status     LoanStatus @default(PENDING)
   borrowedAt DateTime?
   dueAt      DateTime
@@ -49,10 +48,50 @@ model Loan {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   notes      String?
+  quantity   Int        @default(1)
   asset      Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("loans")
+}
+
+model Supply {
+  id           String              @id @default(cuid())
+  name         String
+  description  String?
+  category     String
+  unit         String
+  quantity     Int                 @default(0)
+  minStock     Int                 @default(0)
+  unitPrice    Float?
+  supplier     String?
+  location     String?
+  status       SupplyStatus        @default(AVAILABLE)
+  imageUrl     String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  transactions SupplyTransaction[]
+
+  @@map("supplies")
+}
+
+model SupplyTransaction {
+  id              String                @id @default(cuid())
+  supplyId        String
+  userId          String
+  transactionType SupplyTransactionType
+  quantity        Int
+  remainingStock  Int
+  unitPrice       Float?
+  totalAmount     Float?
+  notes           String?
+  department      String?
+  approvedBy      String?
+  createdAt       DateTime              @default(now())
+  supply          Supply                @relation(fields: [supplyId], references: [id], onDelete: Cascade)
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("supply_transactions")
 }
 
 enum AssetStatus {
@@ -73,53 +112,14 @@ enum LoanStatus {
   REJECTED
 }
 
-model Supply {
-  id           String              @id @default(cuid())
-  name         String
-  description  String?
-  category     String
-  unit         String              // หน่วยนับ เช่น "ชิ้น", "กล่อง", "แกลลอน"
-  quantity     Int                 @default(0)
-  minStock     Int                 @default(0) // จำนวนขั้นต่ำที่ควรมีในสต็อก
-  unitPrice    Float?              // ราคาต่อหน่วย
-  supplier     String?             // ผู้ผลิต/จัดจำหน่าย
-  location     String?             // ตำแหน่งเก็บ
-  status       SupplyStatus        @default(AVAILABLE)
-  imageUrl     String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  transactions SupplyTransaction[]
-
-  @@map("supplies")
-}
-
-model SupplyTransaction {
-  id              String                    @id @default(cuid())
-  supplyId        String
-  userId          String
-  transactionType SupplyTransactionType
-  quantity        Int
-  remainingStock  Int                       // สต็อกที่เหลือหลังทำธุรกรรม
-  unitPrice       Float?                    // ราคาต่อหน่วยในขณะทำธุรกรรม
-  totalAmount     Float?                    // จำนวนเงินรวม
-  notes           String?
-  department      String?                   // แผนก/หน่วยงานที่เบิก
-  approvedBy      String?                   // ผู้อนุมัติ
-  createdAt       DateTime                  @default(now())
-  supply          Supply                    @relation(fields: [supplyId], references: [id], onDelete: Cascade)
-  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("supply_transactions")
-}
-
 enum SupplyStatus {
-  AVAILABLE     // พร้อมใช้งาน
-  LOW_STOCK     // สต็อกต่ำ
-  OUT_OF_STOCK  // หมดสต็อก
-  DISCONTINUED  // เลิกใช้งาน
+  AVAILABLE
+  LOW_STOCK
+  OUT_OF_STOCK
+  DISCONTINUED
 }
 
 enum SupplyTransactionType {
-  IN    // นำเข้า/เพิ่มสต็อก
-  OUT   // เบิกออก/ใช้งาน
+  IN
+  OUT
 }
