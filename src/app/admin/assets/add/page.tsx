@@ -70,12 +70,20 @@ export default function AddAssetPage() {
     setError('');
 
     try {
+      const submitFormData = new FormData();
+      submitFormData.append('name', formData.name);
+      submitFormData.append('code', formData.code);
+      submitFormData.append('assetCode', formData.assetCode);
+      submitFormData.append('description', formData.description);
+      submitFormData.append('category', formData.category);
+      submitFormData.append('price', formData.price);
+      submitFormData.append('costCenter', formData.costCenter);
+      submitFormData.append('status', formData.status);
+      submitFormData.append('imageUrl', formData.imageUrl);
+
       const response = await fetch('/api/assets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: submitFormData,
       });
 
       const data = await response.json();
