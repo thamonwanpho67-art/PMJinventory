@@ -287,7 +287,7 @@ export default function SuppliesPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-kanit font-black bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-              จัดการวัสดุสิ้นเปลือง
+              วัสดุครุภัณฑ์
             </h1>
             <p className="text-pink-700 font-kanit mt-2">
               จัดการวัสดุอุปกรณ์ที่ใช้แล้วหมดไป เช่น หมึกปริ้นเตอร์ กระดาษ อุปกรณ์สำนักงาน
@@ -505,7 +505,7 @@ export default function SuppliesPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-gray-700 font-kanit font-semibold mb-2">
                       ชื่อวัสดุ *
                     </label>
                     <input
@@ -518,7 +518,7 @@ export default function SuppliesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-gray-700 font-kanit font-semibold mb-2">
                       หมวดหมู่ *
                     </label>
                     <input
@@ -533,7 +533,7 @@ export default function SuppliesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                  <label className="block text-gray-700 font-kanit font-semibold mb-2">
                     รายละเอียด
                   </label>
                   <textarea
@@ -547,7 +547,7 @@ export default function SuppliesPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-gray-700 font-kanit font-semibold mb-2">
                       หน่วยนับ *
                     </label>
                     <input
@@ -560,7 +560,7 @@ export default function SuppliesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-gray-700 font-kanit font-semibold mb-2">
                       จำนวน
                     </label>
                     <input
@@ -572,7 +572,7 @@ export default function SuppliesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-gray-700 font-kanit font-semibold mb-2">
                       สต็อกต่ำสุด
                     </label>
                     <input
@@ -587,7 +587,7 @@ export default function SuppliesPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-gray-700 font-kanit font-semibold mb-2">
                       ราคาต่อหน่วย (บาท)
                     </label>
                     <input
@@ -600,7 +600,7 @@ export default function SuppliesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-gray-700 font-kanit font-semibold mb-2">
                       ผู้จัดจำหน่าย
                     </label>
                     <input
@@ -614,7 +614,7 @@ export default function SuppliesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                  <label className="block text-gray-700 font-kanit font-semibold mb-2">
                     ตำแหน่งเก็บ
                   </label>
                   <input
@@ -627,7 +627,7 @@ export default function SuppliesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                  <label className="block text-gray-700 font-kanit font-semibold mb-2">
                     URL รูปภาพ
                   </label>
                   <input

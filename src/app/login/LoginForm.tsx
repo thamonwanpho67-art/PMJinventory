@@ -97,8 +97,7 @@ export default function LoginForm() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full px-4 py-3 border border-pink-300 rounded-xl shadow-sm placeholder-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-pink-50/50 text-gray-800 font-medium"
-                placeholder="your.email@office.com"
+                className="w-full px-4 py-3 border border-pink-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-pink-50/20 text-gray-800 font-medium"
               />
             </div>
 
