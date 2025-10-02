@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
-import { FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaClipboardList, FaCalendarAlt, FaBox, FaSearch, FaFilter, FaCalendar } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaClipboardList, FaCalendarAlt, FaBox, FaSearch, FaFilter, FaCalendar, FaDownload } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 
 type Loan = {
   id: string;
@@ -57,6 +58,87 @@ const statusConfig = {
     color: 'text-red-600',
     bgColor: 'bg-red-100',
     borderColor: 'border-red-200'
+  }
+};
+
+const exportToExcel = (loans: Loan[], activeTab: string) => {
+  try {
+    const workbook = XLSX.utils.book_new();
+    
+    // สร้างข้อมูลสำหรับ Excel
+    const excelData = loans.map((loan, index) => ({
+      'ลำดับ': index + 1,
+      'รหัสครุภัณฑ์': loan.asset.code,
+      'ชื่อครุภัณฑ์': loan.asset.name,
+      'จำนวน': loan.quantity,
+      'สถานะ': 
+        loan.status === 'PENDING' ? 'รอการอนุมัติ' :
+        loan.status === 'APPROVED' ? 'อนุมัติแล้ว' :
+        loan.status === 'REJECTED' ? 'ไม่อนุมัติ' :
+        loan.status === 'RETURNED' ? 'คืนแล้ว' : loan.status,
+      'ผู้ยืม': loan.user.name || loan.user.email,
+      'วันที่ยื่นคำขอ': new Date(loan.createdAt).toLocaleDateString('th-TH'),
+      'กำหนดคืน': loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('th-TH') : 
+                   loan.dueAt ? new Date(loan.dueAt).toLocaleDateString('th-TH') : '-',
+      'วันที่อนุมัติ': loan.borrowedAt ? new Date(loan.borrowedAt).toLocaleDateString('th-TH') : '-',
+      'วันที่คืน': loan.returnedAt ? new Date(loan.returnedAt).toLocaleDateString('th-TH') : '-',
+      'หมายเหตุ': loan.note || '-'
+    }));
+
+    // สร้าง worksheet
+    const worksheet = XLSX.utils.json_to_sheet([]);
+    
+    // เพิ่มหัวข้อหลัก
+    const title = activeTab === 'current' ? 'รายงานการยืมปัจจุบัน' : 'รายงานประวัติการยืม-คืน';
+    const titleRow = [title];
+    XLSX.utils.sheet_add_aoa(worksheet, [titleRow], { origin: 'A1' });
+    
+    // เพิ่มวันที่สร้างรายงาน
+    const dateRow = [`วันที่สร้างรายงาน: ${new Date().toLocaleDateString('th-TH')} ${new Date().toLocaleTimeString('th-TH')}`];
+    XLSX.utils.sheet_add_aoa(worksheet, [dateRow], { origin: 'A2' });
+    
+    // เพิ่มหัวข้อคอลัมน์
+    const headers = ['ลำดับ', 'รหัสครุภัณฑ์', 'ชื่อครุภัณฑ์', 'จำนวน', 'สถานะ', 'ผู้ยืม', 'วันที่ยื่นคำขอ', 'กำหนดคืน', 'วันที่อนุมัติ', 'วันที่คืน', 'หมายเหตุ'];
+    XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: 'A4' });
+    
+    // เพิ่มข้อมูล
+    if (excelData.length > 0) {
+      XLSX.utils.sheet_add_json(worksheet, excelData, { origin: 'A5', skipHeader: true });
+    }
+    
+    // กำหนด column widths
+    const colWidths = [
+      { wch: 8 },   // ลำดับ
+      { wch: 15 },  // รหัสครุภัณฑ์
+      { wch: 30 },  // ชื่อครุภัณฑ์
+      { wch: 10 },  // จำนวน
+      { wch: 15 },  // สถานะ
+      { wch: 20 },  // ผู้ยืม
+      { wch: 15 },  // วันที่ยื่นคำขอ
+      { wch: 15 },  // กำหนดคืน
+      { wch: 15 },  // วันที่อนุมัติ
+      { wch: 15 },  // วันที่คืน
+      { wch: 25 }   // หมายเหตุ
+    ];
+    worksheet['!cols'] = colWidths;
+    
+    // Merge cells สำหรับ title
+    worksheet['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }, // Title row
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } }  // Date row
+    ];
+    
+    // เพิ่ม worksheet เข้า workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'รายงาน');
+    
+    // สร้างชื่อไฟล์
+    const fileName = `รายงาน${activeTab === 'current' ? 'การยืมปัจจุบัน' : 'ประวัติการยืม-คืน'}_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.xlsx`;
+    
+    // ดาวน์โหลดไฟล์
+    XLSX.writeFile(workbook, fileName);
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    alert('เกิดข้อผิดพลาดในการส่งออกไฟล์ Excel');
   }
 };
 
@@ -453,19 +535,32 @@ export default function LoansAndHistoryPage() {
               </div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600 font-kanit">
-              แสดงผล {filteredLoans.length} รายการจากทั้งหมด {activeTab === 'current' ? currentStats.total : historyStats.total} รายการ
-              {(startDate || endDate) && (
-                <span className="text-pink-600 ml-2">
-                  {startDate && endDate && startDate === endDate 
-                    ? `(วันที่ ${new Date(startDate).toLocaleDateString('th-TH')})` 
-                    : startDate && endDate 
-                    ? `(${new Date(startDate).toLocaleDateString('th-TH')} - ${new Date(endDate).toLocaleDateString('th-TH')})` 
-                    : startDate 
-                    ? `(ตั้งแต่ ${new Date(startDate).toLocaleDateString('th-TH')})` 
-                    : `(ถึง ${new Date(endDate).toLocaleDateString('th-TH')})`
-                  }
-                </span>
+            <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="text-sm text-gray-600 font-kanit">
+                แสดงผล {filteredLoans.length} รายการจากทั้งหมด {activeTab === 'current' ? currentStats.total : historyStats.total} รายการ
+                {(startDate || endDate) && (
+                  <span className="text-pink-600 ml-2">
+                    {startDate && endDate && startDate === endDate 
+                      ? `(วันที่ ${new Date(startDate).toLocaleDateString('th-TH')})` 
+                      : startDate && endDate 
+                      ? `(${new Date(startDate).toLocaleDateString('th-TH')} - ${new Date(endDate).toLocaleDateString('th-TH')})` 
+                      : startDate 
+                      ? `(ตั้งแต่ ${new Date(startDate).toLocaleDateString('th-TH')})` 
+                      : `(ถึง ${new Date(endDate).toLocaleDateString('th-TH')})`
+                    }
+                  </span>
+                )}
+              </div>
+              
+              {/* Export Button */}
+              {filteredLoans.length > 0 && (
+                <button
+                  onClick={() => exportToExcel(filteredLoans, activeTab)}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white rounded-lg font-kanit font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <FaDownload className="mr-2" />
+                  ดาวน์โหลด Excel
+                </button>
               )}
             </div>
           </div>

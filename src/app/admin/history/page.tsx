@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
-import { FaHistory, FaCalendarAlt, FaUser, FaBox, FaArrowRight, FaDownload, FaFilter, FaSearch, FaClock, FaCheckCircle, FaTimesCircle, FaGift } from 'react-icons/fa';
+import { FaHistory, FaCalendarAlt, FaUser, FaBox, FaArrowRight, FaDownload, FaFilter, FaSearch, FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaFileExcel } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 
 type HistoryRecord = {
   id: string;
@@ -97,33 +98,123 @@ export default function HistoryPage() {
     }
   };
 
-  const exportToCSV = () => {
-    const csvData = filteredHistory.map(record => ({
-      'วันที่ยื่นคำขอ': new Date(record.createdAt).toLocaleDateString('th-TH'),
-      'ครุภัณฑ์': record.asset.name,
-      'รหัส': record.asset.code,
-      'ผู้ยืม': record.user.name || record.user.email,
-      'จำนวน': record.quantity,
-      'กำหนดคืน': new Date(record.dueDate).toLocaleDateString('th-TH'),
-      'สถานะ': statusConfig[record.status].label,
-      'วันที่ยืม': record.borrowedAt ? new Date(record.borrowedAt).toLocaleDateString('th-TH') : '-',
-      'วันที่คืน': record.returnedAt ? new Date(record.returnedAt).toLocaleDateString('th-TH') : '-',
-      'หมายเหตุ': record.note || '-'
-    }));
-
-    const csvContent = [
-      Object.keys(csvData[0] || {}).join(','),
-      ...csvData.map(row => Object.values(row).join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `ประวัติการยืม-คืน_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const exportToExcel = () => {
+    // สร้าง workbook ใหม่
+    const wb = XLSX.utils.book_new();
+    
+    // สร้าง worksheet
+    const ws: any = {};
+    
+    // Header ของเอกสาร
+    ws['A1'] = { v: 'รายงานประวัติการยืม-คืนครุภัณฑ์', s: { font: { bold: true, size: 16 }, alignment: { horizontal: 'center' } } };
+    ws['A2'] = { v: `ข้อมูล ณ วันที่ ${new Date().toLocaleDateString('th-TH')}`, s: { font: { size: 12 }, alignment: { horizontal: 'center' } } };
+    ws['A3'] = { v: '' }; // ช่องว่าง
+    
+    // Header ของตาราง
+    const headers = [
+      'ลำดับ',
+      'วันที่ยื่นคำขอ',
+      'ครุภัณฑ์',
+      'รหัสครุภัณฑ์',
+      'ผู้ยืม',
+      'อีเมล',
+      'จำนวน',
+      'กำหนดคืน',
+      'สถานะ',
+      'วันที่ยืม',
+      'วันที่คืน',
+      'หมายเหตุ'
+    ];
+    
+    // เพิ่ม headers ในแถวที่ 4
+    headers.forEach((header, index) => {
+      const cellRef = XLSX.utils.encode_cell({ r: 3, c: index });
+      ws[cellRef] = { 
+        v: header, 
+        s: { 
+          font: { bold: true, size: 12 }, 
+          alignment: { horizontal: 'center', vertical: 'center' },
+          fill: { fgColor: { rgb: 'F0F0F0' } },
+          border: { 
+            top: { style: 'thin' }, 
+            left: { style: 'thin' }, 
+            bottom: { style: 'thin' }, 
+            right: { style: 'thin' } 
+          }
+        } 
+      };
+    });
+    
+    // เพิ่มข้อมูล
+    filteredHistory.forEach((record, index) => {
+      const row = 4 + index; // เริ่มจากแถวที่ 5 (index 4)
+      
+      const rowData = [
+        index + 1,
+        new Date(record.createdAt).toLocaleDateString('th-TH'),
+        record.asset.name,
+        record.asset.code,
+        record.user.name || record.user.email,
+        record.user.email,
+        record.quantity,
+        new Date(record.dueDate).toLocaleDateString('th-TH'),
+        statusConfig[record.status].label,
+        record.borrowedAt ? new Date(record.borrowedAt).toLocaleDateString('th-TH') : '-',
+        record.returnedAt ? new Date(record.returnedAt).toLocaleDateString('th-TH') : '-',
+        record.note || '-'
+      ];
+      
+      rowData.forEach((data, colIndex) => {
+        const cellRef = XLSX.utils.encode_cell({ r: row, c: colIndex });
+        ws[cellRef] = { 
+          v: data,
+          s: {
+            alignment: { horizontal: colIndex === 0 ? 'center' : 'left', vertical: 'center' },
+            border: { 
+              top: { style: 'thin' }, 
+              left: { style: 'thin' }, 
+              bottom: { style: 'thin' }, 
+              right: { style: 'thin' } 
+            }
+          }
+        };
+      });
+    });
+    
+    // ตั้งค่า range ของ worksheet
+    const lastRow = 4 + filteredHistory.length;
+    ws['!ref'] = `A1:L${lastRow}`;
+    
+    // ผสาน cells สำหรับ header
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }, // ผสาน title
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 11 } }  // ผสาน date
+    ];
+    
+    // ตั้งค่าความกว้างของคอลัมน์
+    ws['!cols'] = [
+      { wch: 8 },  // ลำดับ
+      { wch: 15 }, // วันที่ยื่นคำขอ
+      { wch: 25 }, // ครุภัณฑ์
+      { wch: 15 }, // รหัสครุภัณฑ์
+      { wch: 20 }, // ผู้ยืม
+      { wch: 25 }, // อีเมล
+      { wch: 8 },  // จำนวน
+      { wch: 15 }, // กำหนดคืน
+      { wch: 15 }, // สถานะ
+      { wch: 15 }, // วันที่ยืม
+      { wch: 15 }, // วันที่คืน
+      { wch: 30 }  // หมายเหตุ
+    ];
+    
+    // เพิ่ม worksheet เข้า workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'ประวัติการยืม-คืน');
+    
+    // ส่งออกไฟล์
+    const fileName = `ประวัติการยืม-คืน_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    alert('ส่งออกไฟล์ Excel เรียบร้อยแล้ว');
   };
 
   const filteredHistory = history.filter(record => {
@@ -224,12 +315,12 @@ export default function HistoryPage() {
             </div>
 
             <button
-              onClick={exportToCSV}
+              onClick={exportToExcel}
               disabled={filteredHistory.length === 0}
               className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <FaDownload className="w-4 h-4" />
-              <span>ดาวน์โหลด CSV</span>
+              <FaFileExcel className="w-4 h-4" />
+              <span>ดาวน์โหลด Excel</span>
             </button>
           </div>
         </div>

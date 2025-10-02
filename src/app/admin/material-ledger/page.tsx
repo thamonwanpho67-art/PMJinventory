@@ -245,45 +245,225 @@ export default function MaterialLedgerPage() {
   };
 
   const exportToExcel = () => {
-    const exportData = entries.map(entry => ({
-      'ประเภท': entry.type,
-      'ชื่อหรือชนิดวัสดุ': entry.materialName,
-      'หน่วยนับ': entry.unit,
-      'รหัส': entry.code,
-      'จำนวนอย่างสูง': entry.maxQuantity,
-      'จำนวนอย่างต่ำ': entry.minQuantity,
-      'วันเดือนปี': entry.date,
-      'รับจาก/จ่ายให้': entry.fromTo,
-      'เลขที่เอกสาร': entry.documentNumber,
-      'ราคาต่อหน่วย(บาท)': entry.unitPrice,
-      'จำนวนรับ': entry.receiveQuantity,
-      'จำนวนจ่าย': entry.issueQuantity,
-      'จำนวนคงเหลือ': entry.balanceQuantity,
-      'จำนวนเงิน(บาท)': entry.totalAmount,
-      'หมายเหตุ': entry.remarks
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
+    // สร้าง workbook ใหม่
     const wb = XLSX.utils.book_new();
+    
+    // สร้าง worksheet
+    const ws: any = {};
+    
+    // Header ของเอกสาร (แถว 1-6)
+    ws['A1'] = { v: 'ประเทศ', s: { font: { bold: true, size: 14 }, alignment: { horizontal: 'left' } } };
+    ws['B1'] = { v: 'วัดสู่สำนักงาน', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    ws['G1'] = { v: 'หน้าที่ ........................................................................', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    
+    ws['A2'] = { v: 'สือกรอมเซีอวัสดุ', s: { font: { bold: true, size: 14 }, alignment: { horizontal: 'left' } } };
+    ws['B2'] = { v: 'กระทรวงดิจิตอลเศรษฐกิจ และ สังคม', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    ws['G2'] = { v: 'จำนวนอย่างสูง ........................................................................', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    
+    ws['A3'] = { v: 'หน่วยนับ', s: { font: { bold: true, size: 14 }, alignment: { horizontal: 'left' } } };
+    ws['B3'] = { v: 'รัม', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    ws['G3'] = { v: 'จำนวนอย่างต่ำ ........................................................................', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    
+    // ช่องว่าง
+    ws['A4'] = { v: '' };
+    ws['A5'] = { v: '' };
+    ws['A6'] = { v: '' };
+    ws['A7'] = { v: '' };
+    
+    // Header ของตาราง (แถว 8-9)
+    ws['A8'] = { v: 'วัน เดือน ปี', s: { 
+      font: { bold: true, size: 12 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    ws['B8'] = { v: 'รับจาก/จ่ายให้', s: { 
+      font: { bold: true, size: 12 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    ws['C8'] = { v: 'เลขที่เอกสาร', s: { 
+      font: { bold: true, size: 12 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    // Header ราคาหน่วย
+    ws['D8'] = { v: 'ราคาหน่วย', s: { 
+      font: { bold: true, size: 12 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    ws['D9'] = { v: '(บาท)', s: { 
+      font: { bold: true, size: 10 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    // Header จำนวน (merged cell)
+    ws['E8'] = { v: 'จำนวน', s: { 
+      font: { bold: true, size: 12 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    // Sub-headers จำนวน
+    ws['E9'] = { v: 'รับ', s: { 
+      font: { bold: true, size: 11 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    ws['F9'] = { v: 'จ่าย', s: { 
+      font: { bold: true, size: 11 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    ws['G9'] = { v: 'คงเหลือ', s: { 
+      font: { bold: true, size: 11 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    ws['H8'] = { v: 'จำนวนเงิน(บาท)', s: { 
+      font: { bold: true, size: 12 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    ws['I8'] = { v: 'หมายเหตุ', s: { 
+      font: { bold: true, size: 12 }, 
+      alignment: { horizontal: 'center', vertical: 'center' }, 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } },
+      fill: { fgColor: { rgb: 'F0F0F0' } }
+    } };
+    
+    // เติมข้อมูลจริงจากระบบ
+    let currentRow = 10;
+    entries.forEach((entry, index) => {
+      const row = currentRow + index;
+      
+      // แปลงวันที่เป็นรูปแบบไทย
+      const thaiDate = new Date(entry.date).toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      
+      ws[`A${row}`] = { v: thaiDate, s: { 
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`B${row}`] = { v: entry.fromTo, s: { 
+        alignment: { horizontal: 'left', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`C${row}`] = { v: entry.documentNumber, s: { 
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`D${row}`] = { v: entry.unitPrice, s: { 
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`E${row}`] = { v: entry.receiveQuantity, s: { 
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`F${row}`] = { v: entry.issueQuantity, s: { 
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`G${row}`] = { v: entry.balanceQuantity, s: { 
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`H${row}`] = { v: entry.totalAmount, s: { 
+        alignment: { horizontal: 'right', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+      
+      ws[`I${row}`] = { v: entry.remarks, s: { 
+        alignment: { horizontal: 'left', vertical: 'center' },
+        border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+      } };
+    });
+    
+    // เพิ่มแถวว่างสำหรับเติมข้อมูลในอนาคต (20 แถว)
+    for (let i = 0; i < 20; i++) {
+      const row = currentRow + entries.length + i;
+      for (let col = 0; col < 9; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: row - 1, c: col });
+        ws[cellRef] = { v: '', s: { 
+          border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+        } };
+      }
+    }
+    
+    // ตั้งค่า range ของ worksheet
+    ws['!ref'] = `A1:I${currentRow + entries.length + 20}`;
+    
+    // ตั้งค่าความกว้างของคอลัมน์
+    ws['!cols'] = [
+      { wch: 18 }, // วัน เดือน ปี
+      { wch: 30 }, // รับจาก/จ่ายให้
+      { wch: 20 }, // เลขที่เอกสาร
+      { wch: 12 }, // ราคาหน่วย
+      { wch: 10 }, // รับ
+      { wch: 10 }, // จ่าย
+      { wch: 12 }, // คงเหลือ
+      { wch: 15 }, // จำนวนเงิน
+      { wch: 25 }  // หมายเหตุ
+    ];
+    
+    // ตั้งค่าความสูงของแถว
+    ws['!rows'] = [
+      { hpt: 20 }, // แถว 1
+      { hpt: 20 }, // แถว 2
+      { hpt: 20 }, // แถว 3
+      { hpt: 15 }, // แถว 4
+      { hpt: 15 }, // แถว 5
+      { hpt: 15 }, // แถว 6
+      { hpt: 15 }, // แถว 7
+      { hpt: 25 }, // แถว 8 (header)
+      { hpt: 20 }  // แถว 9 (sub-header)
+    ];
+    
+    // ผสาน cells สำหรับ header
+    ws['!merges'] = [
+      { s: { r: 7, c: 4 }, e: { r: 7, c: 6 } }, // ผสาน "จำนวน" header
+      { s: { r: 7, c: 0 }, e: { r: 8, c: 0 } }, // ผสาน "วัน เดือน ปี"
+      { s: { r: 7, c: 1 }, e: { r: 8, c: 1 } }, // ผสาน "รับจาก/จ่ายให้"
+      { s: { r: 7, c: 2 }, e: { r: 8, c: 2 } }, // ผสาน "เลขที่เอกสาร"
+      { s: { r: 7, c: 7 }, e: { r: 8, c: 7 } }, // ผสาน "จำนวนเงิน"
+      { s: { r: 7, c: 8 }, e: { r: 8, c: 8 } }  // ผสาน "หมายเหตุ"
+    ];
+    
+    // เพิ่ม worksheet เข้า workbook
     XLSX.utils.book_append_sheet(wb, ws, 'บัญชีวัสดุ');
     
-    // Auto-fit column widths
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-    const colWidths: any[] = [];
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      let maxWidth = 10;
-      for (let R = range.s.r; R <= range.e.r; ++R) {
-        const cell = ws[XLSX.utils.encode_cell({ r: R, c: C })];
-        if (cell && cell.v) {
-          const cellLength = cell.v.toString().length;
-          maxWidth = Math.max(maxWidth, cellLength);
-        }
-      }
-      colWidths.push({ wch: Math.min(maxWidth + 2, 50) });
-    }
-    ws['!cols'] = colWidths;
-
-    XLSX.writeFile(wb, `บัญชีวัสดุ_${new Date().toLocaleDateString('th-TH')}.xlsx`);
+    // ส่งออกไฟล์
+    const fileName = `บัญชีวัสดุ_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    alert('ส่งออกไฟล์ Excel ในรูปแบบบัญชีวัสดุทางราชการเรียบร้อยแล้ว');
   };
 
   const filteredEntries = entries.filter(entry => {
