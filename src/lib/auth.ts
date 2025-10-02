@@ -14,6 +14,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   basePath: "/api/auth",
   trustHost: true,
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "credentials",

@@ -133,8 +133,8 @@ export default function QRManagementPage() {
     }
   };
 
-  // Export to Excel with QR Code images
-  const exportToExcel = async () => {
+  // Export comprehensive report with QR images
+  const exportComprehensiveReport = async () => {
     if (filteredAssets.length === 0) {
       alert('ไม่มีข้อมูลสำหรับส่งออก');
       return;
@@ -143,19 +143,17 @@ export default function QRManagementPage() {
     try {
       setLoading(true);
       
-      // Create workbook
+      // Create ZIP file that contains Excel + all QR images
+      const zip = new JSZip();
+      
+      // 1. Create Excel file
       const workbook = XLSX.utils.book_new();
       
-      // First Sheet: Asset Data
+      // Main data sheet
       const mainData: any[] = [];
       mainData.push([
-        'รหัสครุภัณฑ์',
-        'ชื่อครุภัณฑ์', 
-        'รายละเอียด',
-        'หมวดหมู่',
-        'สถานะ',
-        'QR Code URL',
-        'วันที่สร้าง'
+        'รหัสครุภัณฑ์', 'ชื่อครุภัณฑ์', 'รายละเอียด', 'หมวดหมู่', 
+        'สถานะ', 'QR Code URL', 'ไฟล์ QR Code', 'วันที่สร้าง'
       ]);
 
       for (const asset of filteredAssets) {
@@ -170,25 +168,421 @@ export default function QRManagementPage() {
           asset.category || 'ไม่ระบุ',
           statusText,
           qrUrl,
+          `QR_Images/QR_${asset.code}_${asset.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`,
           new Date(asset.createdAt).toLocaleDateString('th-TH')
         ]);
       }
 
       const mainSheet = XLSX.utils.aoa_to_sheet(mainData);
       mainSheet['!cols'] = [
-        { wch: 15 }, { wch: 30 }, { wch: 40 }, { wch: 15 }, 
-        { wch: 12 }, { wch: 50 }, { wch: 15 }
+        { wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 15 },
+        { wch: 12 }, { wch: 45 }, { wch: 35 }, { wch: 15 }
       ];
-
       XLSX.utils.book_append_sheet(workbook, mainSheet, 'ข้อมูลครุภัณฑ์');
 
-      // Second Sheet: QR Codes Summary
-      const qrData: any[] = [];
-      qrData.push(['รหัส', 'ชื่อครุภัณฑ์', 'QR Code URL', 'หมายเหตุ']);
+      // 2. Generate QR codes and add to ZIP
+      const qrImagesFolder = zip.folder("QR_Images");
+      const printData: any[] = [];
+      printData.push(['หน้า', 'ตำแหน่ง', 'รหัส', 'ชื่อครุภัณฑ์', 'ไฟล์รูป']);
+
+      let currentPage = 1;
+      let positionOnPage = 1;
+      
+      for (let i = 0; i < filteredAssets.length; i++) {
+        const asset = filteredAssets[i];
+        const qrUrl = generateQRUrl(asset.id);
+        
+        try {
+          // Generate QR code
+          const qrDataUrl = await QRCodeLib.toDataURL(qrUrl, { 
+            width: 300, 
+            margin: 2,
+            color: { dark: '#000000', light: '#FFFFFF' }
+          });
+          
+          // Create canvas with asset info
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            canvas.width = 350;
+            canvas.height = 420;
+            
+            // White background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Border
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+
+            const img = new Image();
+            await new Promise<void>((resolve) => {
+              img.onload = () => {
+                // Draw QR code
+                ctx.drawImage(img, 25, 25, 300, 300);
+                
+                // Draw text
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'center';
+                
+                // Asset name (bold, larger)
+                ctx.font = 'bold 18px Arial';
+                const nameLines = wrapText(ctx, asset.name, canvas.width - 40);
+                let yPos = 350;
+                nameLines.forEach(line => {
+                  ctx.fillText(line, canvas.width / 2, yPos);
+                  yPos += 22;
+                });
+                
+                // Asset code
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(`รหัส: ${asset.code}`, canvas.width / 2, yPos + 10);
+                
+                // Category
+                ctx.font = '12px Arial';
+                ctx.fillText(`หมวดหมู่: ${asset.category || 'ไม่ระบุ'}`, canvas.width / 2, yPos + 30);
+                
+                resolve();
+              };
+              img.src = qrDataUrl;
+            });
+
+            // Convert to blob and add to ZIP
+            const blob = await new Promise<Blob>((resolve) => {
+              canvas.toBlob((blob) => {
+                if (blob) resolve(blob);
+              }, 'image/png', 1.0);
+            });
+
+            const fileName = `QR_${asset.code}_${asset.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+            qrImagesFolder?.file(fileName, blob);
+            
+            // Add to print layout data
+            printData.push([
+              currentPage,
+              positionOnPage,
+              asset.code,
+              asset.name,
+              `QR_Images/${fileName}`
+            ]);
+            
+            positionOnPage++;
+            if (positionOnPage > 6) { // 6 QR codes per page
+              currentPage++;
+              positionOnPage = 1;
+            }
+          }
+        } catch (error) {
+          console.error(`Error generating QR for ${asset.code}:`, error);
+        }
+      }
+
+      // 3. Add print layout sheet
+      const printSheet = XLSX.utils.aoa_to_sheet(printData);
+      printSheet['!cols'] = [{ wch: 8 }, { wch: 10 }, { wch: 15 }, { wch: 30 }, { wch: 40 }];
+      XLSX.utils.book_append_sheet(workbook, printSheet, 'รูปแบบการพิมพ์');
+
+      // 4. Add statistics sheet
+      const stats = {
+        total: filteredAssets.length,
+        available: filteredAssets.filter(a => a.status === 'AVAILABLE').length,
+        maintenance: filteredAssets.filter(a => a.status === 'MAINTENANCE').length,
+        broken: filteredAssets.filter(a => a.status === 'OUT_OF_ORDER').length,
+        categories: [...new Set(filteredAssets.map(a => a.category).filter(Boolean))].length,
+        pages: Math.ceil(filteredAssets.length / 6)
+      };
+
+      const statsData = [
+        ['รายงานการจัดการ QR Code ครุภัณฑ์', ''],
+        ['', ''],
+        ['สถิติทั่วไป', 'จำนวน'],
+        ['ครุภัณฑ์ทั้งหมด', stats.total],
+        ['- พร้อมใช้งาน', stats.available],
+        ['- ซ่อมบำรุง', stats.maintenance],
+        ['- เสียหาย', stats.broken],
+        ['หมวดหมู่ทั้งหมด', stats.categories],
+        ['จำนวนหน้าสำหรับพิมพ์', stats.pages],
+        ['', ''],
+        ['ข้อมูลการสร้างรายงาน', ''],
+        ['วันที่สร้าง', new Date().toLocaleString('th-TH')],
+        ['ผู้สร้าง', session?.user?.name || 'ไม่ระบุ'],
+        ['จำนวนไฟล์ QR Code', stats.total],
+        ['', ''],
+        ['คำแนะนำการใช้งาน', ''],
+        ['1. ไฟล์ Excel นี้มีข้อมูลครุภัณฑ์ทั้งหมด', ''],
+        ['2. โฟลเดอร์ QR_Images มีรูป QR Code ทั้งหมด', ''],
+        ['3. ใช้แท็บ "รูปแบบการพิมพ์" สำหรับจัดรูปแบบ', ''],
+        ['4. QR Code แต่ละอันสามารถสแกนดูข้อมูลได้', ''],
+        ['5. รูป QR Code ขนาด 350x420 พิกเซล เหมาะสำหรับพิมพ์', '']
+      ];
+
+      const statsSheet = XLSX.utils.aoa_to_sheet(statsData);
+      statsSheet['!cols'] = [{ wch: 45 }, { wch: 20 }];
+      XLSX.utils.book_append_sheet(workbook, statsSheet, 'สถิติและคำแนะนำ');
+
+      // 5. Style all sheets
+      const headerStyle = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "EC4899" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      Object.keys(workbook.Sheets).forEach(sheetName => {
+        const ws = workbook.Sheets[sheetName];
+        if (ws['!ref']) {
+          const range = XLSX.utils.decode_range(ws['!ref']);
+          for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (ws[cellAddress]) {
+              ws[cellAddress].s = headerStyle;
+            }
+          }
+        }
+      });
+
+      // 6. Convert Excel to blob and add to ZIP
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const currentDate = new Date();
+      const dateString = currentDate.toISOString().split('T')[0];
+      const timeString = currentDate.toTimeString().split(' ')[0].replace(/:/g, '-');
+      
+      zip.file(`QR_Management_Complete_${dateString}_${timeString}.xlsx`, excelBlob);
+
+      // 7. Add README file
+      const readmeContent = `🔖 รายงานการจัดการ QR Code ครุภัณฑ์
+=========================================
+
+📅 สร้างเมื่อ: ${new Date().toLocaleString('th-TH')}
+👤 ผู้สร้าง: ${session?.user?.name || 'ไม่ระบุ'}
+📊 จำนวนครุภัณฑ์: ${stats.total} รายการ
+
+📁 ไฟล์ในแพ็คเกจนี้:
+├── QR_Management_Complete_${dateString}_${timeString}.xlsx (ไฟล์ข้อมูลหลัก)
+└── QR_Images/ (โฟลเดอร์รูป QR Code)
+    ├── QR_[รหัส]_[ชื่อ].png (${stats.total} ไฟล์)
+
+📋 แท็บใน Excel:
+• ข้อมูลครุภัณฑ์ - ข้อมูลโดยละเอียดทั้งหมด
+• รูปแบบการพิมพ์ - จัดเรียงสำหรับพิมพ์ (6 รายการต่อหน้า)
+• สถิติและคำแนะนำ - สรุปข้อมูลและวิธีใช้
+
+🖨️ การพิมพ์ QR Code:
+1. เปิดโฟลเดอร์ QR_Images
+2. เลือกรูปที่ต้องการพิมพ์
+3. ขนาดที่แนะนำ: 5x6 ซม. (2x2.4 นิ้ว)
+4. คุณภาพ: 300 DPI ขึ้นไป
+
+📱 การใช้งาน QR Code:
+• สแกนด้วยแอปกล้องมือถือ
+• จะเปิดหน้าข้อมูลครุภัณฑ์โดยตรง
+• ไม่ต้องติดตั้งแอปพิเศษ
+
+⚠️ หมายเหตุ:
+• เก็บไฟล์นี้ไว้สำหรับการอ้างอิง
+• สำรองข้อมูลเป็นประจำ
+• ตรวจสอบการทำงานของ QR Code ก่อนนำไปใช้
+
+📞 ติดต่อสอบถาม: ฝ่ายไอที
+`;
+
+      zip.file("📖_คำแนะนำการใช้งาน.txt", readmeContent);
+
+      // 8. Generate and download ZIP
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipFileName = `QR_Management_Complete_Package_${dateString}_${timeString}.zip`;
+      saveAs(zipBlob, zipFileName);
+
+      alert(`🎉 สร้างแพ็คเกจสมบูรณ์เรียบร้อย!\n\n📦 ไฟล์: ${zipFileName}\n📊 ครุภัณฑ์: ${stats.total} รายการ\n🖼️ QR Code: ${stats.total} รูป\n📄 หน้าพิมพ์: ${stats.pages} หน้า\n\n💡 แพ็คเกจประกอบด้วย:\n• ไฟล์ Excel ข้อมูลครบถ้วน\n• รูป QR Code ทุกรายการ\n• คำแนะนำการใช้งาน`);
+
+    } catch (error) {
+      console.error('Error creating comprehensive report:', error);
+      alert('❌ เกิดข้อผิดพลาดในการสร้างรายงาน\nกรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to wrap text
+  const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = ctx.measureText(currentLine + " " + word).width;
+      if (width < maxWidth) {
+        currentLine += " " + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    lines.push(currentLine);
+    return lines;
+  };
+
+  // Export to Excel with embedded QR Code images
+  const exportToExcel = async () => {
+    if (filteredAssets.length === 0) {
+      alert('ไม่มีข้อมูลสำหรับส่งออก');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      
+      // First Sheet: Asset Data with QR Images
+      const mainData: any[] = [];
+      mainData.push([
+        'QR Code',
+        'รหัสครุภัณฑ์',
+        'ชื่อครุภัณฑ์', 
+        'รายละเอียด',
+        'หมวดหมู่',
+        'สถานะ',
+        'วันที่สร้าง'
+      ]);
+
+      // Generate QR codes and create data
+      for (let i = 0; i < filteredAssets.length; i++) {
+        const asset = filteredAssets[i];
+        const qrUrl = generateQRUrl(asset.id);
+        const statusText = asset.status === 'AVAILABLE' ? 'พร้อมใช้งาน' :
+                          asset.status === 'MAINTENANCE' ? 'ซ่อมบำรุง' : 'เสียหาย';
+        
+        try {
+          // Generate QR code as base64
+          const qrDataUrl = await QRCodeLib.toDataURL(qrUrl, { 
+            width: 150, 
+            margin: 1,
+            color: { dark: '#000000', light: '#FFFFFF' }
+          });
+          
+          // Add row with base64 image data
+          mainData.push([
+            qrDataUrl, // Base64 image data
+            asset.code,
+            asset.name,
+            asset.description || '',
+            asset.category || 'ไม่ระบุ',
+            statusText,
+            new Date(asset.createdAt).toLocaleDateString('th-TH')
+          ]);
+        } catch (error) {
+          console.error(`Error generating QR for ${asset.code}:`, error);
+          mainData.push([
+            'Error generating QR',
+            asset.code,
+            asset.name,
+            asset.description || '',
+            asset.category || 'ไม่ระบุ',
+            statusText,
+            new Date(asset.createdAt).toLocaleDateString('th-TH')
+          ]);
+        }
+      }
+
+      const mainSheet = XLSX.utils.aoa_to_sheet(mainData);
+      
+      // Set column widths and row heights
+      mainSheet['!cols'] = [
+        { wch: 20 }, // QR Code column (wider for image)
+        { wch: 15 }, // รหัสครุภัณฑ์
+        { wch: 25 }, // ชื่อครุภัณฑ์
+        { wch: 30 }, // รายละเอียด
+        { wch: 15 }, // หมวดหมู่
+        { wch: 12 }, // สถานะ
+        { wch: 15 }  // วันที่สร้าง
+      ];
+
+      // Set row heights for QR codes
+      const rowHeights: any[] = [{ hpt: 25 }]; // Header row
+      for (let i = 1; i <= filteredAssets.length; i++) {
+        rowHeights.push({ hpt: 120 }); // QR code rows (120 points ≈ 160px)
+      }
+      mainSheet['!rows'] = rowHeights;
+
+      XLSX.utils.book_append_sheet(workbook, mainSheet, 'QR Codes & ข้อมูล');
+
+      // Second Sheet: Print Layout (3x2 per page)
+      const printData: any[] = [];
+      printData.push(['หน้าที่', 'ตำแหน่ง', 'QR Code', 'รหัส', 'ชื่อครุภัณฑ์', 'หมวดหมู่']);
+
+      let currentPage = 1;
+      let positionOnPage = 1;
+      
+      for (let i = 0; i < filteredAssets.length; i++) {
+        const asset = filteredAssets[i];
+        const qrUrl = generateQRUrl(asset.id);
+        
+        try {
+          // Generate larger QR code for printing
+          const qrDataUrl = await QRCodeLib.toDataURL(qrUrl, { 
+            width: 200, 
+            margin: 2,
+            color: { dark: '#000000', light: '#FFFFFF' }
+          });
+          
+          printData.push([
+            currentPage,
+            positionOnPage,
+            qrDataUrl,
+            asset.code,
+            asset.name,
+            asset.category || 'ไม่ระบุ'
+          ]);
+          
+          positionOnPage++;
+          if (positionOnPage > 6) { // 6 QR codes per page (3x2)
+            currentPage++;
+            positionOnPage = 1;
+          }
+        } catch (error) {
+          console.error(`Error generating print QR for ${asset.code}:`, error);
+          printData.push([
+            currentPage,
+            positionOnPage,
+            'Error',
+            asset.code,
+            asset.name,
+            asset.category || 'ไม่ระบุ'
+          ]);
+        }
+      }
+
+      const printSheet = XLSX.utils.aoa_to_sheet(printData);
+      printSheet['!cols'] = [
+        { wch: 8 },  // หน้าที่
+        { wch: 10 }, // ตำแหน่ง
+        { wch: 25 }, // QR Code (image)
+        { wch: 15 }, // รหัส
+        { wch: 25 }, // ชื่อครุภัณฑ์
+        { wch: 15 }  // หมวดหมู่
+      ];
+
+      // Set row heights for print layout
+      const printRowHeights: any[] = [{ hpt: 25 }]; // Header
+      for (let i = 1; i <= printData.length - 1; i++) {
+        printRowHeights.push({ hpt: 150 }); // Print QR rows
+      }
+      printSheet['!rows'] = printRowHeights;
+
+      XLSX.utils.book_append_sheet(workbook, printSheet, 'รูปแบบพิมพ์');
+
+      // Third Sheet: URL References
+      const urlData: any[] = [];
+      urlData.push(['รหัส', 'ชื่อครุภัณฑ์', 'QR Code URL', 'หมายเหตุ']);
 
       for (const asset of filteredAssets) {
         const qrUrl = generateQRUrl(asset.id);
-        qrData.push([
+        urlData.push([
           asset.code,
           asset.name,
           qrUrl,
@@ -196,40 +590,12 @@ export default function QRManagementPage() {
         ]);
       }
 
-      const qrSheet = XLSX.utils.aoa_to_sheet(qrData);
-      qrSheet['!cols'] = [
+      const urlSheet = XLSX.utils.aoa_to_sheet(urlData);
+      urlSheet['!cols'] = [
         { wch: 15 }, { wch: 30 }, { wch: 50 }, { wch: 30 }
       ];
 
-      XLSX.utils.book_append_sheet(workbook, qrSheet, 'QR Code URLs');
-
-      // Third Sheet: Print-Ready QR Codes (Text format for printing)
-      const printData: any[] = [];
-      printData.push(['หน้าที่', 'รหัสครุภัณฑ์', 'ชื่อครุภัณฑ์', 'QR Code URL', 'วิธีใช้งาน']);
-
-      let pageNum = 1;
-      for (let i = 0; i < filteredAssets.length; i += 6) { // 6 QR codes per page
-        const pageAssets = filteredAssets.slice(i, i + 6);
-        
-        for (const asset of pageAssets) {
-          const qrUrl = generateQRUrl(asset.id);
-          printData.push([
-            pageNum,
-            asset.code,
-            asset.name,
-            qrUrl,
-            'คัดลอก URL นี้ไปสร้าง QR Code หรือใช้เครื่องมือออนไลน์'
-          ]);
-        }
-        pageNum++;
-      }
-
-      const printSheet = XLSX.utils.aoa_to_sheet(printData);
-      printSheet['!cols'] = [
-        { wch: 8 }, { wch: 15 }, { wch: 30 }, { wch: 50 }, { wch: 40 }
-      ];
-
-      XLSX.utils.book_append_sheet(workbook, printSheet, 'พิมพ์ QR Codes');
+      XLSX.utils.book_append_sheet(workbook, urlSheet, 'URL References');
 
       // Fourth Sheet: Statistics
       const stats = {
@@ -237,25 +603,29 @@ export default function QRManagementPage() {
         availableAssets: filteredAssets.filter(a => a.status === 'AVAILABLE').length,
         maintenanceAssets: filteredAssets.filter(a => a.status === 'MAINTENANCE').length,
         brokenAssets: filteredAssets.filter(a => a.status === 'OUT_OF_ORDER').length,
-        categories: [...new Set(filteredAssets.map(a => a.category).filter(Boolean))].length
+        categories: [...new Set(filteredAssets.map(a => a.category).filter(Boolean))].length,
+        pages: Math.ceil(filteredAssets.length / 6)
       };
 
       const statsData = [
-        ['สถิติครุภัณฑ์', 'จำนวน'],
+        ['รายงาน QR Code ครุภัณฑ์', ''],
+        ['สร้างเมื่อ: ' + new Date().toLocaleString('th-TH'), ''],
+        ['ผู้สร้าง: ' + (session?.user?.name || 'ไม่ระบุ'), ''],
+        ['', ''],
+        ['สถิติทั่วไป', 'จำนวน'],
         ['ครุภัณฑ์ทั้งหมด', stats.totalAssets],
-        ['พร้อมใช้งาน', stats.availableAssets],
-        ['ซ่อมบำรุง', stats.maintenanceAssets], 
-        ['เสียหาย', stats.brokenAssets],
+        ['- พร้อมใช้งาน', stats.availableAssets],
+        ['- ซ่อมบำรุง', stats.maintenanceAssets], 
+        ['- เสียหาย', stats.brokenAssets],
         ['หมวดหมู่ทั้งหมด', stats.categories],
-        [''],
-        ['สร้างรายงานเมื่อ', new Date().toLocaleString('th-TH')],
-        ['ผู้สร้างรายงาน', session?.user?.name || 'ไม่ระบุ'],
-        [''],
-        ['คำแนะนำ:', ''],
-        ['1. ใช้แท็บ "ข้อมูลครุภัณฑ์" เพื่อดูข้อมูลโดยละเอียด', ''],
-        ['2. ใช้แท็บ "QR Code URLs" เพื่อคัดลอก URL สำหรับสร้าง QR Code', ''],
-        ['3. ใช้แท็บ "พิมพ์ QR Codes" เพื่อจัดรูปแบบการพิมพ์', ''],
-        ['4. QR Code สามารถสแกนได้ด้วยมือถือเพื่อดูข้อมูลครุภัณฑ์', '']
+        ['หน้าสำหรับพิมพ์', stats.pages],
+        ['', ''],
+        ['คำแนะนำการใช้งาน', ''],
+        ['1. แท็บ "QR Codes & ข้อมูล" - ดูข้อมูลพร้อมรูป QR', ''],
+        ['2. แท็บ "รูปแบบพิมพ์" - จัดเรียงสำหรับพิมพ์', ''],
+        ['3. แท็บ "URL References" - ลิงก์สำหรับอ้างอิง', ''],
+        ['4. รูป QR Code แสดงในเซลล์โดยตรง', ''],
+        ['5. สามารถปรับขนาดรูปได้ใน Excel', '']
       ];
 
       const statsSheet = XLSX.utils.aoa_to_sheet(statsData);
@@ -271,11 +641,11 @@ export default function QRManagementPage() {
       };
 
       // Apply header styling to all sheets
-      const sheets = ['ข้อมูลครุภัณฑ์', 'QR Code URLs', 'พิมพ์ QR Codes', 'สถิติและคำแนะนำ'];
+      const sheets = ['QR Codes & ข้อมูล', 'รูปแบบพิมพ์', 'URL References', 'สถิติและคำแนะนำ'];
       sheets.forEach(sheetName => {
         const ws = workbook.Sheets[sheetName];
-        if (ws) {
-          const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+        if (ws && ws['!ref']) {
+          const range = XLSX.utils.decode_range(ws['!ref']);
           for (let col = range.s.c; col <= range.e.c; col++) {
             const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
             if (ws[cellAddress]) {
@@ -289,15 +659,15 @@ export default function QRManagementPage() {
       const currentDate = new Date();
       const dateString = currentDate.toISOString().split('T')[0];
       const timeString = currentDate.toTimeString().split(' ')[0].replace(/:/g, '-');
-      const filename = `QR_Management_Complete_${dateString}_${timeString}.xlsx`;
+      const filename = `QR_Codes_Images_${dateString}_${timeString}.xlsx`;
 
       // Write file
       XLSX.writeFile(workbook, filename);
       
-      alert(`✅ ส่งออกข้อมูลเรียบร้อย!\n\n📊 รายงานรวม: ${stats.totalAssets} รายการ\n📁 ไฟล์: ${filename}\n\n💡 ไฟล์ประกอบด้วย:\n• ข้อมูลครุภัณฑ์ทั้งหมด\n• URL สำหรับสร้าง QR Code\n• รูปแบบสำหรับพิมพ์\n• สถิติและคำแนะนำ`);
+      alert(`🎉 ส่งออก Excel พร้อมรูป QR Code เรียบร้อย!\n\n📊 รายการ: ${stats.totalAssets} QR Codes\n📁 ไฟล์: ${filename}\n� หน้าพิมพ์: ${stats.pages} หน้า\n\n✨ ฟีเจอร์พิเศษ:\n• รูป QR Code แสดงในเซลล์โดยตรง\n• จัดเรียงสำหรับพิมพ์ 6 รายการต่อหน้า\n• ข้อมูลครบถ้วนทุกรายการ\n• สามารถปรับขนาดรูปใน Excel ได้`);
       
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      console.error('Error exporting Excel with images:', error);
       alert('❌ เกิดข้อผิดพลาดในการส่งออกข้อมูล\nกรุณาลองใหม่อีกครั้ง');
     } finally {
       setLoading(false);
@@ -460,12 +830,20 @@ export default function QRManagementPage() {
 
               <div className="flex gap-3">
                 <button
+                  onClick={exportComprehensiveReport}
+                  disabled={filteredAssets.length === 0 || loading}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FaFileExcel />
+                  {loading ? 'กำลังสร้าง...' : `แพ็คเกจ ZIP+Excel (${filteredAssets.length})`}
+                </button>
+                <button
                   onClick={exportToExcel}
                   disabled={filteredAssets.length === 0 || loading}
                   className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaFileExcel />
-                  {loading ? 'กำลังสร้างไฟล์...' : `ส่งออก Excel (${filteredAssets.length})`}
+                  {loading ? 'กำลังสร้าง...' : `Excel+รูป QR (${filteredAssets.length})`}
                 </button>
                 <button
                   onClick={downloadAllQRCodes}
@@ -473,13 +851,20 @@ export default function QRManagementPage() {
                   className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaDownload />
-                  ดาวน์โหลด ZIP ({filteredAssets.length})
+                  ZIP รูปภาพอย่างเดียว
                 </button>
               </div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600 font-kanit">
-              แสดงผล {filteredAssets.length} รายการจากทั้งหมด {assets.length} รายการ
+            <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="text-sm text-gray-600 font-kanit">
+                แสดงผล {filteredAssets.length} รายการจากทั้งหมด {assets.length} รายการ
+              </div>
+              <div className="text-xs text-gray-500 font-kanit">
+                💜 แพ็คเกจ ZIP+Excel: ZIP ไฟล์ที่มี Excel + รูป QR แยกไฟล์ | 
+                💚 Excel+รูป QR: รูป QR ฝังใน Excel โดยตรง | 
+                🟢 ZIP รูปภาพ: เฉพาะไฟล์รูป PNG
+              </div>
             </div>
           </div>
 

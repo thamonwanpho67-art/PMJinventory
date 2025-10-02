@@ -312,14 +312,15 @@ export default function MaterialLedgerPage() {
 
   return (
     <LayoutWrapper>
-      <div className="p-6">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-pink-100">
+        <div className="p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-kanit font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-kanit font-black bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
               บัญชีวัสดุ
             </h1>
-            <p className="text-blue-700 font-kanit mt-2">
+            <p className="text-pink-700 font-kanit mt-2">
               จัดการบัญชีรับ-จ่ายวัสดุและการติดตามสต็อก
             </p>
           </div>
@@ -333,7 +334,7 @@ export default function MaterialLedgerPage() {
             </button>
             <button
               onClick={() => setShowModal(true)}
-              className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
+              className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3 rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2"
             >
               <FaPlus />
               <span>เพิ่มรายการใหม่</span>
@@ -344,21 +345,21 @@ export default function MaterialLedgerPage() {
         {/* Search and Filters */}
         <div className="mb-6 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
             <input
               type="text"
               placeholder="ค้นหาวัสดุ..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-kanit text-gray-900"
+              className="w-full pl-10 pr-4 py-3 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900 bg-white"
             />
           </div>
           <div className="relative">
-            <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-kanit bg-white text-gray-900"
+              className="pl-10 pr-8 py-3 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white text-gray-900"
             >
               <option value="all">ทุกประเภท</option>
               {types.map(type => (
@@ -371,56 +372,56 @@ export default function MaterialLedgerPage() {
         {/* Material Ledger Table */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
-            <p className="text-blue-600 font-kanit">กำลังโหลดข้อมูล...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-600 mx-auto mb-4"></div>
+            <p className="text-pink-600 font-kanit">กำลังโหลดข้อมูล...</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-lg border border-blue-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border border-pink-100 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                <thead className="bg-gradient-to-r from-pink-50 to-rose-50">
                   <tr>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">ประเภท</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">ชื่อหรือชนิดวัสดุ</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">หน่วยนับ</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">รหัส</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">สูงสุด</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">ต่ำสุด</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">วันที่</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">รับจาก/จ่ายให้</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">เลขที่เอกสาร</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">ราคา/หน่วย</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">รับ</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">จ่าย</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">คงเหลือ</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">จำนวนเงิน</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">หมายเหตุ</th>
-                    <th className="px-3 py-3 text-left font-kanit font-bold text-blue-800 text-xs">จัดการ</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">ประเภท</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">ชื่อหรือชนิดวัสดุ</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">หน่วยนับ</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">รหัส</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">สูงสุด</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">ต่ำสุด</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">วันที่</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">รับจาก/จ่ายให้</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">เลขที่เอกสาร</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">ราคา/หน่วย</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">รับ</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">จ่าย</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">คงเหลือ</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">จำนวนเงิน</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">หมายเหตุ</th>
+                    <th className="px-3 py-3 text-left font-kanit font-bold text-pink-800 text-xs">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredEntries.map((entry) => (
-                    <tr key={entry.id} className="border-t border-blue-100 hover:bg-blue-25">
-                      <td className="px-3 py-3 font-kanit text-xs">{entry.type}</td>
-                      <td className="px-3 py-3 font-kanit text-xs font-semibold">{entry.materialName}</td>
-                      <td className="px-3 py-3 font-kanit text-xs">{entry.unit}</td>
-                      <td className="px-3 py-3 font-kanit text-xs font-mono">{entry.code}</td>
-                      <td className="px-3 py-3 font-kanit text-xs">{entry.maxQuantity}</td>
-                      <td className="px-3 py-3 font-kanit text-xs">{entry.minQuantity}</td>
-                      <td className="px-3 py-3 font-kanit text-xs">{new Date(entry.date).toLocaleDateString('th-TH')}</td>
-                      <td className="px-3 py-3 font-kanit text-xs">{entry.fromTo}</td>
-                      <td className="px-3 py-3 font-kanit text-xs font-mono">{entry.documentNumber}</td>
-                      <td className="px-3 py-3 font-kanit text-xs text-right">{entry.unitPrice.toLocaleString()}</td>
+                    <tr key={entry.id} className="border-t border-pink-100 hover:bg-pink-25">
+                      <td className="px-3 py-3 font-kanit text-xs text-gray-900">{entry.type}</td>
+                      <td className="px-3 py-3 font-kanit text-xs font-semibold text-gray-900">{entry.materialName}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-gray-900">{entry.unit}</td>
+                      <td className="px-3 py-3 font-kanit text-xs font-mono text-gray-900">{entry.code}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-gray-900">{entry.maxQuantity}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-gray-900">{entry.minQuantity}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-gray-900">{new Date(entry.date).toLocaleDateString('th-TH')}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-gray-900">{entry.fromTo}</td>
+                      <td className="px-3 py-3 font-kanit text-xs font-mono text-gray-900">{entry.documentNumber}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-right text-gray-900">{entry.unitPrice.toLocaleString()}</td>
                       <td className="px-3 py-3 font-kanit text-xs text-right text-green-600 font-semibold">{entry.receiveQuantity || '-'}</td>
                       <td className="px-3 py-3 font-kanit text-xs text-right text-red-600 font-semibold">{entry.issueQuantity || '-'}</td>
-                      <td className="px-3 py-3 font-kanit text-xs text-right font-semibold">{entry.balanceQuantity}</td>
-                      <td className="px-3 py-3 font-kanit text-xs text-right font-semibold">{entry.totalAmount.toLocaleString()}</td>
-                      <td className="px-3 py-3 font-kanit text-xs">{entry.remarks || '-'}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-right font-semibold text-gray-900">{entry.balanceQuantity}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-right font-semibold text-gray-900">{entry.totalAmount.toLocaleString()}</td>
+                      <td className="px-3 py-3 font-kanit text-xs text-gray-900">{entry.remarks || '-'}</td>
                       <td className="px-3 py-3">
                         <div className="flex space-x-1">
                           <button
                             onClick={() => handleEdit(entry)}
-                            className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
+                            className="p-1 bg-pink-100 text-pink-600 rounded hover:bg-pink-200 transition-colors"
                             title="แก้ไข"
                           >
                             <FaEdit className="text-xs" />
@@ -454,7 +455,7 @@ export default function MaterialLedgerPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl p-8 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-kanit font-bold text-blue-800">
+                <h2 className="text-2xl font-kanit font-bold text-pink-800">
                   {editingEntry ? 'แก้ไขรายการบัญชีวัสดุ' : 'เพิ่มรายการบัญชีวัสดุใหม่'}
                 </h2>
                 <button
@@ -476,7 +477,7 @@ export default function MaterialLedgerPage() {
                       name="type"
                       value={formData.type}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น สำนักงาน, ทำความสะอาด"
                       required
                     />
@@ -490,7 +491,7 @@ export default function MaterialLedgerPage() {
                       name="materialName"
                       value={formData.materialName}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น กระดาษ A4"
                       required
                     />
@@ -504,7 +505,7 @@ export default function MaterialLedgerPage() {
                       name="unit"
                       value={formData.unit}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น รีม, ชิ้น, กล่อง"
                       required
                     />
@@ -521,7 +522,7 @@ export default function MaterialLedgerPage() {
                       name="code"
                       value={formData.code}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น P001"
                       required
                     />
@@ -535,7 +536,7 @@ export default function MaterialLedgerPage() {
                       name="maxQuantity"
                       value={formData.maxQuantity}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       min="0"
                     />
                   </div>
@@ -548,7 +549,7 @@ export default function MaterialLedgerPage() {
                       name="minQuantity"
                       value={formData.minQuantity}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       min="0"
                     />
                   </div>
@@ -561,7 +562,7 @@ export default function MaterialLedgerPage() {
                       name="date"
                       value={formData.date}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       required
                     />
                   </div>
@@ -577,7 +578,7 @@ export default function MaterialLedgerPage() {
                       name="fromTo"
                       value={formData.fromTo}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น บริษัท ABC จำกัด, แผนกบัญชี"
                     />
                   </div>
@@ -590,7 +591,7 @@ export default function MaterialLedgerPage() {
                       name="documentNumber"
                       value={formData.documentNumber}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น PO-2025-001"
                     />
                   </div>
@@ -603,7 +604,7 @@ export default function MaterialLedgerPage() {
                       name="unitPrice"
                       value={formData.unitPrice}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       step="0.01"
                       min="0"
                     />
@@ -620,7 +621,7 @@ export default function MaterialLedgerPage() {
                       name="receiveQuantity"
                       value={formData.receiveQuantity}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       min="0"
                     />
                   </div>
@@ -633,7 +634,7 @@ export default function MaterialLedgerPage() {
                       name="issueQuantity"
                       value={formData.issueQuantity}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       min="0"
                     />
                   </div>
@@ -646,7 +647,7 @@ export default function MaterialLedgerPage() {
                       name="balanceQuantity"
                       value={formData.balanceQuantity}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       min="0"
                     />
                   </div>
@@ -659,7 +660,7 @@ export default function MaterialLedgerPage() {
                       name="totalAmount"
                       value={formData.totalAmount}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900 bg-gray-50"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900 bg-gray-50"
                       step="0.01"
                       min="0"
                       readOnly
@@ -675,23 +676,23 @@ export default function MaterialLedgerPage() {
                     name="remarks"
                     value={formData.remarks}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-kanit text-gray-900"
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                     rows={3}
                     placeholder="หมายเหตุเพิ่มเติม..."
                   />
                 </div>
 
-                <div className="flex space-x-4 pt-6 border-t border-blue-100">
+                <div className="flex space-x-4 pt-6 border-t border-pink-100">
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="flex-1 px-6 py-3 border border-blue-300 text-blue-600 rounded-xl font-kanit font-semibold hover:bg-blue-50 transition-colors"
+                    className="flex-1 px-6 py-3 border border-pink-300 text-pink-600 rounded-xl font-kanit font-semibold hover:bg-pink-50 transition-colors"
                   >
                     ยกเลิก
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     {editingEntry ? 'บันทึกการแก้ไข' : 'เพิ่มรายการ'}
                   </button>
@@ -700,6 +701,7 @@ export default function MaterialLedgerPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </LayoutWrapper>
   );
