@@ -4,17 +4,55 @@ import { compare } from "bcryptjs";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+// Ensure environment variables are available
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+const NEXTAUTH_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+if (!NEXTAUTH_SECRET) {
+  console.warn("NEXTAUTH_SECRET is not set. Using fallback.");
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+    updateAge: 24 * 60 * 60, // 24 hours
   },
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   basePath: "/api/auth",
   trustHost: true,
-  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+  secret: NEXTAUTH_SECRET,
+  experimental: {
+    enableWebAuthn: false,
+  },
+  events: {
+    async signIn(message) {
+      console.log("User signed in:", message.user?.email);
+    },
+    async signOut(message) {
+      console.log("User signed out");
+    },
+    async session(message) {
+      // Silent session events
+    },
+  },
+  logger: {
+    error(error: Error) {
+      console.error("NextAuth Error:", error.message);
+    },
+    warn(code: any) {
+      console.warn("NextAuth Warning:", code);
+    },
+    debug(code: any, metadata?: any) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug("NextAuth Debug:", code, metadata);
+      }
+    },
+  },
   providers: [
     CredentialsProvider({
       name: "credentials",
