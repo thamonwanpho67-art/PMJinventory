@@ -5,11 +5,12 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
-import { FaDownload, FaQrcode, FaSearch, FaEye, FaArrowLeft } from 'react-icons/fa';
+import { FaDownload, FaQrcode, FaSearch, FaEye, FaArrowLeft, FaFileExcel } from 'react-icons/fa';
 import QRCode from 'react-qr-code';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import * as QRCodeLib from 'qrcode';
+import * as XLSX from 'xlsx';
 
 interface Asset {
   id: string;
@@ -129,6 +130,177 @@ export default function QRManagementPage() {
     } catch (error) {
       console.error('Error downloading QR code:', error);
       alert('เกิดข้อผิดพลาดในการดาวน์โหลด QR Code');
+    }
+  };
+
+  // Export to Excel with QR Code images
+  const exportToExcel = async () => {
+    if (filteredAssets.length === 0) {
+      alert('ไม่มีข้อมูลสำหรับส่งออก');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      
+      // First Sheet: Asset Data
+      const mainData: any[] = [];
+      mainData.push([
+        'รหัสครุภัณฑ์',
+        'ชื่อครุภัณฑ์', 
+        'รายละเอียด',
+        'หมวดหมู่',
+        'สถานะ',
+        'QR Code URL',
+        'วันที่สร้าง'
+      ]);
+
+      for (const asset of filteredAssets) {
+        const qrUrl = generateQRUrl(asset.id);
+        const statusText = asset.status === 'AVAILABLE' ? 'พร้อมใช้งาน' :
+                          asset.status === 'MAINTENANCE' ? 'ซ่อมบำรุง' : 'เสียหาย';
+        
+        mainData.push([
+          asset.code,
+          asset.name,
+          asset.description || '',
+          asset.category || 'ไม่ระบุ',
+          statusText,
+          qrUrl,
+          new Date(asset.createdAt).toLocaleDateString('th-TH')
+        ]);
+      }
+
+      const mainSheet = XLSX.utils.aoa_to_sheet(mainData);
+      mainSheet['!cols'] = [
+        { wch: 15 }, { wch: 30 }, { wch: 40 }, { wch: 15 }, 
+        { wch: 12 }, { wch: 50 }, { wch: 15 }
+      ];
+
+      XLSX.utils.book_append_sheet(workbook, mainSheet, 'ข้อมูลครุภัณฑ์');
+
+      // Second Sheet: QR Codes Summary
+      const qrData: any[] = [];
+      qrData.push(['รหัส', 'ชื่อครุภัณฑ์', 'QR Code URL', 'หมายเหตุ']);
+
+      for (const asset of filteredAssets) {
+        const qrUrl = generateQRUrl(asset.id);
+        qrData.push([
+          asset.code,
+          asset.name,
+          qrUrl,
+          'สแกน QR Code เพื่อดูข้อมูลครุภัณฑ์'
+        ]);
+      }
+
+      const qrSheet = XLSX.utils.aoa_to_sheet(qrData);
+      qrSheet['!cols'] = [
+        { wch: 15 }, { wch: 30 }, { wch: 50 }, { wch: 30 }
+      ];
+
+      XLSX.utils.book_append_sheet(workbook, qrSheet, 'QR Code URLs');
+
+      // Third Sheet: Print-Ready QR Codes (Text format for printing)
+      const printData: any[] = [];
+      printData.push(['หน้าที่', 'รหัสครุภัณฑ์', 'ชื่อครุภัณฑ์', 'QR Code URL', 'วิธีใช้งาน']);
+
+      let pageNum = 1;
+      for (let i = 0; i < filteredAssets.length; i += 6) { // 6 QR codes per page
+        const pageAssets = filteredAssets.slice(i, i + 6);
+        
+        for (const asset of pageAssets) {
+          const qrUrl = generateQRUrl(asset.id);
+          printData.push([
+            pageNum,
+            asset.code,
+            asset.name,
+            qrUrl,
+            'คัดลอก URL นี้ไปสร้าง QR Code หรือใช้เครื่องมือออนไลน์'
+          ]);
+        }
+        pageNum++;
+      }
+
+      const printSheet = XLSX.utils.aoa_to_sheet(printData);
+      printSheet['!cols'] = [
+        { wch: 8 }, { wch: 15 }, { wch: 30 }, { wch: 50 }, { wch: 40 }
+      ];
+
+      XLSX.utils.book_append_sheet(workbook, printSheet, 'พิมพ์ QR Codes');
+
+      // Fourth Sheet: Statistics
+      const stats = {
+        totalAssets: filteredAssets.length,
+        availableAssets: filteredAssets.filter(a => a.status === 'AVAILABLE').length,
+        maintenanceAssets: filteredAssets.filter(a => a.status === 'MAINTENANCE').length,
+        brokenAssets: filteredAssets.filter(a => a.status === 'OUT_OF_ORDER').length,
+        categories: [...new Set(filteredAssets.map(a => a.category).filter(Boolean))].length
+      };
+
+      const statsData = [
+        ['สถิติครุภัณฑ์', 'จำนวน'],
+        ['ครุภัณฑ์ทั้งหมด', stats.totalAssets],
+        ['พร้อมใช้งาน', stats.availableAssets],
+        ['ซ่อมบำรุง', stats.maintenanceAssets], 
+        ['เสียหาย', stats.brokenAssets],
+        ['หมวดหมู่ทั้งหมด', stats.categories],
+        [''],
+        ['สร้างรายงานเมื่อ', new Date().toLocaleString('th-TH')],
+        ['ผู้สร้างรายงาน', session?.user?.name || 'ไม่ระบุ'],
+        [''],
+        ['คำแนะนำ:', ''],
+        ['1. ใช้แท็บ "ข้อมูลครุภัณฑ์" เพื่อดูข้อมูลโดยละเอียด', ''],
+        ['2. ใช้แท็บ "QR Code URLs" เพื่อคัดลอก URL สำหรับสร้าง QR Code', ''],
+        ['3. ใช้แท็บ "พิมพ์ QR Codes" เพื่อจัดรูปแบบการพิมพ์', ''],
+        ['4. QR Code สามารถสแกนได้ด้วยมือถือเพื่อดูข้อมูลครุภัณฑ์', '']
+      ];
+
+      const statsSheet = XLSX.utils.aoa_to_sheet(statsData);
+      statsSheet['!cols'] = [{ wch: 40 }, { wch: 20 }];
+
+      XLSX.utils.book_append_sheet(workbook, statsSheet, 'สถิติและคำแนะนำ');
+
+      // Style headers for all sheets
+      const headerStyle = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "EC4899" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      // Apply header styling to all sheets
+      const sheets = ['ข้อมูลครุภัณฑ์', 'QR Code URLs', 'พิมพ์ QR Codes', 'สถิติและคำแนะนำ'];
+      sheets.forEach(sheetName => {
+        const ws = workbook.Sheets[sheetName];
+        if (ws) {
+          const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+          for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (ws[cellAddress]) {
+              ws[cellAddress].s = headerStyle;
+            }
+          }
+        }
+      });
+
+      // Generate filename
+      const currentDate = new Date();
+      const dateString = currentDate.toISOString().split('T')[0];
+      const timeString = currentDate.toTimeString().split(' ')[0].replace(/:/g, '-');
+      const filename = `QR_Management_Complete_${dateString}_${timeString}.xlsx`;
+
+      // Write file
+      XLSX.writeFile(workbook, filename);
+      
+      alert(`✅ ส่งออกข้อมูลเรียบร้อย!\n\n📊 รายงานรวม: ${stats.totalAssets} รายการ\n📁 ไฟล์: ${filename}\n\n💡 ไฟล์ประกอบด้วย:\n• ข้อมูลครุภัณฑ์ทั้งหมด\n• URL สำหรับสร้าง QR Code\n• รูปแบบสำหรับพิมพ์\n• สถิติและคำแนะนำ`);
+      
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      alert('❌ เกิดข้อผิดพลาดในการส่งออกข้อมูล\nกรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -288,12 +460,20 @@ export default function QRManagementPage() {
 
               <div className="flex gap-3">
                 <button
+                  onClick={exportToExcel}
+                  disabled={filteredAssets.length === 0 || loading}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FaFileExcel />
+                  {loading ? 'กำลังสร้างไฟล์...' : `ส่งออก Excel (${filteredAssets.length})`}
+                </button>
+                <button
                   onClick={downloadAllQRCodes}
                   disabled={filteredAssets.length === 0 || loading}
                   className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaDownload />
-                  ดาวน์โหลดทั้งหมด ({filteredAssets.length})
+                  ดาวน์โหลด ZIP ({filteredAssets.length})
                 </button>
               </div>
             </div>

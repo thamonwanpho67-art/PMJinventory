@@ -247,7 +247,7 @@ export default function AdminAssetsPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 font-kanit mb-2 flex items-center">
             <FaBox className="mr-3 text-pink-500" />
-            คลังอุปกรณ์
+            วัสดุครุภัณฑ์
           </h1>
           <p className="text-gray-600 font-kanit text-lg font-light">
             จัดการอุปกรณ์ทั้งหมดในระบบ พร้อมรูปภาพและข้อมูลสถานะ
@@ -435,8 +435,10 @@ export default function AdminAssetsPage() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = '/images/placeholder-asset.png';
-                        target.onerror = null;
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center"><svg class="text-gray-400 w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg></div>';
+                        }
                       }}
                     />
                   </div>

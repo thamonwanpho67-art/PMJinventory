@@ -287,7 +287,7 @@ export default function SuppliesPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-kanit font-black bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-              วัสดุครุภัณฑ์
+              จัดการวัสดุสิ้นเปลือง
             </h1>
             <p className="text-pink-700 font-kanit mt-2">
               จัดการวัสดุอุปกรณ์ที่ใช้แล้วหมดไป เช่น หมึกปริ้นเตอร์ กระดาษ อุปกรณ์สำนักงาน
@@ -512,7 +512,7 @@ export default function SuppliesPage() {
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น หมึกปริ้นเตอร์ HP"
                       required
                     />
@@ -525,7 +525,7 @@ export default function SuppliesPage() {
                       type="text"
                       value={formData.category}
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น อุปกรณ์สำนักงาน"
                       required
                     />
@@ -539,7 +539,7 @@ export default function SuppliesPage() {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                     rows={3}
                     placeholder="รายละเอียดเพิ่มเติม..."
                   />
@@ -554,7 +554,7 @@ export default function SuppliesPage() {
                       type="text"
                       value={formData.unit}
                       onChange={(e) => setFormData({...formData, unit: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="เช่น ชิ้น, กล่อง, แกลลอน"
                       required
                     />
@@ -567,7 +567,7 @@ export default function SuppliesPage() {
                       type="number"
                       value={formData.quantity}
                       onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       min="0"
                     />
                   </div>
@@ -579,7 +579,7 @@ export default function SuppliesPage() {
                       type="number"
                       value={formData.minStock}
                       onChange={(e) => setFormData({...formData, minStock: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       min="0"
                     />
                   </div>
@@ -594,7 +594,7 @@ export default function SuppliesPage() {
                       type="number"
                       value={formData.unitPrice}
                       onChange={(e) => setFormData({...formData, unitPrice: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       step="0.01"
                       min="0"
                     />
@@ -607,7 +607,7 @@ export default function SuppliesPage() {
                       type="text"
                       value={formData.supplier}
                       onChange={(e) => setFormData({...formData, supplier: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="ชื่อบริษัท/ร้านค้า"
                     />
                   </div>
@@ -621,7 +621,7 @@ export default function SuppliesPage() {
                     type="text"
                     value={formData.location}
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                     placeholder="เช่น ห้องเก็บของ ชั้น 2"
                   />
                 </div>
@@ -634,7 +634,7 @@ export default function SuppliesPage() {
                     type="url"
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
