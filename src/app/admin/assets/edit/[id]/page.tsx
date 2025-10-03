@@ -12,6 +12,10 @@ interface Asset {
   description: string | null;
   category: string | null;
   location: string | null;
+  assetCode: string | null;
+  costCenter: string | null;
+  price: number | null;
+  accountingDate: string | null;
   status: 'AVAILABLE' | 'DAMAGED' | 'OUT_OF_STOCK';
   imageUrl: string | null;
 }
@@ -33,6 +37,10 @@ export default function EditAssetPage() {
     description: '',
     category: '',
     location: '',
+    assetCode: '',
+    costCenter: '',
+    price: '',
+    accountingDate: '',
     status: 'AVAILABLE' as const,
     imageUrl: ''
   });
@@ -55,6 +63,10 @@ export default function EditAssetPage() {
         description: assetData.description || '',
         category: assetData.category || '',
         location: assetData.location || '',
+        assetCode: assetData.assetCode || '',
+        costCenter: assetData.costCenter || '',
+        price: assetData.price ? assetData.price.toString() : '',
+        accountingDate: assetData.accountingDate ? new Date(assetData.accountingDate).toISOString().split('T')[0] : '',
         status: assetData.status,
         imageUrl: assetData.imageUrl || ''
       });
@@ -215,7 +227,7 @@ export default function EditAssetPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น Notebook Dell Inspiron"
                   />
                 </div>
@@ -231,7 +243,7 @@ export default function EditAssetPage() {
                     value={formData.code}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น NB001"
                   />
                 </div>
@@ -246,7 +258,7 @@ export default function EditAssetPage() {
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น คอมพิวเตอร์"
                   />
                 </div>
@@ -261,7 +273,7 @@ export default function EditAssetPage() {
                     name="location"
                     value={formData.location}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น ห้องทำงาน"
                   />
                 </div>
@@ -275,12 +287,73 @@ export default function EditAssetPage() {
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white text-gray-900"
                   >
                     <option value="AVAILABLE">ว่าง</option>
                     <option value="DAMAGED">ชำรุด</option>
                     <option value="OUT_OF_STOCK">หมด</option>
                   </select>
+                </div>
+
+                {/* Asset Code */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    รหัสทรัพย์สิน
+                  </label>
+                  <input
+                    type="text"
+                    name="assetCode"
+                    value={formData.assetCode}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น PMJ-IT-001"
+                  />
+                </div>
+
+                {/* Cost Center */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    ศูนย์ต้นทุน
+                  </label>
+                  <input
+                    type="text"
+                    name="costCenter"
+                    value={formData.costCenter}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น IT-DEP"
+                  />
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    ราคา (บาท)
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                {/* Accounting Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    วันที่ลงบัญชี
+                  </label>
+                  <input
+                    type="date"
+                    name="accountingDate"
+                    value={formData.accountingDate}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                  />
                 </div>
 
                 {/* Image Upload */}
@@ -337,7 +410,7 @@ export default function EditAssetPage() {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                   placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับครุภัณฑ์..."
                 />
               </div>

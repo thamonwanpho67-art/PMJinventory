@@ -13,6 +13,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   const handleAuthError = useCallback((error: any) => {
     console.warn('NextAuth error detected:', error);
+    
+    // Don't retry if it's a client-side navigation error
+    if (error?.message?.includes('chunk') || error?.message?.includes('Loading chunk')) {
+      return;
+    }
+    
     if (retryCount < 3) {
       setIsRetrying(true);
       setTimeout(() => {
@@ -25,12 +31,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [retryCount]);
 
   useEffect(() => {
-    setIsClient(true);
+    // Add a small delay to prevent hydration issues
+    const timer = setTimeout(() => {
+      setIsClient(true);
+    }, 100);
     
     // Add error listener for unhandled promise rejections
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (event.reason?.message?.includes('Failed to fetch') || 
-          event.reason?.message?.includes('fetch')) {
+      if (event.reason?.message?.includes('Failed to fetch') && 
+          event.reason?.message?.includes('auth')) {
         handleAuthError(event.reason);
         event.preventDefault(); // Prevent the error from being thrown
       }
@@ -38,7 +47,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     // Add error listener for regular errors
     const handleError = (event: ErrorEvent) => {
-      if (event.message?.includes('Failed to fetch') || 
+      if (event.message?.includes('Failed to fetch') && 
           event.message?.includes('auth')) {
         handleAuthError(event.error);
         event.preventDefault();
@@ -49,6 +58,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     window.addEventListener('error', handleError);
     
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       window.removeEventListener('error', handleError);
     };
@@ -91,6 +101,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       refetchInterval={retryCount > 0 ? 10 * 60 : 5 * 60} // Longer interval if there were errors
       refetchOnWindowFocus={retryCount === 0}
       refetchWhenOffline={false}
+      session={undefined} // Let NextAuth handle session fetching
     >
       <ChunkErrorHandler />
       {children}

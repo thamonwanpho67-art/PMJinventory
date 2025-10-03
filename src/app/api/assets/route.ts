@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
     const assetCode = formData.get('assetCode') as string;
     const costCenter = formData.get('costCenter') as string;
     const price = formData.get('price') as string;
+    const accountingDate = formData.get('accountingDate') as string;
     const status = formData.get('status') as string;
     const imageFile = formData.get('image') as File;
 
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
         assetCode: assetCode || null,
         costCenter: costCenter || null,
         price: price ? parseFloat(price) : null,
+        accountingDate: accountingDate ? new Date(accountingDate) : null,
         status: (status as any) || 'AVAILABLE',
         imageUrl: imageUrl || null
       }

@@ -19,6 +19,7 @@ export default function AddAssetPage() {
     category: '',
     price: '',
     costCenter: '',
+    accountingDate: '',
     status: 'AVAILABLE',
     imageUrl: ''
   });
@@ -78,6 +79,7 @@ export default function AddAssetPage() {
       submitFormData.append('category', formData.category);
       submitFormData.append('price', formData.price);
       submitFormData.append('costCenter', formData.costCenter);
+      submitFormData.append('accountingDate', formData.accountingDate);
       submitFormData.append('status', formData.status);
       submitFormData.append('imageUrl', formData.imageUrl);
 
@@ -228,6 +230,20 @@ export default function AddAssetPage() {
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น CC-IT-001"
+                  />
+                </div>
+
+                {/* Accounting Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    วันที่ลงบัญชี
+                  </label>
+                  <input
+                    type="date"
+                    name="accountingDate"
+                    value={formData.accountingDate}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                   />
                 </div>
 

@@ -6,10 +6,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 // Ensure environment variables are available
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
-const NEXTAUTH_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+const NEXTAUTH_URL = process.env.NEXTAUTH_URL || process.env.AUTH_URL || "http://localhost:3000";
 
 if (!NEXTAUTH_SECRET) {
-  console.warn("NEXTAUTH_SECRET is not set. Using fallback.");
+  throw new Error("NEXTAUTH_SECRET or AUTH_SECRET environment variable is required");
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -17,7 +17,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24 hours
-    updateAge: 24 * 60 * 60, // 24 hours
+    updateAge: 60 * 60, // 1 hour
   },
   pages: {
     signIn: "/login",
@@ -26,8 +26,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   basePath: "/api/auth",
   trustHost: true,
   secret: NEXTAUTH_SECRET,
-  experimental: {
-    enableWebAuthn: false,
+  useSecureCookies: process.env.NODE_ENV === "production",
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
   events: {
     async signIn(message) {
