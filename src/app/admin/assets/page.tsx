@@ -139,12 +139,24 @@ export default function AdminAssetsPage() {
       });
 
       if (response.ok) {
+        alert('ลบอุปกรณ์เรียบร้อยแล้ว');
         fetchAssets();
       } else {
-        console.error('Failed to delete asset');
+        const errorData = await response.json();
+        if (response.status === 409) {
+          alert(`ไม่สามารถลบอุปกรณ์ได้: ${errorData.error}\nมีการยืมที่ยังไม่ได้คืน: ${errorData.activeLoans} รายการ`);
+        } else if (response.status === 403) {
+          alert('คุณไม่มีสิทธิ์ในการลบอุปกรณ์');
+        } else if (response.status === 404) {
+          alert('ไม่พบอุปกรณ์ที่ต้องการลบ');
+        } else {
+          alert(`เกิดข้อผิดพลาด: ${errorData.error || 'ไม่สามารถลบอุปกรณ์ได้'}`);
+        }
+        console.error('Failed to delete asset:', errorData);
       }
     } catch (error) {
       console.error('Error deleting asset:', error);
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
     }
   };
 
