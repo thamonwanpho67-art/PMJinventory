@@ -252,23 +252,92 @@ export default function MaterialLedgerPage() {
     const ws: any = {};
     
     // Header ของเอกสาร (แถว 1-6)
-    ws['A1'] = { v: 'ประเทศ', s: { font: { bold: true, size: 14 }, alignment: { horizontal: 'left' } } };
-    ws['B1'] = { v: 'วัดสู่สำนักงาน', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
-    ws['G1'] = { v: 'หน้าที่ ........................................................................', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    ws['A1'] = { v: 'ประเภท', s: { 
+      font: { bold: true, size: 14 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
+    ws['B1'] = { v: 'วัดสู่สำนักงาน', s: { 
+      font: { size: 12 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
+    ws['G1'] = { v: 'รหัส ........................................................................', s: { 
+      font: { size: 12 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
     
-    ws['A2'] = { v: 'สือกรอมเซีอวัสดุ', s: { font: { bold: true, size: 14 }, alignment: { horizontal: 'left' } } };
-    ws['B2'] = { v: 'กระทรวงดิจิตอลเศรษฐกิจ และ สังคม', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
-    ws['G2'] = { v: 'จำนวนอย่างสูง ........................................................................', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    ws['A2'] = { v: 'ชื่อหรือชนิดของวัสดุ', s: { 
+      font: { bold: true, size: 14 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
+    ws['B2'] = { v: 'กระทรวงดิจิตอลเศรษฐกิจ และ สังคม', s: { 
+      font: { size: 12 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
+    ws['G2'] = { v: 'จำนวนอย่างสูง ........................................................................', s: { 
+      font: { size: 12 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
     
-    ws['A3'] = { v: 'หน่วยนับ', s: { font: { bold: true, size: 14 }, alignment: { horizontal: 'left' } } };
-    ws['B3'] = { v: 'รัม', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
-    ws['G3'] = { v: 'จำนวนอย่างต่ำ ........................................................................', s: { font: { size: 12 }, alignment: { horizontal: 'left' } } };
+    ws['A3'] = { v: 'หน่วยนับ', s: { 
+      font: { bold: true, size: 14 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
+    ws['B3'] = { v: 'รัม', s: { 
+      font: { size: 12 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
+    ws['G3'] = { v: 'จำนวนอย่างต่ำ ........................................................................', s: { 
+      font: { size: 12 }, 
+      alignment: { horizontal: 'left' },
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    } };
     
-    // ช่องว่าง
-    ws['A4'] = { v: '' };
-    ws['A5'] = { v: '' };
-    ws['A6'] = { v: '' };
-    ws['A7'] = { v: '' };
+    // เติมเซลล์ว่างในแถว 1-3 ให้มีเส้นตาราง
+    const emptyStyle = { 
+      border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+    };
+    
+    // แถว 1
+    ws['C1'] = { v: '', s: emptyStyle };
+    ws['D1'] = { v: '', s: emptyStyle };
+    ws['E1'] = { v: '', s: emptyStyle };
+    ws['F1'] = { v: '', s: emptyStyle };
+    ws['H1'] = { v: '', s: emptyStyle };
+    ws['I1'] = { v: '', s: emptyStyle };
+    
+    // แถว 2
+    ws['C2'] = { v: '', s: emptyStyle };
+    ws['D2'] = { v: '', s: emptyStyle };
+    ws['E2'] = { v: '', s: emptyStyle };
+    ws['F2'] = { v: '', s: emptyStyle };
+    ws['H2'] = { v: '', s: emptyStyle };
+    ws['I2'] = { v: '', s: emptyStyle };
+    
+    // แถว 3
+    ws['C3'] = { v: '', s: emptyStyle };
+    ws['D3'] = { v: '', s: emptyStyle };
+    ws['E3'] = { v: '', s: emptyStyle };
+    ws['F3'] = { v: '', s: emptyStyle };
+    ws['H3'] = { v: '', s: emptyStyle };
+    ws['I3'] = { v: '', s: emptyStyle };
+    
+    // ช่องว่าง (เพิ่มเส้นตารางให้ทุกเซลล์)
+    for (let row = 4; row <= 7; row++) {
+      for (let col = 0; col < 9; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: row - 1, c: col });
+        ws[cellRef] = { v: '', s: { 
+          border: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
+        } };
+      }
+    }
     
     // Header ของตาราง (แถว 8-9)
     ws['A8'] = { v: 'วัน เดือน ปี', s: { 
