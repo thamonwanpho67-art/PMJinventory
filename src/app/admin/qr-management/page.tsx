@@ -96,55 +96,59 @@ export default function QRManagementPage() {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       
-      canvas.width = 320;
-      canvas.height = 380;
+      canvas.width = 300;
+      canvas.height = 350;
       
       // วาดพื้นหลังสีขาว
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // สร้าง QR Code
-      const qrCanvas = await QRCodeLib.toCanvas(url, { width: 256, margin: 2 });
+      const qrCanvas = await QRCodeLib.toCanvas(url, { width: 200, margin: 1 });
       
-      // วาง QR Code ตรงกลาง
-      ctx.drawImage(qrCanvas, 32, 30, 256, 256);
+      // วาง QR Code ตรงกลาง (ด้านบน)
+      const qrX = (canvas.width - 200) / 2;
+      ctx.drawImage(qrCanvas, qrX, 20, 200, 200);
       
       // เพิ่มข้อความ
       ctx.fillStyle = '#000000';
       ctx.textAlign = 'center';
       
-      // รหัสครุภัณฑ์
-      ctx.font = 'bold 18px Arial';
-      ctx.fillText(asset.code, canvas.width / 2, 320);
+      // ข้อความอธิบายภาษาไทย
+      ctx.font = '14px Arial';
+      const thaiText = 'สแกนเพื่อดูรายละเอียดครุภัณฑ์';
+      ctx.fillText(thaiText, canvas.width / 2, 250);
       
       // ชื่อครุภัณฑ์
-      ctx.font = '14px Arial';
-      const maxWidth = 300;
-      const text = asset.name;
-      if (ctx.measureText(text).width > maxWidth) {
-        const words = text.split(' ');
+      ctx.font = 'bold 16px Arial';
+      const maxWidth = 280;
+      const assetName = `${asset.code} - ${asset.name}`;
+      
+      if (ctx.measureText(assetName).width > maxWidth) {
+        // ถ้าข้อความยาวเกินไป ให้ตัดและขึ้นบรรทัดใหม่
+        const words = assetName.split(' ');
         let line = '';
-        let y = 345;
+        let y = 280;
         
         for (let i = 0; i < words.length; i++) {
           const testLine = line + words[i] + ' ';
           if (ctx.measureText(testLine).width > maxWidth && i > 0) {
             ctx.fillText(line, canvas.width / 2, y);
             line = words[i] + ' ';
-            y += 20;
-            if (y > 365) break; // จำกัดไม่เกิน 2 บรรทัด
+            y += 25;
+            if (y > 330) break; // จำกัดไม่เกิน 3 บรรทัด
           } else {
             line = testLine;
           }
         }
         ctx.fillText(line, canvas.width / 2, y);
       } else {
-        ctx.fillText(text, canvas.width / 2, 345);
+        ctx.fillText(assetName, canvas.width / 2, 280);
       }
       
       canvas.toBlob((blob) => {
         if (blob) {
-          saveAs(blob, `QR_${asset.code}_${asset.name.substring(0, 20)}.png`);
+          saveAs(blob, `QR_${asset.code}_${asset.name.substring(0, 15).replace(/[^a-zA-Z0-9ก-๙]/g, '_')}.png`);
         }
       });
     } catch (error) {
@@ -231,56 +235,60 @@ export default function QRManagementPage() {
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
           
-          canvas.width = 320;
-          canvas.height = 380;
+          canvas.width = 300;
+          canvas.height = 350;
           
           // วาดพื้นหลังสีขาว
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
           // สร้าง QR Code
-          const qrCanvas = await QRCodeLib.toCanvas(url, { width: 256, margin: 2 });
+          const qrCanvas = await QRCodeLib.toCanvas(url, { width: 200, margin: 1 });
           
-          // วาง QR Code ตรงกลาง
-          ctx.drawImage(qrCanvas, 32, 30, 256, 256);
+          // วาง QR Code ตรงกลาง (ด้านบน)
+          const qrX = (canvas.width - 200) / 2;
+          ctx.drawImage(qrCanvas, qrX, 20, 200, 200);
           
           // เพิ่มข้อความ
           ctx.fillStyle = '#000000';
           ctx.textAlign = 'center';
           
-          // รหัสครุภัณฑ์
-          ctx.font = 'bold 18px Arial';
-          ctx.fillText(asset.code, canvas.width / 2, 320);
+          // ข้อความอธิบายภาษาไทย
+          ctx.font = '14px Arial';
+          const thaiText = 'สแกนเพื่อดูรายละเอียดครุภัณฑ์';
+          ctx.fillText(thaiText, canvas.width / 2, 250);
           
           // ชื่อครุภัณฑ์
-          ctx.font = '14px Arial';
-          const maxWidth = 300;
-          const text = asset.name;
-          if (ctx.measureText(text).width > maxWidth) {
-            const words = text.split(' ');
+          ctx.font = 'bold 16px Arial';
+          const maxWidth = 280;
+          const assetName = `${asset.code} - ${asset.name}`;
+          
+          if (ctx.measureText(assetName).width > maxWidth) {
+            // ถ้าข้อความยาวเกินไป ให้ตัดและขึ้นบรรทัดใหม่
+            const words = assetName.split(' ');
             let line = '';
-            let y = 345;
+            let y = 280;
             
             for (let i = 0; i < words.length; i++) {
               const testLine = line + words[i] + ' ';
               if (ctx.measureText(testLine).width > maxWidth && i > 0) {
                 ctx.fillText(line, canvas.width / 2, y);
                 line = words[i] + ' ';
-                y += 20;
-                if (y > 365) break; // จำกัดไม่เกิน 2 บรรทัด
+                y += 25;
+                if (y > 330) break; // จำกัดไม่เกิน 3 บรรทัด
               } else {
                 line = testLine;
               }
             }
             ctx.fillText(line, canvas.width / 2, y);
           } else {
-            ctx.fillText(text, canvas.width / 2, 345);
+            ctx.fillText(assetName, canvas.width / 2, 280);
           }
           
           // แปลงเป็น base64 และเพิ่มลง ZIP
           const dataUrl = canvas.toDataURL('image/png');
           const base64Data = dataUrl.split(',')[1];
-          const filename = `QR_${asset.code}_${asset.name.substring(0, 20).replace(/[^a-zA-Z0-9ก-๙]/g, '_')}.png`;
+          const filename = `QR_${asset.code}_${asset.name.substring(0, 15).replace(/[^a-zA-Z0-9ก-๙]/g, '_')}.png`;
           zip.file(filename, base64Data, { base64: true });
         } catch (error) {
           console.error(`Error generating QR for ${asset.code}:`, error);
@@ -288,8 +296,8 @@ export default function QRManagementPage() {
       }
 
       const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, `QR_Codes_WithText_${new Date().toISOString().split('T')[0]}.zip`);
-      alert(`🎉 ดาวน์โหลด ZIP เรียบร้อย! (${filteredAssets.length} ไฟล์ QR พร้อมชื่อครุภัณฑ์)`);
+      saveAs(content, `QR_Codes_Clean_${new Date().toISOString().split('T')[0]}.zip`);
+      alert(`🎉 ดาวน์โหลด ZIP เรียบร้อย! (${filteredAssets.length} ไฟล์ QR แบบสะอาด)`);
     } catch (error) {
       console.error('Error creating ZIP file:', error);
       alert('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP');
@@ -398,7 +406,7 @@ export default function QRManagementPage() {
                   className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaDownload />
-                  ZIP QR+ชื่อครุภัณฑ์
+                  ZIP QR สะอาด
                 </button>
               </div>
             </div>
@@ -409,7 +417,7 @@ export default function QRManagementPage() {
               </div>
               <div className="text-xs text-gray-500 font-kanit">
                 💚 Excel+ลิงก์ QR: Excel พร้อมลิงก์ QR Code |
-                🟢 ZIP QR+ชื่อ: ไฟล์ QR Code พร้อมรหัสและชื่อครุภัณฑ์
+                🟢 ZIP QR สะอาด: QR Code แบบสะอาด (ไม่มี URL)
               </div>
             </div>
           </div>
