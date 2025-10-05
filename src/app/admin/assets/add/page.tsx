@@ -10,6 +10,8 @@ export default function AddAssetPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [codeError, setCodeError] = useState('');
+  const [isCheckingCode, setIsCheckingCode] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -31,6 +33,34 @@ export default function AddAssetPage() {
       ...prev,
       [name]: value
     }));
+
+    // ตรวจสอบรหัสครุภัณฑ์แบบ real-time
+    if (name === 'code' && value.trim()) {
+      checkAssetCode(value.trim());
+    } else if (name === 'code') {
+      setCodeError('');
+    }
+  };
+
+  // ฟังก์ชันตรวจสอบรหัสครุภัณฑ์ซ้ำ
+  const checkAssetCode = async (code: string) => {
+    if (!code) return;
+    
+    setIsCheckingCode(true);
+    setCodeError('');
+    
+    try {
+      const response = await fetch(`/api/assets?checkCode=${encodeURIComponent(code)}`);
+      const data = await response.json();
+      
+      if (data.exists) {
+        setCodeError(`รหัสครุภัณฑ์ "${code}" มีอยู่ในระบบแล้ว`);
+      }
+    } catch (error) {
+      console.error('Error checking asset code:', error);
+    } finally {
+      setIsCheckingCode(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +123,21 @@ export default function AddAssetPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create asset');
+        // ปรับปรุงข้อความแสดงข้อผิดพลาด
+        let errorMessage = data.error || 'เกิดข้อผิดพลาดในการสร้างครุภัณฑ์';
+        
+        // แปลข้อความภาษาอังกฤษเป็นไทย
+        if (errorMessage.includes('Asset code already exists')) {
+          errorMessage = `รหัสครุภัณฑ์ "${formData.code}" มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น`;
+        } else if (errorMessage.includes('Missing required fields')) {
+          errorMessage = 'กรุณากรอกข้อมูลที่จำเป็น: รหัสครุภัณฑ์ และชื่ออุปกรณ์';
+        } else if (errorMessage.includes('Invalid status')) {
+          errorMessage = 'สถานะไม่ถูกต้อง กรุณาเลือก: ว่าง, ชำรุด, หรือ หมด';
+        } else if (errorMessage.includes('Unauthorized')) {
+          errorMessage = 'ไม่มีสิทธิ์เข้าถึง กรุณาเข้าสู่ระบบใหม่';
+        }
+        
+        throw new Error(errorMessage);
       }
 
       router.push('/admin/assets');
@@ -162,15 +206,38 @@ export default function AddAssetPage() {
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
                     รหัสครุภัณฑ์ *
                   </label>
-                  <input
-                    type="text"
-                    name="code"
-                    value={formData.code}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
-                    placeholder="เช่น NB001"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="code"
+                      value={formData.code}
+                      onChange={handleInputChange}
+                      required
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent font-kanit text-black ${
+                        codeError 
+                          ? 'border-red-300 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-pink-500'
+                      }`}
+                      placeholder="เช่น NB001"
+                    />
+                    {isCheckingCode && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-pink-500"></div>
+                      </div>
+                    )}
+                  </div>
+                  {codeError && (
+                    <p className="text-red-600 text-sm font-kanit mt-1 flex items-center">
+                      <span className="mr-1">⚠️</span>
+                      {codeError}
+                    </p>
+                  )}
+                  {formData.code && !codeError && !isCheckingCode && (
+                    <p className="text-green-600 text-sm font-kanit mt-1 flex items-center">
+                      <span className="mr-1">✅</span>
+                      รหัสครุภัณฑ์นี้ใช้ได้
+                    </p>
+                  )}
                 </div>
 
                 {/* Category */}

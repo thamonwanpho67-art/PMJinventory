@@ -138,7 +138,23 @@ export default function EditAssetPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update asset');
+        // ปรับปรุงข้อความแสดงข้อผิดพลาด
+        let errorMessage = data.error || 'เกิดข้อผิดพลาดในการแก้ไขครุภัณฑ์';
+        
+        // แปลข้อความภาษาอังกฤษเป็นไทย
+        if (errorMessage.includes('Asset code already exists')) {
+          errorMessage = `รหัสครุภัณฑ์ "${formData.code}" มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น`;
+        } else if (errorMessage.includes('Asset not found')) {
+          errorMessage = 'ไม่พบครุภัณฑ์ที่ต้องการแก้ไข';
+        } else if (errorMessage.includes('Missing required fields')) {
+          errorMessage = 'กรุณากรอกข้อมูลที่จำเป็น: รหัสครุภัณฑ์ และชื่ออุปกรณ์';
+        } else if (errorMessage.includes('Invalid status')) {
+          errorMessage = 'สถานะไม่ถูกต้อง กรุณาเลือก: ว่าง, ชำรุด, หรือ หมด';
+        } else if (errorMessage.includes('Unauthorized')) {
+          errorMessage = 'ไม่มีสิทธิ์เข้าถึง กรุณาเข้าสู่ระบบใหม่';
+        }
+        
+        throw new Error(errorMessage);
       }
 
       router.push('/admin/assets');
