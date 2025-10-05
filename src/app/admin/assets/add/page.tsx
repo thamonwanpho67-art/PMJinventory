@@ -165,23 +165,13 @@ export default function AddAssetPage() {
                   <p className="text-gray-600 font-kanit">สร้างรายการครุภัณฑ์ใหม่ในระบบ</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleBulkImport}
-                  disabled={isLoading}
-                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-kanit disabled:opacity-50"
-                >
-                  <FaUpload className="mr-2" />
-                  นำเข้าข้อมูลจำนวนมาก
-                </button>
-                <button
-                  onClick={() => router.push('/admin/assets')}
-                  className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors font-kanit"
-                >
-                  <FaTimes className="mr-2" />
-                  ยกเลิก
-                </button>
-              </div>
+              <button
+                onClick={() => router.push('/admin/assets')}
+                className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors font-kanit"
+              >
+                <FaTimes className="mr-2" />
+                ยกเลิก
+              </button>
             </div>
           </div>
 
