@@ -165,13 +165,23 @@ export default function AddAssetPage() {
                   <p className="text-gray-600 font-kanit">สร้างรายการครุภัณฑ์ใหม่ในระบบ</p>
                 </div>
               </div>
-              <button
-                onClick={() => router.push('/admin/assets')}
-                className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors font-kanit"
-              >
-                <FaTimes className="mr-2" />
-                ยกเลิก
-              </button>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleBulkImport}
+                  disabled={isLoading}
+                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-kanit disabled:opacity-50"
+                >
+                  <FaUpload className="mr-2" />
+                  นำเข้าข้อมูลจำนวนมาก
+                </button>
+                <button
+                  onClick={() => router.push('/admin/assets')}
+                  className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors font-kanit"
+                >
+                  <FaTimes className="mr-2" />
+                  ยกเลิก
+                </button>
+              </div>
             </div>
           </div>
 
@@ -313,7 +323,7 @@ export default function AddAssetPage() {
                     value={formData.accountingDate}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
-                    min="2018-01-01" 
+                    min="2005-01-01" 
                     max="2032-12-31"
                   />
                 </div>
