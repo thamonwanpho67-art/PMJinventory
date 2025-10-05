@@ -1,29 +1,84 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { FaPlus, FaTimes, FaBox, FaUpload } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { FaEdit, FaTimes, FaBox, FaUpload, FaSpinner } from 'react-icons/fa';
 import LayoutWrapper from '@/components/LayoutWrapper';
 
-export default function AddAssetPage() {
+interface Asset {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  category: string | null;
+  location: string | null;
+  assetCode: string | null;
+  costCenter: string | null;
+  price: number | null;
+  accountingDate: string | null;
+  quantity: number;
+  status: 'AVAILABLE' | 'DAMAGED' | 'OUT_OF_STOCK';
+  imageUrl: string | null;
+}
+
+export default function EditAssetPage() {
   const router = useRouter();
+  const params = useParams();
+  const assetId = params.id as string;
+  
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState('');
+  const [asset, setAsset] = useState<Asset | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
     code: '',
-    assetCode: '',
     description: '',
     category: '',
-    price: '',
+    location: '',
+    assetCode: '',
     costCenter: '',
+    price: '',
     accountingDate: '',
     quantity: '1',
-    status: 'AVAILABLE',
+    status: 'AVAILABLE' as const,
     imageUrl: ''
   });
+
+  useEffect(() => {
+    fetchAsset();
+  }, [assetId]);
+
+  const fetchAsset = async () => {
+    try {
+      const response = await fetch(`/api/assets/${assetId}`);
+      if (!response.ok) {
+        throw new Error('Asset not found');
+      }
+      const assetData = await response.json();
+      setAsset(assetData);
+      setFormData({
+        name: assetData.name,
+        code: assetData.code,
+        description: assetData.description || '',
+        category: assetData.category || '',
+        location: assetData.location || '',
+        assetCode: assetData.assetCode || '',
+        costCenter: assetData.costCenter || '',
+        price: assetData.price ? assetData.price.toString() : '',
+        accountingDate: assetData.accountingDate ? new Date(assetData.accountingDate).toISOString().split('T')[0] : '',
+        quantity: assetData.quantity ? assetData.quantity.toString() : '1',
+        status: assetData.status,
+        imageUrl: assetData.imageUrl || ''
+      });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -52,7 +107,7 @@ export default function AddAssetPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload file');
+        throw new Error(data.error || 'Upload failed');
       }
 
       setFormData(prev => ({
@@ -72,28 +127,18 @@ export default function AddAssetPage() {
     setError('');
 
     try {
-      const submitFormData = new FormData();
-      submitFormData.append('name', formData.name);
-      submitFormData.append('code', formData.code);
-      submitFormData.append('assetCode', formData.assetCode);
-      submitFormData.append('description', formData.description);
-      submitFormData.append('category', formData.category);
-      submitFormData.append('price', formData.price);
-      submitFormData.append('costCenter', formData.costCenter);
-      submitFormData.append('accountingDate', formData.accountingDate);
-      submitFormData.append('quantity', formData.quantity);
-      submitFormData.append('status', formData.status);
-      submitFormData.append('imageUrl', formData.imageUrl);
-
-      const response = await fetch('/api/assets', {
-        method: 'POST',
-        body: submitFormData,
+      const response = await fetch(`/api/assets/${assetId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create asset');
+        throw new Error(data.error || 'Failed to update asset');
       }
 
       router.push('/admin/assets');
@@ -105,21 +150,54 @@ export default function AddAssetPage() {
     }
   };
 
+  if (isFetching) {
+    return (
+      <LayoutWrapper>
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 py-8 flex items-center justify-center">
+          <div className="flex items-center space-x-3 text-pink-600">
+            <FaSpinner className="animate-spin text-2xl" />
+            <span className="text-lg font-kanit">กำลังโหลดข้อมูล...</span>
+          </div>
+        </div>
+      </LayoutWrapper>
+    );
+  }
+
+  if (!asset) {
+    return (
+      <LayoutWrapper>
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 py-8 flex items-center justify-center">
+          <div className="text-center">
+            <FaBox className="text-6xl text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-700 font-kanit">ไม่พบครุภัณฑ์</h2>
+            <p className="text-gray-500 font-kanit mt-2">ครุภัณฑ์ที่คุณค้นหาไม่มีอยู่ในระบบ</p>
+            <button
+              onClick={() => router.push('/admin/assets')}
+              className="mt-6 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors font-kanit"
+            >
+              กลับไปรายการครุภัณฑ์
+            </button>
+          </div>
+        </div>
+      </LayoutWrapper>
+    );
+  }
+
   return (
     <LayoutWrapper>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-pink-100">
+        <div className="container mx-auto px-6 py-8">
           {/* Header */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="mb-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
-                  <FaPlus className="text-white text-xl" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 font-kanit">เพิ่มรายการครุภัณฑ์</h1>
-                  <p className="text-gray-600 font-kanit">สร้างรายการครุภัณฑ์ใหม่ในระบบ</p>
-                </div>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 font-kanit mb-2 flex items-center">
+                  <FaEdit className="mr-3 text-pink-500" />
+                  แก้ไขครุภัณฑ์
+                </h1>
+                <p className="text-gray-600 font-kanit text-lg font-light">
+                  แก้ไขข้อมูลและรายละเอียดของครุภัณฑ์
+                </p>
               </div>
               <button
                 onClick={() => router.push('/admin/assets')}
@@ -152,7 +230,7 @@ export default function AddAssetPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น Notebook Dell Inspiron"
                   />
                 </div>
@@ -168,7 +246,7 @@ export default function AddAssetPage() {
                     value={formData.code}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
                     placeholder="เช่น NB001"
                   />
                 </div>
@@ -188,64 +266,18 @@ export default function AddAssetPage() {
                   />
                 </div>
 
-                {/* Price */}
+                {/* Location */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    ราคา (บาท)
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
-                    placeholder="เช่น 25000"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-
-                {/* Asset Code */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    รหัสสินทรัพย์
+                    สถานที่
                   </label>
                   <input
                     type="text"
-                    name="assetCode"
-                    value={formData.assetCode}
+                    name="location"
+                    value={formData.location}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
-                    placeholder="เช่น AS-2025-001"
-                  />
-                </div>
-
-                {/* Cost Center */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    ศูนย์ต้นทุน
-                  </label>
-                  <input
-                    type="text"
-                    name="costCenter"
-                    value={formData.costCenter}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
-                    placeholder="เช่น CC-IT-001"
-                  />
-                </div>
-
-                {/* Accounting Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    วันที่ลงบัญชี
-                  </label>
-                  <input
-                    type="date"
-                    name="accountingDate"
-                    value={formData.accountingDate}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น ห้องทำงาน"
                   />
                 </div>
 
@@ -266,6 +298,67 @@ export default function AddAssetPage() {
                   </select>
                 </div>
 
+                {/* Asset Code */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    รหัสทรัพย์สิน
+                  </label>
+                  <input
+                    type="text"
+                    name="assetCode"
+                    value={formData.assetCode}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น PMJ-IT-001"
+                  />
+                </div>
+
+                {/* Cost Center */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    ศูนย์ต้นทุน
+                  </label>
+                  <input
+                    type="text"
+                    name="costCenter"
+                    value={formData.costCenter}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="เช่น IT-DEP"
+                  />
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    ราคา (บาท)
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                {/* Accounting Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                    วันที่ลงบัญชี
+                  </label>
+                  <input
+                    type="date"
+                    name="accountingDate"
+                    value={formData.accountingDate}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                  />
+                </div>
+
                 {/* Quantity */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
@@ -283,48 +376,48 @@ export default function AddAssetPage() {
                     step="1"
                   />
                 </div>
+              </div>
 
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    รูปภาพ
-                  </label>
-                  <div className="space-y-3">
-                    {/* File Upload */}
-                    <div className="flex items-center">
-                      <label className="flex-1">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                          disabled={uploadLoading}
-                        />
-                        <div className="flex cursor-pointer">
-                          <div className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg bg-gray-50 text-gray-500 font-kanit">
-                            {uploadLoading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์รูปภาพ'}
-                          </div>
-                          <div className="px-4 py-3 bg-pink-500 hover:bg-pink-600 border border-pink-500 rounded-r-lg transition-colors text-white">
-                            {uploadLoading ? (
-                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                            ) : (
-                              <FaUpload />
-                            )}
-                          </div>
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                  รูปภาพ
+                </label>
+                <div className="space-y-3">
+                  {/* File Upload */}
+                  <div className="flex items-center">
+                    <label className="flex-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        disabled={uploadLoading}
+                      />
+                      <div className="flex cursor-pointer">
+                        <div className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg bg-gray-50 text-gray-500 font-kanit">
+                          {uploadLoading ? 'กำลังอัปโหลด...' : 'เลือกไฟล์รูปภาพใหม่'}
                         </div>
-                      </label>
-                    </div>
-                    {/* Manual URL Input */}
-                    <div className="text-center text-sm text-gray-500 font-kanit">หรือ</div>
-                    <input
-                      type="url"
-                      name="imageUrl"
-                      value={formData.imageUrl}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
-                      placeholder="หรือใส่ URL รูปภาพ"
-                    />
+                        <div className="px-4 py-3 bg-pink-500 hover:bg-pink-600 border border-pink-500 rounded-r-lg transition-colors text-white">
+                          {uploadLoading ? (
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          ) : (
+                            <FaUpload />
+                          )}
+                        </div>
+                      </div>
+                    </label>
                   </div>
+                  {/* Manual URL Input */}
+                  <div className="text-center text-sm text-gray-500 font-kanit">หรือ</div>
+                  <input
+                    type="url"
+                    name="imageUrl"
+                    value={formData.imageUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit"
+                    placeholder="หรือใส่ URL รูปภาพ"
+                  />
                 </div>
               </div>
 
@@ -357,7 +450,9 @@ export default function AddAssetPage() {
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
-                        target.parentElement!.innerHTML = '<FaBox className="text-gray-400 text-2xl" />';
+                        if (target.parentElement) {
+                          target.parentElement.innerHTML = '<div class="text-gray-400 text-2xl">📷</div>';
+                        }
                       }}
                     />
                   </div>
@@ -385,8 +480,8 @@ export default function AddAssetPage() {
                     </>
                   ) : (
                     <>
-                      <FaPlus className="mr-2" />
-                      เพิ่มรายการ
+                      <FaEdit className="mr-2" />
+                      บันทึกการเปลี่ยนแปลง
                     </>
                   )}
                 </button>
@@ -398,4 +493,3 @@ export default function AddAssetPage() {
     </LayoutWrapper>
   );
 }
-

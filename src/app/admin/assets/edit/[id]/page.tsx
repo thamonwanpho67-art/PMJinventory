@@ -16,6 +16,7 @@ interface Asset {
   costCenter: string | null;
   price: number | null;
   accountingDate: string | null;
+  quantity: number;
   status: 'AVAILABLE' | 'DAMAGED' | 'OUT_OF_STOCK';
   imageUrl: string | null;
 }
@@ -41,6 +42,7 @@ export default function EditAssetPage() {
     costCenter: '',
     price: '',
     accountingDate: '',
+    quantity: '1',
     status: 'AVAILABLE' as const,
     imageUrl: ''
   });
@@ -67,6 +69,7 @@ export default function EditAssetPage() {
         costCenter: assetData.costCenter || '',
         price: assetData.price ? assetData.price.toString() : '',
         accountingDate: assetData.accountingDate ? new Date(assetData.accountingDate).toISOString().split('T')[0] : '',
+        quantity: assetData.quantity ? assetData.quantity.toString() : '1',
         status: assetData.status,
         imageUrl: assetData.imageUrl || ''
       });
@@ -356,11 +359,30 @@ export default function EditAssetPage() {
                   />
                 </div>
 
-                {/* Image Upload */}
+                {/* Quantity */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    รูปภาพ
+                    จำนวนคงเหลือ *
                   </label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={formData.quantity}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    placeholder="1"
+                    min="0"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                  รูปภาพ
+                </label>
                   <div className="space-y-3">
                     {/* File Upload */}
                     <div className="flex items-center">

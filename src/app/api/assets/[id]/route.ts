@@ -60,7 +60,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { code, name, description, category, location, status, imageUrl, assetCode, costCenter, price, accountingDate } = body;
+    const { code, name, description, category, location, status, imageUrl, assetCode, costCenter, price, accountingDate, quantity } = body;
 
     // ตรวจสอบว่าอุปกรณ์มีอยู่หรือไม่
     const existingAsset = await prisma.asset.findUnique({
@@ -108,6 +108,7 @@ export async function PATCH(
     if (costCenter !== undefined) updateData.costCenter = costCenter || null;
     if (price !== undefined) updateData.price = price ? parseFloat(price) : null;
     if (accountingDate !== undefined) updateData.accountingDate = accountingDate ? new Date(accountingDate) : null;
+    if (quantity !== undefined) updateData.quantity = quantity ? parseInt(quantity) : 1;
     if (status) updateData.status = status;
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl || null;
 
