@@ -356,6 +356,8 @@ export default function EditAssetPage() {
                     value={formData.accountingDate}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
+                    min="2018-01-01" 
+                    max="2032-12-31"
                   />
                 </div>
 
