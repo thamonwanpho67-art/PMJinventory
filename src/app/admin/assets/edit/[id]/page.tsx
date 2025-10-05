@@ -419,7 +419,6 @@ export default function EditAssetPage() {
                       placeholder="หรือใส่ URL รูปภาพ"
                     />
                   </div>
-                </div>
               </div>
 
               {/* Description */}
