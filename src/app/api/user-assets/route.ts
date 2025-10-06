@@ -25,6 +25,7 @@ export async function GET() {
         status: true,
         imageUrl: true,
         description: true,
+        quantity: true,
         _count: {
           select: {
             loans: {
@@ -45,17 +46,20 @@ export async function GET() {
     // คำนวณจำนวนที่ว่างและสถานะ
     const assetsWithAvailability = assets.map((asset) => {
       const borrowedCount = asset._count.loans;
+      const availableCount = asset.quantity - borrowedCount;
       const isAvailable = asset.status === 'AVAILABLE';
       
       return {
         id: asset.id,
         name: asset.name,
         category: asset.category || 'ไม่ระบุ',
+        quantity: asset.quantity,
+        available: availableCount,
         borrowed: borrowedCount,
         status: asset.status,
         imageUrl: asset.imageUrl,
         description: asset.description,
-        canBorrow: isAvailable && borrowedCount === 0
+        canBorrow: isAvailable && availableCount > 0
       };
     });
 

@@ -35,7 +35,7 @@ type UserAsset = {
   available: number;
   borrowed: number;
   status: string;
-  image?: string | null;
+  imageUrl?: string | null;
   description?: string | null;
   canBorrow: boolean;
 };
@@ -288,10 +288,10 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {filteredAssets.map((asset) => (
               <div key={asset.id} className="bg-white rounded-2xl shadow-lg border border-pink-100 overflow-hidden hover:shadow-xl transition-shadow">
-                {asset.image && (
+                {asset.imageUrl && (
                   <div className="h-48 bg-gray-100 flex items-center justify-center relative">
                     <Image 
-                      src={asset.image} 
+                      src={asset.imageUrl} 
                       alt={asset.name}
                       fill
                       className="object-contain"
@@ -342,7 +342,7 @@ export default function DashboardPage() {
                         code: asset.id, // Using id as code for now
                         name: asset.name,
                         description: asset.description,
-                        quantity: asset.available,
+                        quantity: asset.quantity,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()
                       };
@@ -355,7 +355,7 @@ export default function DashboardPage() {
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
-                    {asset.canBorrow ? 'ขอยืม' : 'ไม่สามารถยืมได้'}
+                    {asset.canBorrow ? 'ขอยืม' : `หมด (เหลือ ${asset.available} ชิ้น)`}
                   </button>
                 </div>
               </div>

@@ -315,7 +315,7 @@ export default function UsersManagementPage() {
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => handleEdit(user)}
-                            className="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100 rounded-lg transition-colors"
+                            className="p-2 text-pink-600 hover:text-pink-800 hover:bg-pink-100 rounded-lg transition-colors"
                             title="แก้ไข"
                           >
                             <FaEdit />
@@ -398,7 +398,7 @@ export default function UsersManagementPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
             <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
                 <FaEdit className="text-white text-xl" />
               </div>
               <div>
@@ -417,7 +417,7 @@ export default function UsersManagementPage() {
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-kanit text-black"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
                   placeholder="ชื่อผู้ใช้งาน"
                 />
               </div>
@@ -431,7 +431,7 @@ export default function UsersManagementPage() {
                   type="email"
                   value={editForm.email}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-kanit text-black"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
                   placeholder="อีเมล"
                 />
               </div>
@@ -444,7 +444,7 @@ export default function UsersManagementPage() {
                 <select
                   value={editForm.role}
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value as 'ADMIN' | 'USER' })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-kanit bg-white text-black"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white text-black"
                 >
                   <option value="USER">ผู้ใช้งานทั่วไป</option>
                   <option value="ADMIN">ผู้ดูแลระบบ</option>
@@ -465,7 +465,7 @@ export default function UsersManagementPage() {
               <button
                 onClick={confirmEdit}
                 disabled={isUpdating || !editForm.name || !editForm.email}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-colors font-kanit font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-lg hover:from-pink-600 hover:to-pink-700 transition-colors font-kanit font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isUpdating ? (
                   <>

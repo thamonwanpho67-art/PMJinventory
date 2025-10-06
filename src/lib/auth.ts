@@ -4,49 +4,15 @@ import { compare } from "bcryptjs";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-// Ensure environment variables are available
-const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
-const NEXTAUTH_URL = process.env.NEXTAUTH_URL || process.env.AUTH_URL || "http://localhost:3000";
-
-if (!NEXTAUTH_SECRET) {
-  throw new Error("NEXTAUTH_SECRET or AUTH_SECRET environment variable is required");
-}
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 hours
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: "/login",
     error: "/login",
-  },
-  trustHost: true,
-  secret: NEXTAUTH_SECRET,
-  callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: { token: any; user: any }) {
-      if (user) {
-        return {
-          ...token,
-          id: user.id,
-          role: user.role,
-        };
-      }
-      return token;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: { session: any; token: any }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id,
-          role: token.role,
-        },
-      };
-    },
   },
   providers: [
     CredentialsProvider({
@@ -90,5 +56,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  debug: process.env.NODE_ENV === "development",
+  callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user: any }) {
+      if (user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+        };
+      }
+      return token;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+          role: token.role,
+        },
+      };
+    },
+  },
 });

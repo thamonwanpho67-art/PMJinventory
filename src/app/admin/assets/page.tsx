@@ -24,6 +24,7 @@ interface Asset {
   status: 'AVAILABLE' | 'DAMAGED' | 'OUT_OF_STOCK';
   imageUrl: string | null;
   quantity: number;
+  accountingDate: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,8 +82,9 @@ const getQuantityIcon = (quantity: number) => {
 };
 
 // Function to check if asset is older than 7 years
-const isAssetOld = (createdAt: string) => {
-  const assetDate = new Date(createdAt);
+const isAssetOld = (accountingDate: string | null) => {
+  if (!accountingDate) return false;
+  const assetDate = new Date(accountingDate);
   const currentDate = new Date();
   const diffTime = currentDate.getTime() - assetDate.getTime();
   const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
@@ -143,7 +145,7 @@ export default function AdminAssetsPage() {
     }
 
     if (showOldOnly) {
-      filtered = filtered.filter(asset => isAssetOld(asset.createdAt));
+      filtered = filtered.filter(asset => isAssetOld(asset.accountingDate));
     }
 
     setFilteredAssets(filtered);
@@ -348,7 +350,7 @@ export default function AdminAssetsPage() {
               <div>
                 <p className="text-sm text-gray-600 font-kanit">เก่าเกิน 7 ปี</p>
                 <p className="text-2xl font-bold text-gray-900 font-kanit">
-                  {Array.isArray(assets) ? assets.filter(asset => isAssetOld(asset.createdAt)).length : 0}
+                  {Array.isArray(assets) ? assets.filter(asset => isAssetOld(asset.accountingDate)).length : 0}
                 </p>
               </div>
             </div>
@@ -538,12 +540,12 @@ export default function AdminAssetsPage() {
                   </div>
 
                   {/* Age Warning Badge */}
-                  {isAssetOld(asset.createdAt) && (
+                  {isAssetOld(asset.accountingDate) && (
                     <div className="bg-orange-100 border border-orange-200 rounded-lg p-3 mb-4">
                       <div className="flex items-center gap-2">
                         <FaClock className="text-orange-500" />
                         <span className="text-sm font-kanit text-orange-800 font-medium">
-                          ครุภัณฑ์เก่าเกิน 7 ปี (จัดหาเมื่อ: {new Date(asset.createdAt).toLocaleDateString('th-TH')})
+                          ครุภัณฑ์เก่าเกิน 7 ปี (จัดหาเมื่อ: {asset.accountingDate ? new Date(asset.accountingDate).toLocaleDateString('th-TH') : 'ไม่ระบุ'})
                         </span>
                       </div>
                     </div>
