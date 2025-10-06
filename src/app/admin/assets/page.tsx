@@ -168,7 +168,8 @@ export default function AdminAssetsPage() {
       document.head.appendChild(script);
     } catch (error) {
       console.error('Error in bulk import:', error);
-      alert('เกิดข้อผิดพลาดในการนำเข้าข้อมูล');
+      const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
+      alert(errorMessage);
     }
   };
 

@@ -80,6 +80,8 @@ async function importAssetsFromFile() {
     
     if (importResponse.ok) {
       console.log(`✅ สำเร็จ! เพิ่มครุภัณฑ์ได้ ${result.created} รายการ`);
+      alert(`✅ สำเร็จ! เพิ่มครุภัณฑ์ได้ ${result.created} รายการ`);
+      
       if (result.errorCount > 0) {
         console.log(`⚠️  มีข้อผิดพลาด ${result.errorCount} รายการ:`);
         result.errors.slice(0, 10).forEach(error => {
@@ -88,6 +90,7 @@ async function importAssetsFromFile() {
         if (result.errors.length > 10) {
           console.log(`   ... และอีก ${result.errors.length - 10} รายการ`);
         }
+        alert(`⚠️ มีข้อผิดพลาด ${result.errorCount} รายการ กรุณาดูรายละเอียดใน Console`);
       }
       
       // Refresh หน้าเว็บเพื่อแสดงข้อมูลใหม่
@@ -95,10 +98,14 @@ async function importAssetsFromFile() {
         window.location.reload();
       }
     } else {
-      console.error('❌ เกิดข้อผิดพลาด:', result.error);
+      const errorMessage = result.error || 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ';
+      console.error('❌ เกิดข้อผิดพลาด:', errorMessage);
+      alert('❌ เกิดข้อผิดพลาด: ' + errorMessage);
     }
   } catch (error) {
-    console.error('❌ เกิดข้อผิดพลาดในการนำเข้าข้อมูล:', error);
+    const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
+    console.error('❌ เกิดข้อผิดพลาดในการนำเข้าข้อมูล:', errorMessage);
+    alert('เกิดข้อผิดพลาด: ' + errorMessage);
   }
 }
 
