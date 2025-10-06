@@ -1,39 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaBell } from 'react-icons/fa';
+
+type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  createdAt: string;
+};
 
 export default function NotificationDropdownSimple() {
   const [isOpen, setIsOpen] = useState(false);
-  const [unreadCount] = useState(5); // Mock data
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock notifications
-  const mockNotifications = [
-    {
-      id: '1',
-      title: 'คำขอยืมใหม่',
-      message: 'สมชาย ใจดี ขอยืม เก้าอี้สำนักงาน รุ่น A1',
-      type: 'LOAN_REQUEST',
-      isRead: false,
-      createdAt: '2025-10-06T10:00:00Z'
-    },
-    {
-      id: '2',
-      title: 'คำขอยืมใหม่',
-      message: 'สมหญิง สวยงาม ขอยืม โต๊ะทำงาน รุ่น B2',
-      type: 'LOAN_REQUEST',
-      isRead: false,
-      createdAt: '2025-10-06T09:30:00Z'
-    },
-    {
-      id: '3',
-      title: 'วัสดุใกล้หมด',
-      message: 'กระดาษ A4 เหลือจำนวนน้อย (เหลือ 5 ชิ้น)',
-      type: 'LOW_STOCK',
-      isRead: false,
-      createdAt: '2025-10-06T09:00:00Z'
+  // ดึงข้อมูลการแจ้งเตือนจากฐานข้อมูล
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications');
+      if (response.ok) {
+        const data = await response.json();
+        // API ส่งข้อมูลมาในรูปแบบ { notifications: [], unreadCount: 0 }
+        setNotifications(data.notifications || data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // นับจำนวนที่ยังไม่ได้อ่าน
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const formatTime = (dateString: string) => {
     const now = new Date();
@@ -51,6 +56,10 @@ export default function NotificationDropdownSimple() {
     switch (type) {
       case 'LOAN_REQUEST':
         return 'border-l-blue-500 bg-blue-50';
+      case 'LOAN_APPROVED':
+        return 'border-l-green-500 bg-green-50';
+      case 'LOAN_RETURNED':
+        return 'border-l-purple-500 bg-purple-50';
       case 'LOW_STOCK':
         return 'border-l-yellow-500 bg-yellow-50';
       default:
@@ -90,33 +99,44 @@ export default function NotificationDropdownSimple() {
             </div>
 
             <div className="max-h-80 overflow-y-auto">
-              {mockNotifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`border-l-4 p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors ${
-                    getNotificationColor(notification.type)
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h4 className="text-sm font-semibold text-gray-900 font-kanit">
-                          {notification.title}
-                        </h4>
-                        {!notification.isRead && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                        )}
+              {loading ? (
+                <div className="p-4 text-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500 mx-auto"></div>
+                  <p className="text-sm text-gray-500 mt-2 font-kanit">กำลังโหลด...</p>
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="p-4 text-center">
+                  <p className="text-sm text-gray-500 font-kanit">ไม่มีการแจ้งเตือน</p>
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`border-l-4 p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors ${
+                      getNotificationColor(notification.type)
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="text-sm font-semibold text-gray-900 font-kanit">
+                            {notification.title}
+                          </h4>
+                          {!notification.isRead && (
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1 font-kanit">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-2 font-kanit">
+                          {formatTime(notification.createdAt)}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1 font-kanit">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-2 font-kanit">
-                        {formatTime(notification.createdAt)}
-                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="p-3 border-t bg-gray-50 text-center">
