@@ -67,6 +67,21 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return await updateUser(request, { params });
+}
+
+// PUT /api/users/[id] - แก้ไขข้อมูลผู้ใช้ (ADMIN เท่านั้น) - same as PATCH
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return await updateUser(request, { params });
+}
+
+async function updateUser(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { id } = await params;
   
   try {

@@ -7,7 +7,6 @@ import {
   FaPlus, 
   FaEdit, 
   FaTrash, 
-  FaEye, 
   FaUserShield, 
   FaUser,
   FaSearch,
@@ -37,6 +36,14 @@ export default function UsersManagementPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    email: '',
+    role: 'USER' as 'ADMIN' | 'USER'
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -61,6 +68,16 @@ export default function UsersManagementPage() {
     setShowDeleteModal(true);
   };
 
+  const handleEdit = async (user: User) => {
+    setUserToEdit(user);
+    setEditForm({
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+    setShowEditModal(true);
+  };
+
   const confirmDelete = async () => {
     if (!userToDelete) return;
     
@@ -82,6 +99,35 @@ export default function UsersManagementPage() {
       alert('Error deleting user');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const confirmEdit = async () => {
+    if (!userToEdit) return;
+    
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`/api/users/${userToEdit.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editForm),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUsers(users.map(u => u.id === userToEdit.id ? { ...u, ...updatedUser } : u));
+        setShowEditModal(false);
+        setUserToEdit(null);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update user');
+      }
+    } catch (error) {
+      alert('Error updating user');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -268,14 +314,7 @@ export default function UsersManagementPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end space-x-2">
                           <button
-                            onClick={() => router.push(`/admin/users/view/${user.id}`)}
-                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
-                            title="ดูรายละเอียด"
-                          >
-                            <FaEye />
-                          </button>
-                          <button
-                            onClick={() => router.push(`/admin/users/edit/${user.id}`)}
+                            onClick={() => handleEdit(user)}
                             className="p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100 rounded-lg transition-colors"
                             title="แก้ไข"
                           >
@@ -349,6 +388,94 @@ export default function UsersManagementPage() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && userToEdit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mr-4">
+                <FaEdit className="text-white text-xl" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 font-kanit">แก้ไขข้อมูลผู้ใช้งาน</h3>
+                <p className="text-gray-600 font-kanit text-sm">แก้ไขข้อมูลของ {userToEdit.name}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Name Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                  ชื่อผู้ใช้งาน
+                </label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-kanit text-black"
+                  placeholder="ชื่อผู้ใช้งาน"
+                />
+              </div>
+
+              {/* Email Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                  อีเมล
+                </label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-kanit text-black"
+                  placeholder="อีเมล"
+                />
+              </div>
+
+              {/* Role Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
+                  สิทธิ์การใช้งาน
+                </label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm({ ...editForm, role: e.target.value as 'ADMIN' | 'USER' })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-kanit bg-white text-black"
+                >
+                  <option value="USER">ผู้ใช้งานทั่วไป</option>
+                  <option value="ADMIN">ผู้ดูแลระบบ</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex space-x-4 mt-6">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setUserToEdit(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-kanit font-medium"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={confirmEdit}
+                disabled={isUpdating || !editForm.name || !editForm.email}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-colors font-kanit font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    กำลังบันทึก...
+                  </>
+                ) : (
+                  'บันทึกการแก้ไข'
+                )}
+              </button>
             </div>
           </div>
         </div>
