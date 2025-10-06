@@ -149,62 +149,6 @@ export default function AdminAssetsPage() {
     setFilteredAssets(filtered);
   };
 
-  const handleBulkImport = async () => {
-    try {
-      // โหลด script การนำเข้าข้อมูล
-      const script = document.createElement('script');
-      script.src = '/import-script.js';
-      script.type = 'text/javascript';
-      
-      script.onload = async () => {
-        try {
-          // รอให้ script โหลดเสร็จ แล้วรันฟังก์ชันนำเข้าข้อมูล
-          if (window.importAssetsFromFile) {
-            const confirmed = confirm(
-              'คุณต้องการนำเข้าข้อมูลครุภัณฑ์จากไฟล์ JSON หรือไม่?\n\n' +
-              'ข้อมูลจะถูกเพิ่มเข้าไปในระบบ (ไม่ลบข้อมูลเดิม)\n' +
-              'รายการที่มีรหัสซ้ำจะถูกข้าม'
-            );
-            
-            if (confirmed) {
-              await window.importAssetsFromFile();
-              // รีเฟรชข้อมูลหลังการนำเข้า
-              setTimeout(() => {
-                fetchAssets();
-              }, 2000);
-            }
-          } else {
-            alert('เกิดข้อผิดพลาดในการโหลดสคริปต์นำเข้าข้อมูล');
-          }
-        } catch (scriptError) {
-          console.error('Error executing import script:', scriptError);
-          alert('เกิดข้อผิดพลาดในการรันสคริปต์นำเข้าข้อมูล');
-        }
-      };
-      
-      script.onerror = (errorEvent) => {
-        console.error('Script loading error:', errorEvent);
-        alert('ไม่สามารถโหลดสคริปต์นำเข้าข้อมูลได้');
-      };
-      
-      document.head.appendChild(script);
-    } catch (error) {
-      console.error('Error in bulk import:', error);
-      
-      let errorMessage = 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        errorMessage = 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล (รายละเอียดใน Console)';
-      }
-      
-      alert(errorMessage);
-    }
-  };
-
   const handleDeleteAsset = async (id: string) => {
     if (!confirm('คุณแน่ใจหรือไม่ที่จะลบอุปกรณ์นี้?')) return;
 
@@ -487,22 +431,13 @@ export default function AdminAssetsPage() {
               </button>
 
               {/* Add Button */}
-              <div className="flex gap-3">
-                <button
-                  onClick={handleBulkImport}
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
-                >
-                  <FaDownload />
-                  นำเข้าข้อมูล JSON
-                </button>
-                <button
-                  onClick={() => window.location.href = '/admin/assets/add'}
-                  className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
-                >
-                  <FaPlus />
-                  เพิ่มอุปกรณ์
-                </button>
-              </div>
+              <button
+                onClick={() => window.location.href = '/admin/assets/add'}
+                className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
+              >
+                <FaPlus />
+                เพิ่มอุปกรณ์
+              </button>
             </div>
           </div>
 
