@@ -188,7 +188,7 @@ export default function AddAssetPage() {
                 {/* Asset Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    ชื่ออุปกรณ์ *
+                    ชื่ออุปกรณ์*
                   </label>
                   <input
                     type="text"
