@@ -19,8 +19,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider 
       basePath="/api/auth"
-      refetchInterval={5 * 60} // 5 minutes
-      refetchOnWindowFocus={true}
+      refetchInterval={0} // ปิด auto refetch
+      refetchOnWindowFocus={false}
       refetchWhenOffline={false}
     >
       <ChunkErrorHandler />
