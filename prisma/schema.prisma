@@ -98,6 +98,21 @@ model SupplyTransaction {
   @@map("supply_transactions")
 }
 
+model Notification {
+  id          String           @id @default(cuid())
+  title       String
+  message     String
+  type        NotificationType
+  isRead      Boolean          @default(false)
+  targetRole  Role             @default(ADMIN)
+  relatedId   String?
+  relatedType String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("notifications")
+}
+
 enum AssetStatus {
   AVAILABLE
   DAMAGED
@@ -126,4 +141,13 @@ enum SupplyStatus {
 enum SupplyTransactionType {
   IN
   OUT
+}
+
+enum NotificationType {
+  LOAN_REQUEST
+  LOAN_APPROVED
+  LOAN_REJECTED
+  LOAN_RETURNED
+  LOW_STOCK
+  SYSTEM
 }

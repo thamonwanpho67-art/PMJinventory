@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth-utils';
+import { createLoanRequestNotification } from '@/lib/notifications';
 
 // GET /api/loans - ดู loan requests ทั้งหมด
 export async function GET() {
@@ -117,8 +118,20 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         dueAt: new Date(dueAt),
         notes: notes || null
+      },
+      include: {
+        asset: true,
+        user: true
       }
     });
+
+    // สร้างการแจ้งเตือนสำหรับ Admin
+    try {
+      await createLoanRequestNotification(loan.id, user.name || 'ผู้ใช้', asset.name);
+    } catch (notificationError) {
+      console.error('Error creating notification:', notificationError);
+      // ไม่ให้ notification error ทำให้การสร้าง loan ล้มเหลว
+    }
 
     return NextResponse.json(loan, { status: 201 });
   } catch (error) {
