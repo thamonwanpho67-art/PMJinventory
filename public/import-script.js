@@ -103,8 +103,17 @@ async function importAssetsFromFile() {
       alert('❌ เกิดข้อผิดพลาด: ' + errorMessage);
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
-    console.error('❌ เกิดข้อผิดพลาดในการนำเข้าข้อมูล:', errorMessage);
+    let errorMessage = 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error && typeof error === 'object' && error.toString) {
+      errorMessage = error.toString();
+    }
+    
+    console.error('❌ เกิดข้อผิดพลาดในการนำเข้าข้อมูล:', error);
     alert('เกิดข้อผิดพลาด: ' + errorMessage);
   }
 }

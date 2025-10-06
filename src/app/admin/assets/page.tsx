@@ -10,6 +10,7 @@ import QRScanner from '@/components/QRScanner';
 declare global {
   interface Window {
     importAssetsFromFile?: () => Promise<void>;
+    setupJSONFile?: () => void;
   }
 }
 
@@ -110,15 +111,26 @@ export default function AdminAssetsPage() {
     try {
       const response = await fetch('/api/assets');
       const data = await response.json();
-      setAssets(data);
+      setAssets(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching assets:', error);
+      setAssets([]); // Ensure assets is always an array
+      
+      // แสดง error message เฉพาะในกรณีที่จำเป็น
+      if (error instanceof Error && error.message !== 'Failed to fetch') {
+        console.warn('API Error:', error.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const filterAssets = () => {
+    if (!Array.isArray(assets)) {
+      setFilteredAssets([]);
+      return;
+    }
+
     let filtered = assets;
 
     if (searchTerm) {
@@ -142,33 +154,53 @@ export default function AdminAssetsPage() {
       // โหลด script การนำเข้าข้อมูล
       const script = document.createElement('script');
       script.src = '/import-script.js';
+      script.type = 'text/javascript';
+      
       script.onload = async () => {
-        // รอให้ script โหลดเสร็จ แล้วรันฟังก์ชันนำเข้าข้อมูล
-        if (window.importAssetsFromFile) {
-          const confirmed = confirm(
-            'คุณต้องการนำเข้าข้อมูลครุภัณฑ์จากไฟล์ JSON หรือไม่?\n\n' +
-            'ข้อมูลจะถูกเพิ่มเข้าไปในระบบ (ไม่ลบข้อมูลเดิม)\n' +
-            'รายการที่มีรหัสซ้ำจะถูกข้าม'
-          );
-          
-          if (confirmed) {
-            await window.importAssetsFromFile();
-            // รีเฟรชข้อมูลหลังการนำเข้า
-            setTimeout(() => {
-              fetchAssets();
-            }, 2000);
+        try {
+          // รอให้ script โหลดเสร็จ แล้วรันฟังก์ชันนำเข้าข้อมูล
+          if (window.importAssetsFromFile) {
+            const confirmed = confirm(
+              'คุณต้องการนำเข้าข้อมูลครุภัณฑ์จากไฟล์ JSON หรือไม่?\n\n' +
+              'ข้อมูลจะถูกเพิ่มเข้าไปในระบบ (ไม่ลบข้อมูลเดิม)\n' +
+              'รายการที่มีรหัสซ้ำจะถูกข้าม'
+            );
+            
+            if (confirmed) {
+              await window.importAssetsFromFile();
+              // รีเฟรชข้อมูลหลังการนำเข้า
+              setTimeout(() => {
+                fetchAssets();
+              }, 2000);
+            }
+          } else {
+            alert('เกิดข้อผิดพลาดในการโหลดสคริปต์นำเข้าข้อมูล');
           }
-        } else {
-          alert('เกิดข้อผิดพลาดในการโหลดสคริปต์นำเข้าข้อมูล');
+        } catch (scriptError) {
+          console.error('Error executing import script:', scriptError);
+          alert('เกิดข้อผิดพลาดในการรันสคริปต์นำเข้าข้อมูล');
         }
       };
-      script.onerror = () => {
+      
+      script.onerror = (errorEvent) => {
+        console.error('Script loading error:', errorEvent);
         alert('ไม่สามารถโหลดสคริปต์นำเข้าข้อมูลได้');
       };
+      
       document.head.appendChild(script);
     } catch (error) {
       console.error('Error in bulk import:', error);
-      const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
+      
+      let errorMessage = 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล (รายละเอียดใน Console)';
+      }
+      
       alert(errorMessage);
     }
   };
@@ -279,7 +311,14 @@ export default function AdminAssetsPage() {
       }
     } catch (error) {
       console.error('Error creating loan:', error);
-      alert('เกิดข้อผิดพลาดในการสร้างคำขอยืม');
+      
+      let errorMessage = 'เกิดข้อผิดพลาดในการสร้างคำขอยืม';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -317,7 +356,7 @@ export default function AdminAssetsPage() {
               <div>
                 <p className="text-sm text-gray-600 font-kanit">ทั้งหมด</p>
                 <p className="text-2xl font-bold text-gray-900 font-kanit">
-                  {assets.length}
+                  {Array.isArray(assets) ? assets.length : 0}
                 </p>
               </div>
             </div>
@@ -329,7 +368,7 @@ export default function AdminAssetsPage() {
               <div>
                 <p className="text-sm text-gray-600 font-kanit">ว่าง</p>
                 <p className="text-2xl font-bold text-gray-900 font-kanit">
-                  {assets.filter(asset => asset.status === 'AVAILABLE').length}
+                  {Array.isArray(assets) ? assets.filter(asset => asset.status === 'AVAILABLE').length : 0}
                 </p>
               </div>
             </div>
@@ -341,7 +380,7 @@ export default function AdminAssetsPage() {
               <div>
                 <p className="text-sm text-gray-600 font-kanit">ชำรุด</p>
                 <p className="text-2xl font-bold text-gray-900 font-kanit">
-                  {assets.filter(asset => asset.status === 'DAMAGED').length}
+                  {Array.isArray(assets) ? assets.filter(asset => asset.status === 'DAMAGED').length : 0}
                 </p>
               </div>
             </div>
@@ -353,7 +392,7 @@ export default function AdminAssetsPage() {
               <div>
                 <p className="text-sm text-gray-600 font-kanit">หมดแล้ว</p>
                 <p className="text-2xl font-bold text-gray-900 font-kanit">
-                  {assets.filter(asset => asset.status === 'OUT_OF_STOCK' || (asset.quantity && asset.quantity === 0)).length}
+                  {Array.isArray(assets) ? assets.filter(asset => asset.status === 'OUT_OF_STOCK' || (asset.quantity && asset.quantity === 0)).length : 0}
                 </p>
               </div>
             </div>
@@ -365,7 +404,7 @@ export default function AdminAssetsPage() {
               <div>
                 <p className="text-sm text-gray-600 font-kanit">เก่าเกิน 7 ปี</p>
                 <p className="text-2xl font-bold text-gray-900 font-kanit">
-                  {assets.filter(asset => isAssetOld(asset.createdAt)).length}
+                  {Array.isArray(assets) ? assets.filter(asset => isAssetOld(asset.createdAt)).length : 0}
                 </p>
               </div>
             </div>
