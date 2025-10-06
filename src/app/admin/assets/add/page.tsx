@@ -204,7 +204,7 @@ export default function AddAssetPage() {
                 {/* Asset Code */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    รหัสครุภัณฑ์ *
+                    รหัสครุภัณฑ์ (ถ้ามี)
                   </label>
                   <div className="relative">
                     <input
@@ -275,7 +275,7 @@ export default function AddAssetPage() {
                 {/* Asset Code */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    รหัสสินทรัพย์
+                    รหัสสินทรัพย์ (ถ้ามี)
                   </label>
                   <input
                     type="text"
@@ -283,7 +283,7 @@ export default function AddAssetPage() {
                     value={formData.assetCode}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
-                    placeholder="เช่น AS-2025-001"
+                    placeholder="เช่น AS-2025-001 (ไม่บังคับ)"
                   />
                 </div>
 

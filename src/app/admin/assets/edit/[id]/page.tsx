@@ -254,16 +254,15 @@ export default function EditAssetPage() {
                 {/* Asset Code */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 font-kanit mb-2">
-                    รหัสครุภัณฑ์ *
+                    รหัสครุภัณฑ์ (ถ้ามี)
                   </label>
                   <input
                     type="text"
                     name="code"
                     value={formData.code}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-gray-900"
-                    placeholder="เช่น NB001"
+                    placeholder="เช่น NB001 (ไม่บังคับ)"
                   />
                 </div>
 
