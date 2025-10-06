@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 type HistoryRecord = {
   id: string;
   quantity: number;
-  dueDate: string;
+  dueAt: string;
   note?: string | null;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'RETURNED';
   borrowedAt?: string | null;
@@ -157,7 +157,7 @@ export default function HistoryPage() {
         record.user.name || record.user.email,
         record.user.email,
         record.quantity,
-        new Date(record.dueDate).toLocaleDateString('th-TH'),
+        new Date(record.dueAt).toLocaleDateString('th-TH'),
         statusConfig[record.status].label,
         record.borrowedAt ? new Date(record.borrowedAt).toLocaleDateString('th-TH') : '-',
         record.returnedAt ? new Date(record.returnedAt).toLocaleDateString('th-TH') : '-',
@@ -474,7 +474,7 @@ export default function HistoryPage() {
                         <div>
                           <span className="text-pink-600 font-medium">กำหนดคืน:</span>
                           <p className="text-gray-900">
-                            {new Date(record.dueDate).toLocaleDateString('th-TH')}
+                            {new Date(record.dueAt).toLocaleDateString('th-TH')}
                           </p>
                         </div>
                         <div>

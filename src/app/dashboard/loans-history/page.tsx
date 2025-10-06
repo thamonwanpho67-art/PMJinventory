@@ -10,8 +10,7 @@ import * as XLSX from 'xlsx';
 type Loan = {
   id: string;
   quantity: number;
-  dueDate?: string;
-  dueAt?: string;
+  dueAt: string;
   note?: string | null;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'RETURNED';
   borrowedAt?: string | null;
@@ -78,8 +77,7 @@ const exportToExcel = (loans: Loan[], activeTab: string) => {
         loan.status === 'RETURNED' ? 'คืนแล้ว' : loan.status,
       'ผู้ยืม': loan.user.name || loan.user.email,
       'วันที่ยื่นคำขอ': new Date(loan.createdAt).toLocaleDateString('th-TH'),
-      'กำหนดคืน': loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('th-TH') : 
-                   loan.dueAt ? new Date(loan.dueAt).toLocaleDateString('th-TH') : '-',
+      'กำหนดคืน': loan.dueAt ? new Date(loan.dueAt).toLocaleDateString('th-TH') : '-',
       'วันที่อนุมัติ': loan.borrowedAt ? new Date(loan.borrowedAt).toLocaleDateString('th-TH') : '-',
       'วันที่คืน': loan.returnedAt ? new Date(loan.returnedAt).toLocaleDateString('th-TH') : '-',
       'หมายเหตุ': loan.note || '-'
@@ -612,12 +610,7 @@ export default function LoansAndHistoryPage() {
                       </div>
                       <div className="text-sm text-gray-500 font-kanit space-y-1">
                         <p>วันที่ยื่นคำขอ: {formatDate(loan.createdAt)}</p>
-                        {loan.dueDate && (
-                          <p>กำหนดคืน: {formatDate(loan.dueDate)}</p>
-                        )}
-                        {loan.dueAt && (
-                          <p>กำหนดคืน: {formatDate(loan.dueAt)}</p>
-                        )}
+                        <p>กำหนดคืน: {formatDate(loan.dueAt)}</p>
                         {loan.borrowedAt && (
                           <p>วันที่อนุมัติ: {formatDate(loan.borrowedAt)}</p>
                         )}
