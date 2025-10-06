@@ -17,49 +17,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24 hours
-    updateAge: 60 * 60, // 1 hour
   },
   pages: {
     signIn: "/login",
     error: "/login",
   },
-  basePath: "/api/auth",
   trustHost: true,
   secret: NEXTAUTH_SECRET,
-  useSecureCookies: process.env.NODE_ENV === "production",
-  cookies: {
-    sessionToken: {
-      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-  },
-  events: {
-    async signIn(message) {
-      console.log("User signed in:", message.user?.email);
-    },
-    async signOut(message) {
-      console.log("User signed out");
-    },
-    async session(message) {
-      // Silent session events
-    },
-  },
-  logger: {
-    error(error: Error) {
-      console.error("NextAuth Error:", error.message);
-    },
-    warn(code: any) {
-      console.warn("NextAuth Warning:", code);
-    },
-    debug(code: any, metadata?: any) {
-      if (process.env.NODE_ENV === "development") {
-        console.debug("NextAuth Debug:", code, metadata);
+  callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user: any }) {
+      if (user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+        };
       }
+      return token;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+          role: token.role,
+        },
+      };
     },
   },
   providers: [
@@ -104,29 +90,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: { token: any; user: any }) {
-      if (user) {
-        return {
-          ...token,
-          id: user.id,
-          role: user.role,
-        };
-      }
-      return token;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: { session: any; token: any }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id,
-          role: token.role,
-        },
-      };
-    },
-  },
   debug: process.env.NODE_ENV === "development",
 });
