@@ -4,7 +4,10 @@
   "regions": ["sin1"],
   "env": {
     "NEXTAUTH_URL": "https://pmj-inventory.vercel.app",
-    "NEXTAUTH_SECRET": "@NEXTAUTH_SECRET"
+    "NEXTAUTH_SECRET": "RqBnSdMwn7/SxHukFvM6YUm5R6WXOqFZV7M2qS1D97c=",
+    "AUTH_SECRET": "RqBnSdMwn7/SxHukFvM6YUm5R6WXOqFZV7M2qS1D97c=",
+    "AUTH_URL": "https://pmj-inventory.vercel.app",
+    "DATABASE_URL": "file:./prisma/dev.db"
   },
   "functions": {
     "src/app/api/**/*.ts": {
