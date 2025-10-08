@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { FaBell } from 'react-icons/fa';
 
 type Notification = {
@@ -16,6 +17,7 @@ export default function NotificationDropdownSimple() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   // ดึงข้อมูลการแจ้งเตือนจากฐานข้อมูล
   useEffect(() => {
@@ -39,6 +41,82 @@ export default function NotificationDropdownSimple() {
 
   // นับจำนวนที่ยังไม่ได้อ่าน
   const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  // จัดการการคลิกการแจ้งเตือน
+  const handleNotificationClick = async (notification: Notification) => {
+    try {
+      // อัปเดตสถานะเป็นอ่านแล้ว
+      if (!notification.isRead) {
+        await fetch('/api/notifications', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ids: [notification.id],
+            markAsRead: true
+          })
+        });
+
+        // อัปเดต state ในหน้า
+        setNotifications(prev => 
+          prev.map(n => 
+            n.id === notification.id ? { ...n, isRead: true } : n
+          )
+        );
+      }
+
+      // ปิด dropdown
+      setIsOpen(false);
+
+      // นำทางไปหน้าที่เกี่ยวข้อง
+      switch (notification.type) {
+        case 'LOAN_REQUEST':
+        case 'LOAN_APPROVED':
+        case 'LOAN_RETURNED':
+          router.push('/admin/loans');
+          break;
+        case 'LOW_STOCK':
+          router.push('/admin/assets');
+          break;
+        default:
+          router.push('/admin');
+          break;
+      }
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+    }
+  };
+
+  // ทำเครื่องหมายอ่านทั้งหมด
+  const markAllAsRead = async () => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          markAsRead: true
+        })
+      });
+
+      // อัปเดต state
+      setNotifications(prev => 
+        prev.map(n => ({ ...n, isRead: true }))
+      );
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
+  // รีเฟรชการแจ้งเตือนเมื่อเปิด dropdown
+  const handleDropdownOpen = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      fetchNotifications(); // รีเฟรชข้อมูลเมื่อเปิด
+    }
+  };
 
   const formatTime = (dateString: string) => {
     const now = new Date();
@@ -70,7 +148,7 @@ export default function NotificationDropdownSimple() {
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleDropdownOpen}
         className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
       >
         <FaBell className="w-6 h-6" />
@@ -93,9 +171,19 @@ export default function NotificationDropdownSimple() {
               <h3 className="text-lg font-semibold text-gray-900 font-kanit">
                 การแจ้งเตือน
               </h3>
-              <span className="text-sm text-gray-500 font-kanit">
-                {unreadCount} รายการใหม่
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500 font-kanit">
+                  {unreadCount} รายการใหม่
+                </span>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-kanit underline"
+                  >
+                    อ่านทั้งหมด
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="max-h-80 overflow-y-auto">
@@ -112,9 +200,10 @@ export default function NotificationDropdownSimple() {
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`border-l-4 p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors ${
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`border-l-4 p-4 border-b hover:bg-blue-50 cursor-pointer transition-colors ${
                       getNotificationColor(notification.type)
-                    }`}
+                    } ${!notification.isRead ? 'bg-white' : 'bg-gray-50'}`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -141,7 +230,7 @@ export default function NotificationDropdownSimple() {
 
             <div className="p-3 border-t bg-gray-50 text-center">
               <p className="text-xs text-gray-500 font-kanit">
-                💡 ระบบการแจ้งเตือนพร้อมใช้งานแล้ว!
+                💡 คลิกที่การแจ้งเตือนเพื่อไปยังหน้าที่เกี่ยวข้อง
               </p>
             </div>
           </div>
