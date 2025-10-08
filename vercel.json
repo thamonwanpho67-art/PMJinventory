@@ -4,7 +4,7 @@
   "regions": ["sin1"],
   "env": {
     "NEXTAUTH_URL": "https://pmj-inventory.vercel.app",
-    "NEXTAUTH_SECRET": "@nextauth_secret"
+    "NEXTAUTH_SECRET": "@NEXTAUTH_SECRET"
   },
   "functions": {
     "src/app/api/**/*.ts": {
