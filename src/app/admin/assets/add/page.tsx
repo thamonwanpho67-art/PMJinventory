@@ -12,6 +12,7 @@ export default function AddAssetPage() {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [codeError, setCodeError] = useState('');
   const [isCheckingCode, setIsCheckingCode] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -89,6 +90,7 @@ export default function AddAssetPage() {
         ...prev,
         imageUrl: data.url
       }));
+      setImageLoadError(false); // Reset image load error when new image is uploaded
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred during upload');
     } finally {
@@ -419,16 +421,16 @@ export default function AddAssetPage() {
                     ตัวอย่างรูปภาพ
                   </label>
                   <div className="w-32 h-32 border border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
-                    <img
-                      src={formData.imageUrl}
-                      alt="Asset preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.parentElement!.innerHTML = '<FaBox className="text-gray-400 text-2xl" />';
-                      }}
-                    />
+                    {!imageLoadError ? (
+                      <img
+                        src={formData.imageUrl}
+                        alt="Asset preview"
+                        className="w-full h-full object-cover"
+                        onError={() => setImageLoadError(true)}
+                      />
+                    ) : (
+                      <FaBox className="text-gray-400 text-2xl" />
+                    )}
                   </div>
                 </div>
               )}

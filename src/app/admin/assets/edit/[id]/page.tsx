@@ -467,7 +467,6 @@ export default function EditAssetPage() {
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
-                        target.parentElement!.innerHTML = '<div class="text-gray-400 text-2xl">📦</div>';
                       }}
                     />
                   </div>
