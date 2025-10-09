@@ -9,7 +9,7 @@ import { FaClipboardList, FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaSearc
 type Loan = {
   id: string;
   quantity: number;
-  dueDate: string;
+  dueAt: string | null;
   note?: string | null;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'RETURNED';
   borrowedAt?: string | null;
@@ -296,7 +296,7 @@ export default function AdminLoansPage() {
                         <div>
                           <span className="text-pink-600 font-medium">กำหนดคืน:</span>
                           <p className="text-gray-900">
-                            {new Date(loan.dueDate).toLocaleDateString('th-TH')}
+                            {loan.dueAt || 'ไม่ระบุ'}
                           </p>
                         </div>
                         <div>

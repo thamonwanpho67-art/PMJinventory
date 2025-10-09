@@ -6,9 +6,13 @@ import { createLoanRequestNotification } from '@/lib/notifications';
 // GET /api/loans - ดู loan requests ทั้งหมด
 export async function GET() {
   try {
+    console.log('API: /api/loans - Starting request');
+    
     const user = await getCurrentUser();
+    console.log('API: Current user:', user ? { id: user.id, role: user.role } : 'null');
     
     if (!user) {
+      console.log('API: No user found, returning 401');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -18,6 +22,7 @@ export async function GET() {
     let loans;
 
     if (user.role === 'ADMIN') {
+      console.log('API: Admin user, fetching all loans');
       // ADMIN ดูได้ทุกคำขอ
       loans = await prisma.loan.findMany({
         include: {
@@ -29,6 +34,7 @@ export async function GET() {
         }
       });
     } else {
+      console.log('API: Regular user, fetching user loans for:', user.id);
       // USER ดูได้เฉพาะคำขอของตัวเอง
       loans = await prisma.loan.findMany({
         where: {
@@ -44,6 +50,7 @@ export async function GET() {
       });
     }
 
+    console.log('API: Found loans count:', loans.length);
     return NextResponse.json(loans);
   } catch (error) {
     console.error('Error fetching loans:', error);

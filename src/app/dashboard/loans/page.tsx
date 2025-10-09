@@ -9,7 +9,7 @@ import { FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaClipboardList, FaStar 
 type Loan = {
   id: string;
   quantity: number;
-  dueDate: string;
+  dueAt: string | null;
   note?: string | null;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'RETURNED';
   borrowedAt?: string | null;
@@ -80,14 +80,23 @@ export default function LoansPage() {
 
   const fetchLoans = async () => {
     try {
+      console.log('Frontend: Fetching loans...');
+      console.log('Frontend: Session user ID:', session?.user?.id);
+      
       const response = await fetch('/api/loans');
+      console.log('Frontend: Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Frontend: Received loans:', data.length);
         setLoans(data);
       } else {
+        const errorData = await response.text();
+        console.error('Frontend: Error response:', errorData);
         setError('ไม่สามารถโหลดข้อมูลได้');
       }
-    } catch {
+    } catch (err) {
+      console.error('Frontend: Fetch error:', err);
       setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
     } finally {
       setLoading(false);
@@ -218,7 +227,7 @@ export default function LoansPage() {
                         <div>
                           <span className="text-pink-600 font-medium">กำหนดคืน:</span>
                           <p className="text-gray-900">
-                            {new Date(loan.dueDate).toLocaleDateString('th-TH')}
+                            {loan.dueAt || 'ไม่ระบุ'}
                           </p>
                         </div>
                         <div>
