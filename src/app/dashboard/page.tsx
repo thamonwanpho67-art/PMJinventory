@@ -291,10 +291,15 @@ export default function DashboardPage() {
                 {asset.imageUrl && (
                   <div className="h-48 bg-gray-100 flex items-center justify-center relative">
                     <Image 
-                      src={asset.imageUrl} 
+                      src={`${asset.imageUrl}?t=${Date.now()}`} 
                       alt={asset.name}
                       fill
                       className="object-contain"
+                      onError={(e) => {
+                        // Fallback to a default image if loading fails
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/default-asset.png';
+                      }}
                     />
                   </div>
                 )}
