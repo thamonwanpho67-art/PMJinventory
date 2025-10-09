@@ -260,13 +260,13 @@ export default function UserAssetsPage() {
             </div>
 
             <div className="mt-4 text-sm text-gray-600 font-kanit">
-              แสดงผล {filteredAssets.length} รายการจากทั้งหมด {Array.isArray(assets) ? assets.length : 0} รายการ
+              แสดงผล {Array.isArray(filteredAssets) ? filteredAssets.length : 0} รายการจากทั้งหมด {Array.isArray(assets) ? assets.length : 0} รายการ
             </div>
           </div>
 
           {/* Assets Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAssets.length === 0 ? (
+            {!Array.isArray(filteredAssets) || filteredAssets.length === 0 ? (
               <div className="col-span-full bg-white rounded-xl shadow-lg p-12 text-center">
                 <FaBox className="mx-auto text-gray-300 text-6xl mb-4" />
                 <p className="text-gray-500 font-kanit text-xl">ไม่พบอุปกรณ์</p>
