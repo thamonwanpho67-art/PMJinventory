@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -46,12 +46,14 @@ model Loan {
   assetId    String
   userId     String
   status     LoanStatus @default(PENDING)
+  borrowDate DateTime   @default(now())
   borrowedAt DateTime?
-  dueAt      DateTime
+  dueAt      DateTime?
   returnedAt DateTime?
+  costCenter String?
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-  notes      String?
+  note       String?
   quantity   Int        @default(1)
   asset      Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)

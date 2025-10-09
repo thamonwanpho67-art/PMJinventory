@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FaEdit, FaTimes } from 'react-icons/fa';
+import { costCenters } from '@/lib/costCenters';
 
 type Asset = {
   id: string;
@@ -18,15 +19,19 @@ type BorrowFormProps = {
 
 export default function BorrowForm({ selectedAsset, onClose, onSuccess }: BorrowFormProps) {
   const [quantity, setQuantity] = useState(1);
+  const [borrowDate, setBorrowDate] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [costCenter, setCostCenter] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // ตั้งค่าวันที่ขั้นต่ำเป็นวันพรุ่งนี้
+  // ตั้งค่าวันที่ขั้นต่ำเป็นวันนี้
+  const today = new Date().toISOString().split('T')[0];
+  // ตั้งค่าวันที่ขั้นต่ำสำหรับกำหนดคืนเป็นวันพรุ่งนี้
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
+  const minDueDate = tomorrow.toISOString().split('T')[0];
 
   if (!selectedAsset) return null;
 
@@ -44,7 +49,9 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
         body: JSON.stringify({
           assetId: selectedAsset.id,
           quantity: parseInt(quantity.toString()),
-          dueAt: new Date(dueDate).toISOString(),
+          borrowDate: borrowDate ? new Date(borrowDate).toISOString() : new Date().toISOString(),
+          dueAt: dueDate ? new Date(dueDate).toISOString() : null,
+          costCenter: costCenter || null,
           note: note.trim() || null,
         }),
       });
@@ -54,7 +61,9 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
         onClose();
         // Reset form
         setQuantity(1);
+        setBorrowDate('');
         setDueDate('');
+        setCostCenter('');
         setNote('');
       } else {
         const errorData = await response.json();
@@ -113,17 +122,51 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
           </div>
 
           <div>
+            <label htmlFor="costCenter" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+              ศูนย์ต้นทุน
+            </label>
+            <select
+              id="costCenter"
+              value={costCenter}
+              onChange={(e) => setCostCenter(e.target.value)}
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30"
+              required
+            >
+              <option value="">เลือกศูนย์ต้นทุน</option>
+              {costCenters.map((center) => (
+                <option key={center.code} value={center.code}>
+                  {center.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="borrowDate" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+              วันที่ยืม
+            </label>
+            <input
+              type="date"
+              id="borrowDate"
+              min={today}
+              value={borrowDate}
+              onChange={(e) => setBorrowDate(e.target.value)}
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-black font-medium bg-pink-50/30"
+              required
+            />
+          </div>
+
+          <div>
             <label htmlFor="dueDate" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
-              วันที่คืน
+              กำหนดคืน (ไม่บังคับ)
             </label>
             <input
               type="date"
               id="dueDate"
-              min={minDate}
+              min={minDueDate}
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-black font-medium bg-pink-50/30"
-              required
             />
           </div>
 

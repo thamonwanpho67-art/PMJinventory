@@ -67,17 +67,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { assetId, dueAt, notes } = body;
+    const { assetId, quantity, borrowDate, dueAt, costCenter, note } = body;
 
     // Validation
-    if (!assetId || !dueAt) {
+    if (!assetId || !quantity || !borrowDate) {
       return NextResponse.json(
-        { error: 'Missing required fields: assetId, dueAt' },
+        { error: 'Missing required fields: assetId, quantity, borrowDate' },
         { status: 400 }
       );
     }
-
-    // Removed quantity validation as we use single item loans now
 
     // ตรวจสอบว่า asset มีอยู่จริง
     const asset = await prisma.asset.findUnique({
@@ -88,6 +86,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Asset not found' },
         { status: 404 }
+      );
+    }
+
+    // ตรวจสอบจำนวนที่ขอยืม
+    if (quantity <= 0 || quantity > asset.quantity) {
+      return NextResponse.json(
+        { error: `จำนวนที่ขอยืมไม่ถูกต้อง (มีอยู่ ${asset.quantity} ชิ้น)` },
+        { status: 400 }
       );
     }
 
@@ -104,21 +110,41 @@ export async function POST(request: NextRequest) {
     }
 
     // ตรวจสอบว่าวันที่ valid
-    const dueDate = new Date(dueAt);
-    if (dueDate <= new Date()) {
+    const borrowDateTime = new Date(borrowDate);
+    if (borrowDateTime < new Date(new Date().setHours(0, 0, 0, 0))) {
       return NextResponse.json(
-        { error: 'Due date must be in the future' },
+        { error: 'วันที่ยืมไม่สามารถเป็นวันในอดีตได้' },
         { status: 400 }
       );
     }
 
+    // ตรวจสอบว่าวันกำหนดคืน valid (ถ้ามี)
+    if (dueAt) {
+      const dueDate = new Date(dueAt);
+      if (dueDate <= borrowDateTime) {
+        return NextResponse.json(
+          { error: 'วันกำหนดคืนต้องหลังจากวันที่ยืม' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const loanData: any = {
+      assetId,
+      userId: user.id,
+      quantity: parseInt(quantity.toString()),
+      borrowDate: new Date(borrowDate),
+      costCenter: costCenter || null,
+      note: note || null
+    };
+
+    // เพิ่ม dueAt เฉพาะเมื่อมีค่า
+    if (dueAt) {
+      loanData.dueAt = new Date(dueAt);
+    }
+
     const loan = await prisma.loan.create({
-      data: {
-        assetId,
-        userId: user.id,
-        dueAt: new Date(dueAt),
-        notes: notes || null
-      },
+      data: loanData,
       include: {
         asset: true,
         user: true

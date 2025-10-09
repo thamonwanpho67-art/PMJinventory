@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaDownload, FaBox, FaExclamationTriangle, FaCheckCircle, FaCog, FaQrcode, FaCamera, FaClock } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaBox, FaExclamationTriangle, FaCheckCircle, FaCog, FaQrcode, FaCamera, FaClock } from 'react-icons/fa';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import QRCode from 'react-qr-code';
 import QRScanner from '@/components/QRScanner';
@@ -179,33 +179,6 @@ export default function AdminAssetsPage() {
       console.error('Error deleting asset:', error);
       alert('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
     }
-  };
-
-  const exportToCSV = () => {
-    const csvContent = [
-      ['รหัสอุปกรณ์', 'ชื่ออุปกรณ์', 'คำอธิบาย', 'สถานะ', 'จำนวน', 'หมวดหมู่', 'สถานที่', 'วันที่เพิ่ม', 'อัปเดตล่าสุด'].join(','),
-      ...filteredAssets.map(asset => [
-        asset.code,
-        asset.name,
-        asset.description || '-',
-        getStatusText(asset.status),
-        asset.quantity || 0,
-        asset.category || '-',
-        asset.location || '-',
-        new Date(asset.createdAt).toLocaleDateString('th-TH'),
-        new Date(asset.updatedAt).toLocaleDateString('th-TH')
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `คลังอุปกรณ์_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   // QR Code functions
@@ -421,15 +394,6 @@ export default function AdminAssetsPage() {
               >
                 <FaCamera />
                 สแกน QR
-              </button>
-
-              {/* Export Button */}
-              <button
-                onClick={exportToCSV}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
-              >
-                <FaDownload />
-                ส่งออก CSV
               </button>
 
               {/* Add Button */}
