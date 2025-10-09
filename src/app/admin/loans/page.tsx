@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
-import { FaClipboardList, FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaSearch, FaFilter, FaUser, FaBox } from 'react-icons/fa';
+import { FaClipboardList, FaClock, FaCheckCircle, FaTimesCircle, FaGift, FaSearch, FaFilter, FaUser, FaBox, FaTimes, FaPhone, FaEnvelope, FaCalendarAlt, FaIdCard, FaTag, FaMapMarkerAlt, FaBarcode, FaDollarSign } from 'react-icons/fa';
 
 type Loan = {
   id: string;
@@ -15,16 +15,26 @@ type Loan = {
   borrowedAt?: string | null;
   returnedAt?: string | null;
   createdAt: string;
+  borrowDate: string;
+  costCenter?: string | null;
   asset: {
     id: string;
     code: string;
     name: string;
     description?: string | null;
+    category?: string | null;
+    location?: string | null;
+    price?: number | null;
+    costCenter?: string | null;
+    accountingDate?: string | null;
   };
   user: {
     id: string;
     name?: string | null;
     email: string;
+    phone?: string | null;
+    role: string;
+    createdAt?: string;
   };
 };
 
@@ -62,6 +72,10 @@ export default function AdminLoansPage() {
   const [error, setError] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState<Loan['user'] | null>(null);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+  const [showLoanDetailModal, setShowLoanDetailModal] = useState(false);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -116,6 +130,26 @@ export default function AdminLoansPage() {
     } catch (error) {
       console.error('Error updating loan status:', error);
     }
+  };
+
+  const handleUserClick = (user: Loan['user']) => {
+    setSelectedUser(user);
+    setShowUserModal(true);
+  };
+
+  const closeUserModal = () => {
+    setShowUserModal(false);
+    setSelectedUser(null);
+  };
+
+  const handleLoanDetailClick = (loan: Loan) => {
+    setSelectedLoan(loan);
+    setShowLoanDetailModal(true);
+  };
+
+  const closeLoanDetailModal = () => {
+    setShowLoanDetailModal(false);
+    setSelectedLoan(null);
   };
 
   const filteredLoans = loans.filter(loan => {
@@ -262,17 +296,23 @@ export default function AdminLoansPage() {
                         <div className="flex items-start space-x-3">
                           <FaBox className="text-pink-600 text-lg mt-1" />
                           <div>
-                            <h3 className="text-lg font-bold text-gray-900 font-kanit">
+                            <button
+                              onClick={() => handleLoanDetailClick(loan)}
+                              className="text-lg font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer font-kanit text-left"
+                            >
                               {loan.asset.name}
-                            </h3>
+                            </button>
                             <p className="text-sm text-pink-600 font-medium">
                               รหัส: {loan.asset.code}
                             </p>
                             <div className="flex items-center space-x-2 mt-1">
                               <FaUser className="text-gray-400 text-xs" />
-                              <p className="text-sm text-gray-600">
+                              <button
+                                onClick={() => handleUserClick(loan.user)}
+                                className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer font-medium"
+                              >
                                 ผู้ยืม: {loan.user.name || loan.user.email}
-                              </p>
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -345,6 +385,413 @@ export default function AdminLoansPage() {
             </div>
           )}
         </div>
+
+        {/* Loan Details Modal */}
+        {showLoanDetailModal && selectedLoan && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl border border-pink-200 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-pink-50 to-rose-50 px-6 py-4 border-b border-pink-200 flex items-center justify-between">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent font-kanit">
+                  รายละเอียดการยืมครุภัณฑ์
+                </h3>
+                <button
+                  onClick={closeLoanDetailModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <FaTimes className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 space-y-6">
+                {/* Asset Information */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <FaBox className="text-blue-600 text-xl" />
+                    <h4 className="text-lg font-bold text-blue-900 font-kanit">ข้อมูลครุภัณฑ์</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <FaBarcode className="text-blue-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm text-blue-600 font-medium">เลขครุภัณฑ์</p>
+                          <p className="text-gray-900 font-mono">{selectedLoan.asset.code}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <FaBox className="text-blue-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm text-blue-600 font-medium">ชื่อครุภัณฑ์</p>
+                          <p className="text-gray-900 font-semibold">{selectedLoan.asset.name}</p>
+                        </div>
+                      </div>
+
+                      {selectedLoan.asset.category && (
+                        <div className="flex items-start space-x-3">
+                          <FaTag className="text-blue-600 mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm text-blue-600 font-medium">หมวดหมู่</p>
+                            <p className="text-gray-900">{selectedLoan.asset.category}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      {selectedLoan.asset.location && (
+                        <div className="flex items-start space-x-3">
+                          <FaMapMarkerAlt className="text-blue-600 mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm text-blue-600 font-medium">สถานที่</p>
+                            <p className="text-gray-900">{selectedLoan.asset.location}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedLoan.asset.price && (
+                        <div className="flex items-start space-x-3">
+                          <FaDollarSign className="text-blue-600 mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm text-blue-600 font-medium">ราคา</p>
+                            <p className="text-gray-900">{selectedLoan.asset.price.toLocaleString()} บาท</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedLoan.asset.costCenter && (
+                        <div className="flex items-start space-x-3">
+                          <FaIdCard className="text-blue-600 mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm text-blue-600 font-medium">Cost Center</p>
+                            <p className="text-gray-900 font-mono">{selectedLoan.asset.costCenter}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {selectedLoan.asset.description && (
+                    <div className="mt-4 p-3 bg-white rounded-lg border border-blue-100">
+                      <p className="text-sm text-blue-600 font-medium mb-1">รายละเอียด</p>
+                      <p className="text-gray-700 text-sm">{selectedLoan.asset.description}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Borrower Information */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <FaUser className="text-green-600 text-xl" />
+                    <h4 className="text-lg font-bold text-green-900 font-kanit">ข้อมูลผู้ยืม</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start space-x-3">
+                      <FaUser className="text-green-600 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-green-600 font-medium">ชื่อผู้ยืม</p>
+                        <p className="text-gray-900 font-semibold">{selectedLoan.user.name || 'ไม่ระบุชื่อ'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3">
+                      <FaEnvelope className="text-green-600 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-green-600 font-medium">อีเมล</p>
+                        <p className="text-gray-900">{selectedLoan.user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Loan Information */}
+                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 border border-yellow-200">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <FaCalendarAlt className="text-yellow-600 text-xl" />
+                    <h4 className="text-lg font-bold text-yellow-900 font-kanit">ข้อมูลการยืม</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <FaCalendarAlt className="text-yellow-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm text-yellow-600 font-medium">วันที่ยืม</p>
+                          <p className="text-gray-900 font-semibold">
+                            {new Date(selectedLoan.borrowDate).toLocaleDateString('th-TH', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <FaClock className="text-yellow-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm text-yellow-600 font-medium">กำหนดคืน</p>
+                          <p className="text-gray-900 font-semibold">
+                            {selectedLoan.dueAt || 'ไม่ระบุ'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <FaBox className="text-yellow-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm text-yellow-600 font-medium">จำนวน</p>
+                          <p className="text-gray-900 font-semibold">{selectedLoan.quantity} ชิ้น</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-3">
+                        {React.createElement(statusConfig[selectedLoan.status].icon, { 
+                          className: "text-yellow-600 mt-1 flex-shrink-0" 
+                        })}
+                        <div>
+                          <p className="text-sm text-yellow-600 font-medium">สถานะการยืม</p>
+                          <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-bold ${statusConfig[selectedLoan.status].color}`}>
+                            {React.createElement(statusConfig[selectedLoan.status].icon, { className: 'w-3 h-3' })}
+                            <span>{statusConfig[selectedLoan.status].label}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {selectedLoan.costCenter && (
+                        <div className="flex items-start space-x-3">
+                          <FaIdCard className="text-yellow-600 mt-1 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm text-yellow-600 font-medium">Cost Center</p>
+                            <p className="text-gray-900 font-mono">{selectedLoan.costCenter}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-start space-x-3">
+                        <FaCalendarAlt className="text-yellow-600 mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm text-yellow-600 font-medium">วันที่ยื่นคำขอ</p>
+                          <p className="text-gray-900">
+                            {new Date(selectedLoan.createdAt).toLocaleDateString('th-TH', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedLoan.note && (
+                    <div className="mt-4 p-4 bg-white rounded-lg border border-yellow-200">
+                      <p className="text-sm text-yellow-600 font-medium mb-2">หมายเหตุ</p>
+                      <p className="text-gray-700">{selectedLoan.note}</p>
+                    </div>
+                  )}
+
+                  {/* Status Timeline */}
+                  <div className="mt-4 p-4 bg-white rounded-lg border border-yellow-200">
+                    <p className="text-sm text-yellow-600 font-medium mb-3">ประวัติสถานะ</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-gray-700">
+                          ยื่นคำขอ: {new Date(selectedLoan.createdAt).toLocaleDateString('th-TH')}
+                        </span>
+                      </div>
+                      {selectedLoan.borrowedAt && (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-gray-700">
+                            อนุมัติและยืม: {new Date(selectedLoan.borrowedAt).toLocaleDateString('th-TH')}
+                          </span>
+                        </div>
+                      )}
+                      {selectedLoan.returnedAt && (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                          <span className="text-gray-700">
+                            คืนแล้ว: {new Date(selectedLoan.returnedAt).toLocaleDateString('th-TH')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                <div className="text-sm text-gray-500">
+                  ID: {selectedLoan.id}
+                </div>
+                <div className="flex space-x-2">
+                  {selectedLoan.status === 'PENDING' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleStatusUpdate(selectedLoan.id, 'APPROVED');
+                          closeLoanDetailModal();
+                        }}
+                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-600 transition-all"
+                      >
+                        อนุมัติ
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleStatusUpdate(selectedLoan.id, 'REJECTED');
+                          closeLoanDetailModal();
+                        }}
+                        className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg text-sm font-medium hover:from-red-600 hover:to-rose-600 transition-all"
+                      >
+                        ปฏิเสธ
+                      </button>
+                    </>
+                  )}
+                  {selectedLoan.status === 'APPROVED' && (
+                    <button
+                      onClick={() => {
+                        handleStatusUpdate(selectedLoan.id, 'RETURNED');
+                        closeLoanDetailModal();
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 transition-all"
+                    >
+                      บันทึกการคืน
+                    </button>
+                  )}
+                  <button
+                    onClick={closeLoanDetailModal}
+                    className="px-6 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg font-medium hover:from-gray-600 hover:to-gray-700 transition-all"
+                  >
+                    ปิด
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* User Details Modal */}
+        {showUserModal && selectedUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl border border-pink-200 shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-pink-50 to-rose-50 px-6 py-4 border-b border-pink-200 flex items-center justify-between">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent font-kanit">
+                  รายละเอียดผู้ยืม
+                </h3>
+                <button
+                  onClick={closeUserModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <FaTimes className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 space-y-6">
+                {/* User Avatar */}
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FaUser className="text-white text-2xl" />
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-900 font-kanit">
+                    {selectedUser.name || 'ไม่ระบุชื่อ'}
+                  </h4>
+                  <p className="text-pink-600 font-medium capitalize">
+                    {selectedUser.role?.toLowerCase() === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งานทั่วไป'}
+                  </p>
+                </div>
+
+                {/* User Details */}
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3 p-4 bg-pink-50 rounded-lg border border-pink-100">
+                    <FaIdCard className="text-pink-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-pink-600 font-medium mb-1">รหัสผู้ใช้</p>
+                      <p className="text-gray-900 font-mono text-sm break-all">{selectedUser.id}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <FaEnvelope className="text-blue-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-blue-600 font-medium mb-1">อีเมล</p>
+                      <p className="text-gray-900 break-all">{selectedUser.email}</p>
+                    </div>
+                  </div>
+
+                  {selectedUser.phone && (
+                    <div className="flex items-start space-x-3 p-4 bg-green-50 rounded-lg border border-green-100">
+                      <FaPhone className="text-green-600 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-green-600 font-medium mb-1">เบอร์โทรศัพท์</p>
+                        <p className="text-gray-900">{selectedUser.phone}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedUser.createdAt && (
+                    <div className="flex items-start space-x-3 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                      <FaCalendarAlt className="text-yellow-600 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-yellow-600 font-medium mb-1">วันที่สมัครสมาชิก</p>
+                        <p className="text-gray-900">
+                          {new Date(selectedUser.createdAt).toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* User Loan Statistics */}
+                <div className="border-t border-gray-200 pt-4">
+                  <h5 className="text-lg font-bold text-gray-900 font-kanit mb-4">สถิติการยืม</h5>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border border-pink-200">
+                      <div className="text-lg font-bold text-pink-600">
+                        {loans.filter(loan => loan.user.id === selectedUser.id).length}
+                      </div>
+                      <div className="text-pink-700 text-xs font-medium">ทั้งหมด</div>
+                    </div>
+                    <div className="text-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                      <div className="text-lg font-bold text-green-600">
+                        {loans.filter(loan => loan.user.id === selectedUser.id && loan.status === 'RETURNED').length}
+                      </div>
+                      <div className="text-green-700 text-xs font-medium">คืนแล้ว</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={closeUserModal}
+                  className="px-6 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg font-medium hover:from-gray-600 hover:to-gray-700 transition-all"
+                >
+                  ปิด
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </LayoutWrapper>
   );
