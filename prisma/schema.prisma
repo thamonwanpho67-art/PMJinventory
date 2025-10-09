@@ -47,7 +47,7 @@ model Loan {
   userId     String
   status     LoanStatus @default(PENDING)
   borrowedAt DateTime?
-  dueAt      DateTime?
+  dueAt      String?
   returnedAt DateTime?
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt

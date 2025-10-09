@@ -28,10 +28,6 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
 
   // ตั้งค่าวันที่ขั้นต่ำเป็นวันนี้
   const today = new Date().toISOString().split('T')[0];
-  // ตั้งค่าวันที่ขั้นต่ำสำหรับกำหนดคืนเป็นวันพรุ่งนี้
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDueDate = tomorrow.toISOString().split('T')[0];
 
   if (!selectedAsset) return null;
 
@@ -50,7 +46,7 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
           assetId: selectedAsset.id,
           quantity: parseInt(quantity.toString()),
           borrowDate: borrowDate ? new Date(borrowDate).toISOString() : new Date().toISOString(),
-          dueAt: dueDate ? new Date(dueDate).toISOString() : null,
+          dueAt: dueDate ? dueDate.trim() : null,
           costCenter: costCenter || null,
           note: note.trim() || null,
         }),
@@ -123,7 +119,7 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
 
           <div>
             <label htmlFor="costCenter" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
-              ศูนย์ต้นทุน
+              ผู้ยืม
             </label>
             <select
               id="costCenter"
@@ -132,7 +128,7 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
               className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30"
               required
             >
-              <option value="">เลือกศูนย์ต้นทุน</option>
+              <option value="">เลือกผู้ยืม</option>
               {costCenters.map((center) => (
                 <option key={center.code} value={center.code}>
                   {center.name}
@@ -161,12 +157,12 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
               กำหนดคืน (ไม่บังคับ)
             </label>
             <input
-              type="date"
+              type="text"
               id="dueDate"
-              min={minDueDate}
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-black font-medium bg-pink-50/30"
+              placeholder="ระบุวันที่หรือช่วงเวลาที่ต้องการคืน"
             />
           </div>
 

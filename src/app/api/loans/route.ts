@@ -119,14 +119,12 @@ export async function POST(request: NextRequest) {
     }
 
     // ตรวจสอบว่าวันกำหนดคืน valid (ถ้ามี)
-    if (dueAt) {
-      const dueDate = new Date(dueAt);
-      if (dueDate <= borrowDateTime) {
-        return NextResponse.json(
-          { error: 'วันกำหนดคืนต้องหลังจากวันที่ยืม' },
-          { status: 400 }
-        );
-      }
+    // หมายเหตุ: ตอนนี้ dueAt เป็น string แล้ว ไม่ใช่ date
+    if (dueAt && typeof dueAt === 'string' && dueAt.trim() === '') {
+      return NextResponse.json(
+        { error: 'กรุณาระบุกำหนดคืนให้ชัดเจน' },
+        { status: 400 }
+      );
     }
 
     const loanData: any = {
@@ -138,9 +136,9 @@ export async function POST(request: NextRequest) {
       note: note || null
     };
 
-    // เพิ่ม dueAt เฉพาะเมื่อมีค่า
-    if (dueAt) {
-      loanData.dueAt = new Date(dueAt);
+    // เพิ่ม dueAt เฉพาะเมื่อมีค่า (เป็น string)
+    if (dueAt && typeof dueAt === 'string' && dueAt.trim()) {
+      loanData.dueAt = dueAt.trim();
     }
 
     const loan = await prisma.loan.create({
