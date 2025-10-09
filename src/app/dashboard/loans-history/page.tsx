@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 type Loan = {
   id: string;
   quantity: number;
-  dueAt: string;
+  dueAt: string | null;
   note?: string | null;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'RETURNED';
   borrowedAt?: string | null;
@@ -141,7 +141,7 @@ const exportToExcel = (loans: Loan[], activeTab: string) => {
 };
 
 export default function LoansAndHistoryPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState<'current' | 'history'>('current');
   const [loans, setLoans] = useState<Loan[]>([]);
   const [filteredLoans, setFilteredLoans] = useState<Loan[]>([]);
@@ -153,10 +153,17 @@ export default function LoansAndHistoryPage() {
 
   const fetchLoans = async () => {
     try {
+      console.log('Frontend (loans-history): Fetching loans...');
       const response = await fetch('/api/loans');
+      console.log('Frontend (loans-history): Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Frontend (loans-history): Received loans:', data.length);
         setLoans(data);
+      } else {
+        const errorText = await response.text();
+        console.error('Frontend (loans-history): Error response:', errorText);
       }
     } catch (error) {
       console.error('Error fetching loans:', error);
@@ -214,8 +221,10 @@ export default function LoansAndHistoryPage() {
   }, [loans, activeTab, searchTerm, statusFilter, startDate, endDate]);
 
   useEffect(() => {
-    fetchLoans();
-  }, []);
+    if (session?.user?.id) {
+      fetchLoans();
+    }
+  }, [session?.user?.id]);
 
   useEffect(() => {
     filterLoans();
@@ -565,6 +574,13 @@ export default function LoansAndHistoryPage() {
 
           {/* Loans List */}
           <div className="space-y-6">
+            {/* Debug Info */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm">Debug: Total loans: {loans.length}, Filtered: {filteredLoans.length}, Status: {status}, User ID: {session?.user?.id}</p>
+              </div>
+            )}
+            
             {filteredLoans.length === 0 ? (
               <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                 <FaBox className="mx-auto text-gray-300 text-6xl mb-4" />
@@ -610,7 +626,7 @@ export default function LoansAndHistoryPage() {
                       </div>
                       <div className="text-sm text-gray-500 font-kanit space-y-1">
                         <p>วันที่ยื่นคำขอ: {formatDate(loan.createdAt)}</p>
-                        <p>กำหนดคืน: {formatDate(loan.dueAt)}</p>
+                        <p>กำหนดคืน: {loan.dueAt ? formatDate(loan.dueAt) : 'ไม่ระบุ'}</p>
                         {loan.borrowedAt && (
                           <p>วันที่อนุมัติ: {formatDate(loan.borrowedAt)}</p>
                         )}
