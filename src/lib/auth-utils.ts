@@ -3,6 +3,13 @@ import { NextResponse } from "next/server";
 
 export async function getCurrentUser() {
   const session = await auth();
+  console.log('auth-utils: Session data:', session ? {
+    user: session.user ? {
+      id: session.user.id,
+      email: session.user.email,
+      role: session.user.role
+    } : 'null'
+  } : 'null');
   return session?.user;
 }
 

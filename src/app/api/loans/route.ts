@@ -64,16 +64,35 @@ export async function GET() {
 // POST /api/loans - สร้างคำขอยืมใหม่
 export async function POST(request: NextRequest) {
   try {
+    console.log('API: Creating new loan request...');
     const user = await getCurrentUser();
+    console.log('API: Current user for loan creation:', user ? { id: user.id, email: user.email, role: user.role } : 'null');
     
     if (!user) {
+      console.log('API: No user found for loan creation');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
+    // ตรวจสอบว่า user มีอยู่ใน database จริงหรือไม่
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id }
+    });
+    
+    if (!dbUser) {
+      console.log('API: User not found in database:', user.id);
+      return NextResponse.json(
+        { error: 'User not found in database' },
+        { status: 404 }
+      );
+    }
+    
+    console.log('API: User verified in database:', { id: dbUser.id, email: dbUser.email });
+
     const body = await request.json();
+    console.log('API: Request body:', body);
     const { assetId, quantity, borrowDate, dueAt, costCenter, note } = body;
 
     // Validation

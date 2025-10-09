@@ -672,42 +672,50 @@ async function main() {
 
   // Create assets from JSON data
   console.log('Creating assets from JSON data...');
-  let createdCount = 0;
   
-  for (const item of assetData) {
-    try {
-      const assetCode = item['รหัสครุภัณฑ์'] && item['รหัสครุภัณฑ์'] !== 'nan' ? item['รหัสครุภัณฑ์'] : null;
-      const gfmisCode = item['รหัสสินทรัพย์(GFMIS)#S. No.'] && !item['รหัสสินทรัพย์(GFMIS)#S. No.'].startsWith('#') && item['รหัสสินทรัพย์(GFMIS)#S. No.'] !== 'nan' 
-        ? item['รหัสสินทรัพย์(GFMIS)#S. No.'] 
-        : `ASSET-${item['ลำดับ']}-${Date.now()}`;
+  // Check if assets already exist
+  const existingAssetCount = await prisma.asset.count();
+  if (existingAssetCount >= 65) {
+    console.log(`Assets already exist (${existingAssetCount}). Skipping JSON data import.`);
+  } else {
+    let createdCount = 0;
+    
+    for (const item of assetData) {
+      try {
+        const assetCode = item['รหัสครุภัณฑ์'] && item['รหัสครุภัณฑ์'] !== 'nan' ? item['รหัสครุภัณฑ์'] : null;
+        const gfmisCode = item['รหัสสินทรัพย์(GFMIS)#S. No.'] && !item['รหัสสินทรัพย์(GFMIS)#S. No.'].startsWith('#') && item['รหัสสินทรัพย์(GFMIS)#S. No.'] !== 'nan' 
+          ? item['รหัสสินทรัพย์(GFMIS)#S. No.'] 
+          : `ASSET-${item['ลำดับ']}-SEED`;
 
-      const price = parseFloat(item['ราคา']) || 0;
-      const accountingDate = convertBuddhistToGregorian(item['วันที่ลงบัญชี']);
-      
-      await prisma.asset.upsert({
-        where: { code: gfmisCode },
-        update: {},
-        create: {
-          code: gfmisCode,
-          name: item['ชื่อทรัพย์สิน'],
-          assetCode: assetCode,
-          category: categorizeAsset(item['ชื่อทรัพย์สิน']),
-          location: determineLocation(item['ศูนย์ต้นทุน']),
-          costCenter: item['ศูนย์ต้นทุน'],
-          price: price,
-          accountingDate: accountingDate,
-          status: 'AVAILABLE',
-        },
-      });
-      
-      createdCount++;
-      
-      if (createdCount % 10 === 0) {
-        console.log(`Created ${createdCount} assets...`);
+        const price = parseFloat(item['ราคา']) || 0;
+        const accountingDate = convertBuddhistToGregorian(item['วันที่ลงบัญชี']);
+        
+        await prisma.asset.upsert({
+          where: { code: gfmisCode },
+          update: {},
+          create: {
+            code: gfmisCode,
+            name: item['ชื่อทรัพย์สิน'],
+            assetCode: assetCode,
+            category: categorizeAsset(item['ชื่อทรัพย์สิน']),
+            location: determineLocation(item['ศูนย์ต้นทุน']),
+            costCenter: item['ศูนย์ต้นทุน'],
+            price: price,
+            accountingDate: accountingDate,
+            status: 'AVAILABLE',
+          },
+        });
+        
+        createdCount++;
+        
+        if (createdCount % 10 === 0) {
+          console.log(`Created ${createdCount} assets...`);
+        }
+      } catch (error) {
+        console.error(`Error creating asset ${item['ลำดับ']}:`, error);
       }
-    } catch (error) {
-      console.error(`Error creating asset ${item['ลำดับ']}:`, error);
     }
+    console.log(`Created ${createdCount} assets from JSON data`);
   }
 
   // Create sample assets for testing
@@ -779,7 +787,6 @@ async function main() {
     }),
   ]);
 
-  console.log(`Created ${createdCount} assets from JSON data`);
   console.log('Created sample assets:', sampleAssets.length);
 
   console.log('Seeding finished.');
