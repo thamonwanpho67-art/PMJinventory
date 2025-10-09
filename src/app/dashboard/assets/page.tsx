@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
+import Image from 'next/image';
 import { FaSearch, FaFilter, FaBox, FaExclamationTriangle, FaCheckCircle, FaEye, FaClipboard } from 'react-icons/fa';
 import Link from 'next/link';
 import LayoutWrapper from '@/components/LayoutWrapper';
@@ -13,6 +14,7 @@ interface Asset {
   name: string;
   description: string | null;
   quantity: number;
+  imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -279,6 +281,23 @@ export default function UserAssetsPage() {
             ) : (
               filteredAssets.map((asset) => (
                 <div key={asset.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+                  {/* Asset Image */}
+                  {asset.imageUrl && (
+                    <div className="h-48 bg-gray-100 flex items-center justify-center relative">
+                      <Image 
+                        src={`${asset.imageUrl}?t=${Date.now()}`} 
+                        alt={asset.name}
+                        fill
+                        className="object-contain"
+                        onError={(e) => {
+                          // Fallback to a default image if loading fails
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/images/default-asset.png';
+                        }}
+                      />
+                    </div>
+                  )}
+                  
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -349,7 +368,23 @@ export default function UserAssetsPage() {
         {/* Detail Modal */}
         {showDetailModal && selectedAsset && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-8 max-w-lg w-full mx-4">
+            <div className="bg-white rounded-xl p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+              {/* Asset Image in Modal */}
+              {selectedAsset.imageUrl && (
+                <div className="h-48 bg-gray-100 flex items-center justify-center relative rounded-lg mb-6">
+                  <Image 
+                    src={`${selectedAsset.imageUrl}?t=${Date.now()}`} 
+                    alt={selectedAsset.name}
+                    fill
+                    className="object-contain rounded-lg"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/images/default-asset.png';
+                    }}
+                  />
+                </div>
+              )}
+              
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
                   <FaBox className="text-white text-2xl" />
