@@ -574,13 +574,6 @@ export default function LoansAndHistoryPage() {
 
           {/* Loans List */}
           <div className="space-y-6">
-            {/* Debug Info */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-sm">Debug: Total loans: {loans.length}, Filtered: {filteredLoans.length}, Status: {status}, User ID: {session?.user?.id}</p>
-              </div>
-            )}
-            
             {filteredLoans.length === 0 ? (
               <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                 <FaBox className="mx-auto text-gray-300 text-6xl mb-4" />

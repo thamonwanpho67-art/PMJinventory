@@ -34,6 +34,7 @@ type Loan = {
     email: string;
     phone?: string | null;
     role: string;
+    department?: string | null;
     createdAt?: string;
   };
 };
@@ -158,7 +159,8 @@ export default function AdminLoansPage() {
       loan.asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan.asset.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      loan.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.user.department?.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesStatus && matchesSearch;
   });
@@ -311,7 +313,7 @@ export default function AdminLoansPage() {
                                 onClick={() => handleUserClick(loan.user)}
                                 className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer font-medium"
                               >
-                                ผู้ยืม: {loan.user.name || loan.user.email}
+                                ผู้ยืม: {loan.user.department || loan.user.name || loan.user.email}
                               </button>
                             </div>
                           </div>
@@ -493,8 +495,16 @@ export default function AdminLoansPage() {
                     <div className="flex items-start space-x-3">
                       <FaUser className="text-green-600 mt-1 flex-shrink-0" />
                       <div>
+                        <p className="text-sm text-green-600 font-medium">หน่วยงาน/แผนก</p>
+                        <p className="text-gray-900 font-semibold">{selectedLoan.user.department || 'ไม่ระบุหน่วยงาน'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3">
+                      <FaUser className="text-green-600 mt-1 flex-shrink-0" />
+                      <div>
                         <p className="text-sm text-green-600 font-medium">ชื่อผู้ยืม</p>
-                        <p className="text-gray-900 font-semibold">{selectedLoan.user.name || 'ไม่ระบุชื่อ'}</p>
+                        <p className="text-gray-900">{selectedLoan.user.name || 'ไม่ระบุชื่อ'}</p>
                       </div>
                     </div>
 
@@ -708,7 +718,10 @@ export default function AdminLoansPage() {
                   <h4 className="text-xl font-bold text-gray-900 font-kanit">
                     {selectedUser.name || 'ไม่ระบุชื่อ'}
                   </h4>
-                  <p className="text-pink-600 font-medium capitalize">
+                  <p className="text-pink-600 font-medium">
+                    {selectedUser.department || 'ไม่ระบุหน่วยงาน'}
+                  </p>
+                  <p className="text-gray-500 text-sm capitalize">
                     {selectedUser.role?.toLowerCase() === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งานทั่วไป'}
                   </p>
                 </div>
