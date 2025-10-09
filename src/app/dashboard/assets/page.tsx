@@ -150,7 +150,7 @@ export default function UserAssetsPage() {
                 <div>
                   <p className="text-sm text-gray-600 font-kanit">ทั้งหมด</p>
                   <p className="text-2xl font-bold text-gray-900 font-kanit">
-                    {assets.length}
+                    {Array.isArray(assets) ? assets.length : 0}
                   </p>
                 </div>
               </div>
@@ -162,7 +162,7 @@ export default function UserAssetsPage() {
                 <div>
                   <p className="text-sm text-gray-600 font-kanit">พร้อมใช้</p>
                   <p className="text-2xl font-bold text-gray-900 font-kanit">
-                    {assets.filter(asset => asset.quantity > 5).length}
+                    {Array.isArray(assets) ? assets.filter(asset => asset.quantity > 5).length : 0}
                   </p>
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function UserAssetsPage() {
                 <div>
                   <p className="text-sm text-gray-600 font-kanit">เหลือน้อย</p>
                   <p className="text-2xl font-bold text-gray-900 font-kanit">
-                    {assets.filter(asset => asset.quantity > 0 && asset.quantity <= 5).length}
+                    {Array.isArray(assets) ? assets.filter(asset => asset.quantity > 0 && asset.quantity <= 5).length : 0}
                   </p>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export default function UserAssetsPage() {
                 <div>
                   <p className="text-sm text-gray-600 font-kanit">หมดสต็อก</p>
                   <p className="text-2xl font-bold text-gray-900 font-kanit">
-                    {assets.filter(asset => asset.quantity === 0).length}
+                    {Array.isArray(assets) ? assets.filter(asset => asset.quantity === 0).length : 0}
                   </p>
                 </div>
               </div>
@@ -260,7 +260,7 @@ export default function UserAssetsPage() {
             </div>
 
             <div className="mt-4 text-sm text-gray-600 font-kanit">
-              แสดงผล {filteredAssets.length} รายการจากทั้งหมด {assets.length} รายการ
+              แสดงผล {filteredAssets.length} รายการจากทั้งหมด {Array.isArray(assets) ? assets.length : 0} รายการ
             </div>
           </div>
 

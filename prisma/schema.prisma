@@ -29,15 +29,15 @@ model Asset {
   description    String?
   category       String?
   location       String?
-  assetCode      String?
-  costCenter     String?
-  price          Float?
   status         AssetStatus @default(AVAILABLE)
   imageUrl       String?
-  accountingDate DateTime?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   quantity       Int         @default(1)
+  assetCode      String?
+  costCenter     String?
+  price          Float?
+  accountingDate DateTime?
   loans          Loan[]
 }
 
@@ -46,15 +46,15 @@ model Loan {
   assetId    String
   userId     String
   status     LoanStatus @default(PENDING)
-  borrowDate DateTime   @default(now())
   borrowedAt DateTime?
   dueAt      DateTime?
   returnedAt DateTime?
-  costCenter String?
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-  note       String?
   quantity   Int        @default(1)
+  borrowDate DateTime   @default(now())
+  costCenter String?
+  note       String?
   asset      Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
