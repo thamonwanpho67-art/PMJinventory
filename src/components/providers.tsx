@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import ChunkErrorHandler from './ChunkErrorHandler';
 import AuthErrorHandler from './AuthErrorHandler';
+import ServiceWorkerSetup from './ServiceWorkerSetup';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [isClient, setIsClient] = useState(false);
@@ -44,10 +45,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider 
       basePath="/api/auth"
-      refetchInterval={30} // Refetch every 30 seconds instead of 0
+      refetchInterval={5 * 60} // Refetch every 5 minutes
       refetchOnWindowFocus={false}
       refetchWhenOffline={false}
     >
+      <ServiceWorkerSetup />
       <AuthErrorHandler />
       <ChunkErrorHandler />
       {children}

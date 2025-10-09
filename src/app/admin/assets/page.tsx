@@ -434,7 +434,7 @@ export default function AdminAssetsPage() {
                 {asset.imageUrl ? (
                   <div className="h-48 bg-gray-100 overflow-hidden">
                     <img 
-                      src={asset.imageUrl} 
+                      src={`${asset.imageUrl}${asset.imageUrl.includes('?') ? '&' : '?'}v=${Date.now()}`} 
                       alt={asset.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {

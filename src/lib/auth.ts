@@ -25,8 +25,12 @@ const authConfig = {
         sameSite: "lax" as const,
         path: "/",
         secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
       },
     },
+  },
+  experimental: {
+    enableWebAuthn: false,
   },
   providers: [
     CredentialsProvider({
@@ -91,7 +95,8 @@ const authConfig = {
         return token;
       } catch (error) {
         console.error("JWT callback error:", error);
-        return token;
+        // Return a minimal token to prevent auth failure
+        return token || {};
       }
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,7 +113,15 @@ const authConfig = {
         };
       } catch (error) {
         console.error("Session callback error:", error);
-        return session;
+        // Return session with minimal user data to prevent failure
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: token?.id || 'unknown',
+            role: token?.role || 'USER',
+          },
+        };
       }
     },
   },

@@ -23,6 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script src="/auth-error-prevention.js" />
+      </head>
       <body
         className={`${kanit.variable} font-kanit antialiased bg-gradient-to-br from-pink-50 to-rose-50`}
       >
