@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { FaQrcode, FaArrowLeft, FaBox, FaSearch, FaCheckCircle, FaTimes, FaSpinner, FaPlus, FaMinus } from 'react-icons/fa';
-import QRScanner from '@/components/QRScanner';
+import QRScannerWrapper from '@/components/QRScannerWrapper';
 import AssetDetailModal from '@/components/AssetDetailModal';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -424,7 +424,7 @@ export default function InventoryCheckPage() {
         )}
 
         {/* QR Scanner Modal */}
-        <QRScanner
+        <QRScannerWrapper
           isOpen={showScanner}
           onClose={() => setShowScanner(false)}
           onScanResult={handleScanResult}

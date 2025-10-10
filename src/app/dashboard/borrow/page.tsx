@@ -8,7 +8,7 @@ import ClientOnly from '@/components/ClientOnly';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import AssetList from '@/components/AssetList';
 import BorrowForm from '@/components/BorrowForm';
-import QRScanner from '@/components/QRScanner';
+import QRScannerWrapper from '@/components/QRScannerWrapper';
 import AssetDetailModal from '@/components/AssetDetailModal';
 import { FaStar, FaClipboardList, FaQrcode } from 'react-icons/fa';
 
@@ -171,12 +171,13 @@ export default function BorrowPage() {
       {/* QR Scanner Modal */}
       <ClientOnly>
         {showScanner && (
-          <QRScanner
+          <QRScannerWrapper
             onScanResult={handleScanResult}
-            onError={(error) => console.error('QR Scan Error:', error)}
+            onError={(error: string) => console.error('QR Scan Error:', error)}
             onClose={() => setShowScanner(false)}
             title="สแกนรหัส QR ครุภัณฑ์"
             description="วาง QR Code ของครุภัณฑ์ในกรอบเพื่อดูรายละเอียด"
+            isOpen={showScanner}
           />
         )}
       </ClientOnly>

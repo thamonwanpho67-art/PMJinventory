@@ -1,8 +1,19 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
-import { FaQrcode, FaTimes, FaCamera, FaUpload } from 'react-icons/fa';
+import dynamic from 'next/dynamic';
+import { FaQrcode, FaTimes, FaCamera, FaSpinner } from 'react-icons/fa';
+
+// Dynamically import Html5QrcodeScanner to avoid SSR issues
+let Html5QrcodeScanner: any = null;
+let Html5QrcodeScanType: any = null;
+
+if (typeof window !== 'undefined') {
+  import('html5-qrcode').then((module) => {
+    Html5QrcodeScanner = module.Html5QrcodeScanner;
+    Html5QrcodeScanType = module.Html5QrcodeScanType;
+  });
+}
 
 interface QRScannerProps {
   onScan?: (result: string) => void;
@@ -25,7 +36,8 @@ export default function QRScanner({
 }: QRScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string>('');
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
+  const scannerRef = useRef<any>(null);
   const scannerElementId = 'qr-scanner';
 
   // ตรวจสอบความเข้ากันได้ของเบราว์เซอร์
@@ -47,14 +59,36 @@ export default function QRScanner({
   };
 
   useEffect(() => {
-    startScanner();
+    // Load library only on client side
+    if (typeof window !== 'undefined' && !isLibraryLoaded) {
+      import('html5-qrcode').then((module) => {
+        Html5QrcodeScanner = module.Html5QrcodeScanner;
+        Html5QrcodeScanType = module.Html5QrcodeScanType;
+        setIsLibraryLoaded(true);
+      }).catch((err) => {
+        console.error('Failed to load QR scanner library:', err);
+        setError('ไม่สามารถโหลด QR Scanner ได้');
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLibraryLoaded && Html5QrcodeScanner) {
+      startScanner();
+    }
     
     return () => {
       stopScanner();
     };
-  }, []);
+  }, [isLibraryLoaded]);
 
   const startScanner = async () => {
+    if (!Html5QrcodeScanner || !Html5QrcodeScanType) {
+      setError('QR Scanner ยังไม่พร้อมใช้งาน กรุณารอสักครู่');
+      setIsScanning(false);
+      return;
+    }
+
     try {
       setError('');
       setIsScanning(true);
@@ -173,7 +207,12 @@ export default function QRScanner({
 
         {/* Scanner Content */}
         <div className="p-4">
-          {error ? (
+          {!isLibraryLoaded ? (
+            <div className="text-center py-8">
+              <FaSpinner className="text-4xl text-pink-600 mx-auto mb-4 animate-spin" />
+              <p className="text-pink-600 font-kanit">กำลังโหลด QR Scanner...</p>
+            </div>
+          ) : error ? (
             <div className="text-center py-8">
               <FaCamera className="text-4xl text-gray-300 mx-auto mb-4" />
               <p className="text-red-600 font-kanit mb-4">{error}</p>
