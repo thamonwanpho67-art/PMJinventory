@@ -97,10 +97,10 @@ export default function UserSuppliesPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto"></div>
-          <p className="text-green-600 mt-4 font-kanit text-lg">กำลังโหลดข้อมูล...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="text-pink-600 mt-4 font-kanit text-lg">กำลังโหลดข้อมูล...</p>
         </div>
       </div>
     );
@@ -136,10 +136,10 @@ export default function UserSuppliesPage() {
   if (loading) {
     return (
       <LayoutWrapper>
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto"></div>
-            <p className="text-green-600 mt-4 font-kanit text-lg">กำลังโหลดข้อมูล...</p>
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-500 mx-auto"></div>
+            <p className="text-pink-600 mt-4 font-kanit text-lg">กำลังโหลดข้อมูล...</p>
           </div>
         </div>
       </LayoutWrapper>
@@ -148,26 +148,26 @@ export default function UserSuppliesPage() {
 
   return (
     <LayoutWrapper>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100">
         <div className="container mx-auto px-6 py-8">
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 font-kanit mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent font-kanit mb-2">
               📋 วัสดุสิ้นเปลือง
             </h1>
-            <p className="text-gray-600 font-kanit text-lg">
+            <p className="text-pink-700 font-kanit text-lg">
               ดูวัสดุสิ้นเปลืองทั้งหมดที่พร้อมให้เบิก
             </p>
           </div>
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-400">
+            <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-pink-400">
               <div className="flex items-center">
-                <FaBoxes className="text-blue-500 text-2xl mr-3" />
+                <FaBoxes className="text-pink-500 text-2xl mr-3" />
                 <div>
-                  <p className="text-sm text-gray-600 font-kanit">ทั้งหมด</p>
-                  <p className="text-2xl font-bold text-gray-900 font-kanit">
+                  <p className="text-sm text-pink-600 font-kanit">ทั้งหมด</p>
+                  <p className="text-2xl font-bold text-pink-800 font-kanit">
                     {Array.isArray(supplies) ? supplies.length : 0}
                   </p>
                 </div>
@@ -178,8 +178,8 @@ export default function UserSuppliesPage() {
               <div className="flex items-center">
                 <FaCheckCircle className="text-green-500 text-2xl mr-3" />
                 <div>
-                  <p className="text-sm text-gray-600 font-kanit">พร้อมใช้</p>
-                  <p className="text-2xl font-bold text-gray-900 font-kanit">
+                  <p className="text-sm text-green-600 font-kanit">พร้อมใช้</p>
+                  <p className="text-2xl font-bold text-green-700 font-kanit">
                     {Array.isArray(supplies) ? supplies.filter(supply => supply.quantity > supply.minQuantity).length : 0}
                   </p>
                 </div>
@@ -190,8 +190,8 @@ export default function UserSuppliesPage() {
               <div className="flex items-center">
                 <FaExclamationTriangle className="text-yellow-500 text-2xl mr-3" />
                 <div>
-                  <p className="text-sm text-gray-600 font-kanit">เหลือน้อย</p>
-                  <p className="text-2xl font-bold text-gray-900 font-kanit">
+                  <p className="text-sm text-orange-600 font-kanit">เหลือน้อย</p>
+                  <p className="text-2xl font-bold text-orange-700 font-kanit">
                     {Array.isArray(supplies) ? supplies.filter(supply => supply.quantity > 0 && supply.quantity <= supply.minQuantity).length : 0}
                   </p>
                 </div>
@@ -202,8 +202,8 @@ export default function UserSuppliesPage() {
               <div className="flex items-center">
                 <FaExclamationTriangle className="text-red-500 text-2xl mr-3" />
                 <div>
-                  <p className="text-sm text-gray-600 font-kanit">หมดสต็อก</p>
-                  <p className="text-2xl font-bold text-gray-900 font-kanit">
+                  <p className="text-sm text-red-600 font-kanit">หมดสต็อก</p>
+                  <p className="text-2xl font-bold text-red-700 font-kanit">
                     {Array.isArray(supplies) ? supplies.filter(supply => supply.quantity === 0).length : 0}
                   </p>
                 </div>
@@ -217,13 +217,13 @@ export default function UserSuppliesPage() {
               <div className="flex flex-col sm:flex-row gap-4 flex-1">
                 {/* Search */}
                 <div className="relative flex-1">
-                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
                   <input
                     type="text"
                     placeholder="ค้นหาชื่อวัสดุหรือรหัสวัสดุ..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-20 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-kanit text-black"
+                    className="w-full pl-10 pr-20 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit text-black"
                   />
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
                     {searchTerm && (
@@ -239,7 +239,7 @@ export default function UserSuppliesPage() {
                     )}
                     <button
                       onClick={filterSupplies}
-                      className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-md transition-colors"
+                      className="bg-pink-500 hover:bg-pink-600 text-white p-1.5 rounded-md transition-colors"
                       title="ค้นหา"
                     >
                       <FaSearch className="w-3 h-3" />
@@ -249,11 +249,11 @@ export default function UserSuppliesPage() {
 
                 {/* Category Filter */}
                 <div className="relative">
-                  <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
                   <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-kanit bg-white text-black"
+                    className="pl-10 pr-8 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white text-black"
                   >
                     <option value="ALL">ทุกหมวดหมู่</option>
                     {categories.map(category => (
@@ -264,11 +264,11 @@ export default function UserSuppliesPage() {
 
                 {/* Quantity Filter */}
                 <div className="relative">
-                  <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
                   <select
                     value={quantityFilter}
                     onChange={(e) => setQuantityFilter(e.target.value)}
-                    className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-kanit bg-white text-black"
+                    className="pl-10 pr-8 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-kanit bg-white text-black"
                   >
                     <option value="ALL">ทุกสถานะ</option>
                     <option value="AVAILABLE">พร้อมใช้งาน</option>
@@ -295,9 +295,9 @@ export default function UserSuppliesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {!Array.isArray(filteredSupplies) || filteredSupplies.length === 0 ? (
               <div className="col-span-full bg-white rounded-xl shadow-lg p-12 text-center">
-                <FaBoxes className="mx-auto text-gray-300 text-6xl mb-4" />
-                <p className="text-gray-500 font-kanit text-xl">ไม่พบวัสดุสิ้นเปลือง</p>
-                <p className="text-gray-400 font-kanit">
+                <FaBoxes className="mx-auto text-pink-300 text-6xl mb-4" />
+                <p className="text-pink-600 font-kanit text-xl">ไม่พบวัสดุสิ้นเปลือง</p>
+                <p className="text-pink-400 font-kanit">
                   {searchTerm || categoryFilter !== 'ALL' || quantityFilter !== 'ALL'
                     ? 'ลองเปลี่ยนเงื่อนไขการกรองข้อมูล' 
                     : 'ไม่มีวัสดุสิ้นเปลืองในระบบ'}
@@ -305,10 +305,10 @@ export default function UserSuppliesPage() {
               </div>
             ) : (
               filteredSupplies.map((supply) => (
-                <div key={supply.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+                <div key={supply.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden border border-pink-100 hover:border-pink-200">
                   {/* Supply Image */}
                   {supply.imageUrl && (
-                    <div className="h-48 bg-gray-100 flex items-center justify-center relative">
+                    <div className="h-48 bg-pink-50 flex items-center justify-center relative">
                       <Image 
                         src={`${supply.imageUrl}?t=${Date.now()}`} 
                         alt={supply.name}
@@ -325,17 +325,17 @@ export default function UserSuppliesPage() {
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
                           <FaBoxes className="text-white text-xl" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 font-kanit">
+                          <h3 className="text-lg font-bold text-pink-800 font-kanit">
                             {supply.name}
                           </h3>
-                          <p className="text-sm text-gray-600 font-kanit">
+                          <p className="text-sm text-pink-600 font-kanit">
                             รหัส: {supply.code}
                           </p>
-                          <p className="text-sm text-green-600 font-kanit">
+                          <p className="text-sm text-pink-700 font-kanit">
                             {supply.category}
                           </p>
                         </div>
@@ -343,7 +343,7 @@ export default function UserSuppliesPage() {
 
                       <button
                         onClick={() => openDetailModal(supply)}
-                        className="p-2 text-green-500 hover:bg-green-100 rounded-lg transition-colors"
+                        className="p-2 text-pink-500 hover:bg-pink-100 rounded-lg transition-colors"
                         title="ดูรายละเอียด"
                       >
                         <FaEye />
@@ -366,10 +366,10 @@ export default function UserSuppliesPage() {
                     </div>
 
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-gray-900 font-kanit mb-1">
+                      <p className="text-2xl font-bold text-pink-800 font-kanit mb-1">
                         {supply.quantity} {supply.unit}
                       </p>
-                      <p className="text-sm text-gray-500 font-kanit">
+                      <p className="text-sm text-pink-600 font-kanit">
                         คงเหลือ (ขั้นต่ำ: {supply.minQuantity} {supply.unit})
                       </p>
                     </div>
@@ -377,7 +377,7 @@ export default function UserSuppliesPage() {
                     {supply.quantity > 0 && (
                       <div className="mt-4">
                         <button
-                          className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2"
+                          className="w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-kanit font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2"
                         >
                           <FaClipboard />
                           ยื่นคำขอเบิก
@@ -397,7 +397,7 @@ export default function UserSuppliesPage() {
             <div className="bg-white rounded-xl p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
               {/* Supply Image in Modal */}
               {selectedSupply.imageUrl && (
-                <div className="h-48 bg-gray-100 flex items-center justify-center relative rounded-lg mb-6">
+                <div className="h-48 bg-pink-50 flex items-center justify-center relative rounded-lg mb-6">
                   <Image 
                     src={`${selectedSupply.imageUrl}?t=${Date.now()}`} 
                     alt={selectedSupply.name}
@@ -412,11 +412,11 @@ export default function UserSuppliesPage() {
               )}
               
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-rose-600 rounded-xl flex items-center justify-center">
                   <FaBoxes className="text-white text-2xl" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 font-kanit">
+                  <h2 className="text-2xl font-bold text-pink-800 font-kanit">
                     {selectedSupply.name}
                   </h2>
                   <p className="text-gray-600 font-kanit">
@@ -480,13 +480,13 @@ export default function UserSuppliesPage() {
               <div className="flex gap-4 mt-8">
                 <button
                   onClick={() => setShowDetailModal(false)}
-                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-kanit"
+                  className="flex-1 px-4 py-3 border border-pink-300 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors font-kanit"
                 >
                   ปิด
                 </button>
                 {selectedSupply.quantity > 0 && (
                   <button
-                    className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-colors font-kanit text-center"
+                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white px-4 py-3 rounded-lg hover:from-pink-600 hover:to-rose-700 transition-colors font-kanit text-center"
                   >
                     ยื่นคำขอเบิก
                   </button>
