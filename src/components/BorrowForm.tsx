@@ -2,7 +2,14 @@
 
 import { useState } from 'react';
 import { FaEdit, FaTimes } from 'react-icons/fa';
-import { costCenters } from '@/lib/costCenters';
+
+// รายการแผนก
+const DEPARTMENTS = [
+  'นโยบายและวิชาการ',
+  'การพัฒนาสังคมและสวัสดิการ',
+  'บริหารงานทั่วไป',
+  'ศูนย์บริการคนพิการ'
+];
 
 type Asset = {
   id: string;
@@ -21,7 +28,8 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
   const [quantity, setQuantity] = useState(1);
   const [borrowDate, setBorrowDate] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [costCenter, setCostCenter] = useState('');
+  const [borrowerName, setBorrowerName] = useState('');
+  const [borrowerDepartment, setBorrowerDepartment] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,6 +44,19 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
     setLoading(true);
     setError('');
 
+    // ตรวจสอบข้อมูลที่จำเป็น
+    if (!borrowerName.trim()) {
+      setError('กรุณากรอกชื่อผู้ยืม');
+      setLoading(false);
+      return;
+    }
+
+    if (!borrowerDepartment) {
+      setError('กรุณาเลือกแผนก');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/loans', {
         method: 'POST',
@@ -47,7 +68,8 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
           quantity: parseInt(quantity.toString()),
           borrowDate: borrowDate ? new Date(borrowDate).toISOString() : new Date().toISOString(),
           dueAt: dueDate ? dueDate.trim() : null,
-          costCenter: costCenter || null,
+          borrowerName: borrowerName.trim(),
+          borrowerDepartment: borrowerDepartment,
           note: note.trim() || null,
         }),
       });
@@ -59,7 +81,8 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
         setQuantity(1);
         setBorrowDate('');
         setDueDate('');
-        setCostCenter('');
+        setBorrowerName('');
+        setBorrowerDepartment('');
         setNote('');
       } else {
         const errorData = await response.json();
@@ -118,20 +141,35 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
           </div>
 
           <div>
-            <label htmlFor="costCenter" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
-              ผู้ยืม
+            <label htmlFor="borrowerName" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+              ชื่อผู้ยืม <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="borrowerName"
+              value={borrowerName}
+              onChange={(e) => setBorrowerName(e.target.value)}
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30"
+              placeholder="กรอกชื่อ-นามสกุลผู้ยืม"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="borrowerDepartment" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+              แผนก <span className="text-red-500">*</span>
             </label>
             <select
-              id="costCenter"
-              value={costCenter}
-              onChange={(e) => setCostCenter(e.target.value)}
+              id="borrowerDepartment"
+              value={borrowerDepartment}
+              onChange={(e) => setBorrowerDepartment(e.target.value)}
               className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30"
               required
             >
-              <option value="">เลือกผู้ยืม</option>
-              {costCenters.map((center) => (
-                <option key={center.code} value={center.code}>
-                  {center.name}
+              <option value="">เลือกแผนก</option>
+              {DEPARTMENTS.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
                 </option>
               ))}
             </select>

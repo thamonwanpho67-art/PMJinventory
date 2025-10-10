@@ -166,7 +166,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Action Cards */}
-          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link 
               href="/dashboard/borrow"
               className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -183,31 +183,46 @@ export default function DashboardPage() {
             </Link>
 
             <Link 
-              href="/dashboard/inventory-check"
+              href="/dashboard/supplies"
               className="bg-white rounded-2xl shadow-lg border border-green-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-green-100 to-green-200 rounded-full flex items-center justify-center">
-                  <FaQrcode className="text-green-600 text-xl" />
+                  <FaClipboardList className="text-green-600 text-xl" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-kanit font-bold text-green-800">ตรวจนับครุภัณฑ์</h3>
-                  <p className="text-green-600 text-sm font-kanit">สแกน QR เพื่อตรวจนับ</p>
+                  <h3 className="text-lg font-kanit font-bold text-green-800">วัสดุสิ้นเปลือง</h3>
+                  <p className="text-green-600 text-sm font-kanit">ดูและเบิกวัสดุสิ้นเปลือง</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link 
+              href="/dashboard/inventory-check"
+              className="bg-white rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                  <FaQrcode className="text-purple-600 text-xl" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-kanit font-bold text-purple-800">ตรวจนับครุภัณฑ์</h3>
+                  <p className="text-purple-600 text-sm font-kanit">สแกน QR เพื่อตรวจนับ</p>
                 </div>
               </div>
             </Link>
 
             <Link 
               href="/dashboard/loans-history"
-              className="bg-white rounded-2xl shadow-lg border border-purple-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="bg-white rounded-2xl shadow-lg border border-orange-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
-                  <FaClipboardList className="text-purple-600 text-xl" />
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
+                  <FaClipboardList className="text-orange-600 text-xl" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-kanit font-bold text-purple-800">ประวัติการยืม</h3>
-                  <p className="text-purple-600 text-sm font-kanit">ดูประวัติการยืม-คืน</p>
+                  <h3 className="text-lg font-kanit font-bold text-orange-800">ประวัติการยืม</h3>
+                  <p className="text-orange-600 text-sm font-kanit">ดูประวัติการยืม-คืน</p>
                 </div>
               </div>
             </Link>

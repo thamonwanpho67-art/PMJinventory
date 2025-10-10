@@ -8,7 +8,9 @@ import ClientOnly from '@/components/ClientOnly';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import AssetList from '@/components/AssetList';
 import BorrowForm from '@/components/BorrowForm';
-import { FaStar, FaClipboardList } from 'react-icons/fa';
+import QRScanner from '@/components/QRScanner';
+import AssetDetailModal from '@/components/AssetDetailModal';
+import { FaStar, FaClipboardList, FaQrcode } from 'react-icons/fa';
 
 type Asset = {
   id: string;
@@ -24,6 +26,9 @@ export default function BorrowPage() {
   const { data: session, status } = useSession();
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [showBorrowForm, setShowBorrowForm] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [showAssetDetail, setShowAssetDetail] = useState(false);
+  const [scannedAssetCode, setScannedAssetCode] = useState<string>('');
 
   if (status === 'loading') {
     return <LoadingSpinner fullScreen color="pink" text="กำลังโหลดข้อมูล..." />;
@@ -49,6 +54,24 @@ export default function BorrowPage() {
     // อาจจะเพิ่มการแจ้งเตือนสำเร็จที่นี่
   };
 
+  const handleScanResult = (qrData: string) => {
+    console.log('QR Scanned:', qrData);
+    setScannedAssetCode(qrData);
+    setShowScanner(false);
+    setShowAssetDetail(true);
+  };
+
+  const handleCloseAssetDetail = () => {
+    setShowAssetDetail(false);
+    setScannedAssetCode('');
+  };
+
+  const handleBorrowFromDetail = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setShowAssetDetail(false);
+    setShowBorrowForm(true);
+  };
+
   return (
     <LayoutWrapper>
       <div className="p-6 space-y-8">
@@ -59,9 +82,18 @@ export default function BorrowPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent font-kanit mb-4">
               ยืมครุภัณฑ์
             </h1>
-            <p className="text-lg text-pink-700 font-medium max-w-2xl mx-auto">
+            <p className="text-lg text-pink-700 font-medium max-w-2xl mx-auto mb-6">
               เลือกครุภัณฑ์ที่ต้องการยืมและกรอกข้อมูลการยืม ระบบจะส่งคำขออนุมัติให้ผู้ดูแลระบบ
             </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setShowScanner(true)}
+                className="bg-gradient-to-r from-pink-600 to-rose-600 text-white px-6 py-3 rounded-xl font-kanit font-medium hover:from-pink-700 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+              >
+                <FaQrcode className="text-lg" />
+                <span>สแกน QR Code</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -133,6 +165,30 @@ export default function BorrowPage() {
           selectedAsset={selectedAsset}
           onClose={handleCloseBorrowForm}
           onSuccess={handleBorrowSuccess}
+        />
+      )}
+
+      {/* QR Scanner Modal */}
+      <ClientOnly>
+        {showScanner && (
+          <QRScanner
+            onScanResult={handleScanResult}
+            onError={(error) => console.error('QR Scan Error:', error)}
+            onClose={() => setShowScanner(false)}
+            title="สแกนรหัส QR ครุภัณฑ์"
+            description="วาง QR Code ของครุภัณฑ์ในกรอบเพื่อดูรายละเอียด"
+          />
+        )}
+      </ClientOnly>
+
+      {/* Asset Detail Modal */}
+      {showAssetDetail && (
+        <AssetDetailModal
+          assetCode={scannedAssetCode}
+          isOpen={showAssetDetail}
+          onClose={handleCloseAssetDetail}
+          onBorrow={handleBorrowFromDetail}
+          showBorrowButton={true}
         />
       )}
     </LayoutWrapper>

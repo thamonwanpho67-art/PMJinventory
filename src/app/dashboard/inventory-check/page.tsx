@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { FaQrcode, FaArrowLeft, FaBox, FaSearch, FaCheckCircle, FaTimes, FaSpinner, FaPlus, FaMinus } from 'react-icons/fa';
 import QRScanner from '@/components/QRScanner';
+import AssetDetailModal from '@/components/AssetDetailModal';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -36,6 +37,8 @@ export default function InventoryCheckPage() {
   const [currentAsset, setCurrentAsset] = useState<AssetData | null>(null);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAssetDetail, setShowAssetDetail] = useState(false);
+  const [selectedAssetCode, setSelectedAssetCode] = useState<string>('');
 
   if (status === 'loading') {
     return <LoadingSpinner fullScreen color="pink" text="กำลังโหลดข้อมูล..." />;
@@ -48,20 +51,15 @@ export default function InventoryCheckPage() {
   const handleScanResult = async (qrData: string) => {
     setLoading(true);
     setError('');
+    setShowScanner(false);
 
     try {
-      const response = await fetch('/api/qr/scan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ qrData }),
-      });
-
+      // ใช้ API ค้นหาครุภัณฑ์ด้วยรหัส
+      const response = await fetch(`/api/assets/code/${encodeURIComponent(qrData)}`);
       const data = await response.json();
 
       if (data.success) {
-        const asset = data.asset;
+        const asset = data.data;
         setCurrentAsset(asset);
         
         // อัปเดต inventory list
@@ -69,42 +67,37 @@ export default function InventoryCheckPage() {
           const existingIndex = prev.findIndex(item => item.assetId === asset.id);
           
           if (existingIndex >= 0) {
-            // อัปเดตรายการที่มีอยู่
+            // ถ้ามีอยู่แล้ว เพิ่มจำนวน
             const updated = [...prev];
-            updated[existingIndex].scannedQuantity += 1;
-            
-            // อัปเดตสถานะ
-            const item = updated[existingIndex];
-            if (item.scannedQuantity === item.expectedQuantity) {
-              item.status = 'checked';
-            } else if (item.scannedQuantity > item.expectedQuantity) {
-              item.status = 'over';
-            } else {
-              item.status = 'under';
-            }
-            
+            updated[existingIndex] = {
+              ...updated[existingIndex],
+              scannedQuantity: updated[existingIndex].scannedQuantity + 1,
+              status: updated[existingIndex].scannedQuantity + 1 === updated[existingIndex].expectedQuantity 
+                ? 'checked' 
+                : updated[existingIndex].scannedQuantity + 1 > updated[existingIndex].expectedQuantity 
+                ? 'over' 
+                : 'under'
+            };
             return updated;
           } else {
-            // เพิ่มรายการใหม่
+            // ถ้ายังไม่มี เพิ่มใหม่
             const newItem: InventoryCheck = {
               assetId: asset.id,
               assetName: asset.name,
               assetCode: asset.code,
               scannedQuantity: 1,
               expectedQuantity: asset.quantity,
-              status: asset.quantity === 1 ? 'checked' : 'under'
+              status: 1 === asset.quantity ? 'checked' : 1 > asset.quantity ? 'over' : 'under'
             };
-            
             return [...prev, newItem];
           }
         });
-        
-        setShowScanner(false);
       } else {
-        setError(data.error || 'ไม่สามารถอ่าน QR Code ได้');
+        setError(data.error || 'ไม่พบครุภัณฑ์ที่มีรหัสนี้');
       }
-    } catch (err) {
-      setError('เกิดข้อผิดพลาดในการตรวจสอบ QR Code');
+    } catch (error) {
+      console.error('Error scanning QR code:', error);
+      setError('เกิดข้อผิดพลาดในการสแกน QR Code');
     } finally {
       setLoading(false);
     }
@@ -138,6 +131,16 @@ export default function InventoryCheckPage() {
 
   const removeItem = (assetId: string) => {
     setInventoryList(prev => prev.filter(item => item.assetId !== assetId));
+  };
+
+  const handleViewAssetDetail = (assetCode: string) => {
+    setSelectedAssetCode(assetCode);
+    setShowAssetDetail(true);
+  };
+
+  const handleCloseAssetDetail = () => {
+    setShowAssetDetail(false);
+    setSelectedAssetCode('');
   };
 
   const getStatusColor = (status: string) => {
@@ -336,6 +339,14 @@ export default function InventoryCheckPage() {
                     
                     <div className="flex items-center space-x-2">
                       <button
+                        onClick={() => handleViewAssetDetail(item.assetCode)}
+                        className="p-2 text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
+                        title="ดูรายละเอียด"
+                      >
+                        <FaBox />
+                      </button>
+                      
+                      <button
                         onClick={() => adjustQuantity(item.assetId, -1)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         disabled={item.scannedQuantity === 0}
@@ -420,6 +431,16 @@ export default function InventoryCheckPage() {
           title="สแกน QR Code ครุภัณฑ์"
           description="นำกล้องไปส่องที่ QR Code บนครุภัณฑ์ที่ต้องการตรวจนับ"
         />
+
+        {/* Asset Detail Modal */}
+        {showAssetDetail && (
+          <AssetDetailModal
+            assetCode={selectedAssetCode}
+            isOpen={showAssetDetail}
+            onClose={handleCloseAssetDetail}
+            showBorrowButton={false}
+          />
+        )}
       </div>
     </LayoutWrapper>
   );
