@@ -134,11 +134,11 @@ export default function QRScanner({
         scannerElementId,
         {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
+          qrbox: { width: 200, height: 200 },
           aspectRatio: 1.0,
           supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
           showTorchButtonIfSupported: true,
-          showZoomSliderIfSupported: true,
+          showZoomSliderIfSupported: false, // ปิดเพื่อประหยัดพื้นที่
           defaultZoomValueIfSupported: 2,
           // ปรับการตั้งค่าสำหรับมือถือ
           rememberLastUsedCamera: true,
@@ -221,56 +221,55 @@ export default function QRScanner({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full mx-auto shadow-2xl">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2">
+      <div className="bg-white rounded-lg max-w-sm w-full mx-auto shadow-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <FaQrcode className="text-2xl text-pink-600" />
+        <div className="flex items-center justify-between p-3 border-b border-gray-200">
+          <div className="flex items-center space-x-2">
+            <FaQrcode className="text-lg text-pink-600" />
             <div>
-              <h3 className="text-lg font-kanit font-bold text-gray-900">{title}</h3>
-              <p className="text-sm text-gray-600 font-kanit">{description}</p>
+              <h3 className="text-base font-kanit font-bold text-gray-900">{title}</h3>
+              <p className="text-xs text-gray-600 font-kanit">{description}</p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <FaTimes className="text-xl" />
+            <FaTimes className="text-lg" />
           </button>
         </div>
 
         {/* Scanner Content */}
-        <div className="p-4">
+        <div className="p-3 overflow-y-auto max-h-[70vh]">
           {!isLibraryLoaded ? (
-            <div className="text-center py-8">
-              <FaSpinner className="text-4xl text-pink-600 mx-auto mb-4 animate-spin" />
-              <p className="text-pink-600 font-kanit">กำลังโหลด QR Scanner...</p>
+            <div className="text-center py-6">
+              <FaSpinner className="text-3xl text-pink-600 mx-auto mb-3 animate-spin" />
+              <p className="text-pink-600 font-kanit text-sm">กำลังโหลด QR Scanner...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-8">
-              <FaCamera className="text-4xl text-gray-300 mx-auto mb-4" />
-              <p className="text-red-600 font-kanit mb-4">{error}</p>
-              <div className="space-y-3">
+            <div className="text-center py-6">
+              <FaCamera className="text-3xl text-gray-300 mx-auto mb-3" />
+              <p className="text-red-600 font-kanit mb-3 text-sm">{error}</p>
+              <div className="space-y-2">
                 <button
                   onClick={startScanner}
-                  className="w-full px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors font-kanit"
+                  className="w-full px-3 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors font-kanit text-sm"
                 >
                   ลองใหม่อีกครั้ง
                 </button>
                 <button
                   onClick={() => window.location.reload()}
-                  className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-kanit"
+                  className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-kanit text-sm"
                 >
                   รีเฟรชหน้า
                 </button>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-sm text-yellow-800 font-kanit mb-2">💡 คำแนะนำ:</p>
-                  <ul className="text-xs text-yellow-700 font-kanit space-y-1 text-left">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                  <p className="text-xs text-yellow-800 font-kanit mb-1">💡 คำแนะนำ:</p>
+                  <ul className="text-xs text-yellow-700 font-kanit space-y-0.5 text-left">
                     <li>• อนุญาตการใช้งานกล้องในเบราว์เซอร์</li>
                     <li>• ตรวจสอบว่าไม่มีแอปอื่นใช้กล้องอยู่</li>
                     <li>• ลองเปิดใน Chrome หรือ Safari</li>
-                    <li>• ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</li>
                     <li>• กดปุ่ม "Allow" เมื่อขออนุญาตกล้อง</li>
                   </ul>
                 </div>
@@ -282,17 +281,17 @@ export default function QRScanner({
               <div id={scannerElementId} className="w-full"></div>
               
               {isScanning && (
-                <div className="text-center mt-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-2"></div>
-                  <p className="text-sm text-gray-600 font-kanit mb-2">
+                <div className="text-center mt-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-600 mx-auto mb-2"></div>
+                  <p className="text-xs text-gray-600 font-kanit mb-1">
                     กำลังเริ่มกล้อง...
                   </p>
-                  <div className="flex items-center justify-center space-x-2 text-pink-600">
-                    <FaQrcode className="animate-pulse" />
-                    <span className="text-sm font-kanit">เตรียมพร้อม</span>
+                  <div className="flex items-center justify-center space-x-1 text-pink-600">
+                    <FaQrcode className="animate-pulse text-sm" />
+                    <span className="text-xs font-kanit">เตรียมพร้อม</span>
                   </div>
-                  <p className="text-xs text-gray-500 font-kanit mt-2">
-                    หากไม่เห็นกล้อง ลองกดปุ่ม "Allow" หรือรีเฟรชหน้า
+                  <p className="text-xs text-gray-500 font-kanit mt-1">
+                    หากไม่เห็นกล้อง ลองกดปุ่ม "Allow"
                   </p>
                 </div>
               )}
@@ -301,22 +300,22 @@ export default function QRScanner({
         </div>
 
         {/* Footer */}
-        <div className="px-4 pb-4">
-          <div className="bg-pink-50 rounded-lg p-3">
+        <div className="px-3 pb-3">
+          <div className="bg-pink-50 rounded-lg p-2">
             <div className="text-center space-y-2">
-              <div className="flex items-center justify-center space-x-4 text-sm text-pink-600">
+              <div className="flex items-center justify-center space-x-3 text-xs text-pink-600">
                 <div className="flex items-center space-x-1">
-                  <FaCamera className="text-pink-600" />
+                  <FaCamera className="text-pink-600 text-sm" />
                   <span className="font-kanit">กล้อง</span>
                 </div>
-                <div className="w-px h-4 bg-pink-300"></div>
+                <div className="w-px h-3 bg-pink-300"></div>
                 <div className="flex items-center space-x-1">
-                  <FaQrcode className="text-pink-600" />
+                  <FaQrcode className="text-pink-600 text-sm" />
                   <span className="font-kanit">QR Code</span>
                 </div>
               </div>
               <p className="text-xs text-pink-600 font-kanit">
-                📱 สำหรับมือถือ: หันกล้องหลังไปที่ QR Code
+                📱 หันกล้องหลังไปที่ QR Code
               </p>
               {!isScanning && !error && (
                 <button
