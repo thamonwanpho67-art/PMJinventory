@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import AlertService from '@/lib/alert';
+import { DEPARTMENTS } from '@/lib/constants';
 import QRCode from 'react-qr-code';
 import QRScanner from '@/components/QRScanner';
 import { 
@@ -52,6 +53,7 @@ type SupplyFormData = {
   supplier: string;
   location: string;
   imageUrl: string;
+  department: string;
 };
 
 export default function SuppliesPage() {
@@ -77,7 +79,8 @@ export default function SuppliesPage() {
     unitPrice: '',
     supplier: '',
     location: '',
-    imageUrl: ''
+    imageUrl: '',
+    department: ''
   });
 
   const fetchSupplies = useCallback(async () => {
@@ -105,8 +108,8 @@ export default function SuppliesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.category || !formData.unit) {
-      await AlertService.warning('กรุณากรอกข้อมูลที่จำเป็น');
+    if (!formData.name || !formData.category || !formData.unit || !formData.department) {
+      await AlertService.warning('กรุณากรอกข้อมูลที่จำเป็น (ชื่อวัสดุ, หมวดหมู่, หน่วยนับ, และแผนก)');
       return;
     }
 
@@ -150,7 +153,8 @@ export default function SuppliesPage() {
       unitPrice: supply.unitPrice?.toString() || '',
       supplier: supply.supplier || '',
       location: supply.location || '',
-      imageUrl: supply.imageUrl || ''
+      imageUrl: supply.imageUrl || '',
+      department: ''
     });
     setShowModal(true);
   };
@@ -192,7 +196,8 @@ export default function SuppliesPage() {
       unitPrice: '',
       supplier: '',
       location: '',
-      imageUrl: ''
+      imageUrl: '',
+      department: ''
     });
     setEditingSupply(null);
     setShowModal(false);
@@ -624,6 +629,25 @@ export default function SuppliesPage() {
                     className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                     placeholder="เช่น ห้องเก็บของ ชั้น 2"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-kanit font-semibold mb-2">
+                    แผนก/หน่วยงาน *
+                  </label>
+                  <select
+                    value={formData.department}
+                    onChange={(e) => setFormData({...formData, department: e.target.value})}
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900 bg-white"
+                    required
+                  >
+                    <option value="">เลือกแผนก</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
