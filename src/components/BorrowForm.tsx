@@ -96,36 +96,36 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-50">
+      <div className="bg-white rounded-lg max-w-sm w-full p-4 max-h-[95vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-2">
-            <FaEdit className="text-pink-600 text-lg" />
-            <h2 className="text-xl font-kanit font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">ยื่นคำขอยืม</h2>
+            <FaEdit className="text-pink-600 text-base" />
+            <h2 className="text-lg font-kanit font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">ยื่นคำขอยืม</h2>
           </div>
           <button
             onClick={onClose}
             className="text-pink-400 hover:text-pink-600 transition-colors"
           >
-            <FaTimes className="w-6 h-6" />
+            <FaTimes className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="mb-6 p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl border border-pink-200">
-          <h3 className="font-kanit font-semibold text-gray-900">{selectedAsset.name}</h3>
-          <p className="text-sm text-pink-600 font-kanit">รหัส: {selectedAsset.code}</p>
-          <p className="text-sm text-pink-600 font-kanit">จำนวนที่มี: {selectedAsset.quantity} ชิ้น</p>
+        <div className="mb-4 p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border border-pink-200">
+          <h3 className="font-kanit font-semibold text-gray-900 text-sm">{selectedAsset.name}</h3>
+          <p className="text-xs text-pink-600 font-kanit">รหัส: {selectedAsset.code}</p>
+          <p className="text-xs text-pink-600 font-kanit">จำนวนที่มี: {selectedAsset.quantity} ชิ้น</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
+          <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-red-600 text-xs">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label htmlFor="quantity" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+            <label htmlFor="quantity" className="block text-xs font-kanit font-semibold text-pink-700 mb-1">
               จำนวนที่ต้องการยืม
             </label>
             <input
@@ -135,13 +135,13 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
               max={selectedAsset.quantity}
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30"
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30 text-sm"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="borrowerName" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+            <label htmlFor="borrowerName" className="block text-xs font-kanit font-semibold text-pink-700 mb-1">
               ชื่อผู้ยืม <span className="text-red-500">*</span>
             </label>
             <input
@@ -149,21 +149,21 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
               id="borrowerName"
               value={borrowerName}
               onChange={(e) => setBorrowerName(e.target.value)}
-              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30"
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30 text-sm"
               placeholder="กรอกชื่อ-นามสกุลผู้ยืม"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="borrowerDepartment" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+            <label htmlFor="borrowerDepartment" className="block text-xs font-kanit font-semibold text-pink-700 mb-1">
               แผนก <span className="text-red-500">*</span>
             </label>
             <select
               id="borrowerDepartment"
               value={borrowerDepartment}
               onChange={(e) => setBorrowerDepartment(e.target.value)}
-              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30"
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30 text-sm"
               required
             >
               <option value="">เลือกแผนก</option>
@@ -176,7 +176,7 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
           </div>
 
           <div>
-            <label htmlFor="borrowDate" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+            <label htmlFor="borrowDate" className="block text-xs font-kanit font-semibold text-pink-700 mb-1">
               วันที่ยืม
             </label>
             <input
@@ -185,13 +185,13 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
               min={today}
               value={borrowDate}
               onChange={(e) => setBorrowDate(e.target.value)}
-              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-black font-medium bg-pink-50/30"
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-black font-medium bg-pink-50/30 text-sm"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="dueDate" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+            <label htmlFor="dueDate" className="block text-xs font-kanit font-semibold text-pink-700 mb-1">
               กำหนดคืน (ไม่บังคับ)
             </label>
             <input
@@ -199,37 +199,37 @@ export default function BorrowForm({ selectedAsset, onClose, onSuccess }: Borrow
               id="dueDate"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-black font-medium bg-pink-50/30"
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-black font-medium bg-pink-50/30 text-sm"
               placeholder="ระบุวันที่หรือช่วงเวลาที่ต้องการคืน"
             />
           </div>
 
           <div>
-            <label htmlFor="note" className="block text-sm font-kanit font-semibold text-pink-700 mb-1">
+            <label htmlFor="note" className="block text-xs font-kanit font-semibold text-pink-700 mb-1">
               หมายเหตุ (ไม่บังคับ)
             </label>
             <textarea
               id="note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30 placeholder-pink-400"
+              rows={2}
+              className="w-full px-3 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 font-medium bg-pink-50/30 placeholder-pink-400 text-sm"
               placeholder="วัตถุประสงค์การใช้งาน..."
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 pt-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-colors font-kanit font-medium"
+              className="flex-1 px-3 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors font-kanit font-medium text-sm"
             >
               ยกเลิก
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 disabled:opacity-50 transition-colors font-kanit font-medium"
+              className="flex-1 px-3 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg hover:from-pink-600 hover:to-rose-600 disabled:opacity-50 transition-colors font-kanit font-medium text-sm"
             >
               {loading ? 'กำลังส่ง...' : 'ส่งคำขอ'}
             </button>
