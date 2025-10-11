@@ -3,9 +3,10 @@ import { auth } from '@/lib/auth';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     
     if (!session || session.user?.role !== 'ADMIN') {
@@ -20,7 +21,7 @@ export async function POST(
 
     // @ts-ignore - Prisma client will be regenerated
     const supplyRequest = await prisma.supplyRequest.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         user: true,
         supply: true
@@ -52,7 +53,7 @@ export async function POST(
     // อัปเดตสถานะคำขอเป็น APPROVED
     // @ts-ignore - Prisma client will be regenerated
     const updatedRequest = await prisma.supplyRequest.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         status: 'APPROVED',
         approvedBy: session.user.id,
@@ -94,7 +95,7 @@ export async function POST(
         title: 'คำขอวัสดุสิ้นเปลืองได้รับการอนุมัติ',
         message: `คำขอวัสดุสิ้นเปลืองของคุณได้รับการอนุมัติแล้ว\nจำนวน: ${supplyRequest.quantity} ${supplyRequest.supply.unit}`,
         type: 'SYSTEM',
-        relatedId: params.id,
+        relatedId: id,
         relatedType: 'supply_request'
       }
     });
