@@ -313,7 +313,7 @@ export default function DashboardPage() {
                       onError={(e) => {
                         // Fallback to a default image if loading fails
                         const target = e.target as HTMLImageElement;
-                        target.src = '/images/default-asset.png';
+                        target.src = '/images/default-asset.svg';
                       }}
                     />
                   </div>

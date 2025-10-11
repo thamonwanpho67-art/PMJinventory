@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "prisma generate && next build",
   "framework": "nextjs",
   "regions": ["sin1"],
   "env": {
@@ -14,6 +14,8 @@
       "maxDuration": 30
     }
   },
+  "installCommand": "npm install",
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet . || npx turbo-ignore",
   "rewrites": [
     {
       "source": "/api/:path*",
