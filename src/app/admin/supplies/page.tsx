@@ -205,7 +205,10 @@ export default function SuppliesPage() {
 
   // QR Code functions
   const generateSupplyQRUrl = (supplyId: string) => {
-    return `${window.location.origin}/public/supply/${supplyId}`;
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/public/supply/${supplyId}`;
+    }
+    return `/public/supply/${supplyId}`;
   };
 
   const handleQRScan = (data: string) => {
@@ -774,7 +777,11 @@ export default function SuppliesPage() {
                     เบิกวัสดุ
                   </button>
                   <button
-                    onClick={() => window.location.href = `/public/supply/${selectedSupplyForAction.id}`}
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.location.href = `/public/supply/${selectedSupplyForAction.id}`;
+                      }
+                    }}
                     className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-kanit font-medium py-2 px-4 rounded-lg transition duration-300"
                   >
                     ดูรายละเอียด

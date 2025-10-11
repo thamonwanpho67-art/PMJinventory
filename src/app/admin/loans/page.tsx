@@ -332,7 +332,9 @@ export default function AdminLoansPage() {
                         <div>
                           <span className="text-pink-600 font-medium">วันที่ยื่นคำขอ:</span>
                           <p className="text-gray-900">
-                            {new Date(loan.createdAt).toLocaleDateString('th-TH')}
+                            {new Date(loan.createdAt).toLocaleDateString('th-TH', {
+                              timeZone: 'Asia/Bangkok'
+                            })}
                           </p>
                         </div>
                         <div>
@@ -532,7 +534,8 @@ export default function AdminLoansPage() {
                         <div>
                           <p className="text-sm text-yellow-600 font-medium">วันที่ยืม</p>
                           <p className="text-gray-900 font-semibold">
-                            {new Date(selectedLoan.borrowDate).toLocaleDateString('th-TH', {
+                            {new Date(selectedLoan.createdAt).toLocaleDateString('th-TH', {
+                              timeZone: 'Asia/Bangkok',
                               year: 'numeric',
                               month: 'long',
                               day: 'numeric'
@@ -616,14 +619,18 @@ export default function AdminLoansPage() {
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         <span className="text-gray-700">
-                          ยื่นคำขอ: {new Date(selectedLoan.createdAt).toLocaleDateString('th-TH')}
+                          ยื่นคำขอ: {new Date(selectedLoan.createdAt).toLocaleDateString('th-TH', {
+                            timeZone: 'Asia/Bangkok'
+                          })}
                         </span>
                       </div>
                       {selectedLoan.borrowedAt && (
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                           <span className="text-gray-700">
-                            อนุมัติและยืม: {new Date(selectedLoan.borrowedAt).toLocaleDateString('th-TH')}
+                            อนุมัติและยืม: {new Date(selectedLoan.borrowedAt).toLocaleDateString('th-TH', {
+                              timeZone: 'Asia/Bangkok'
+                            })}
                           </span>
                         </div>
                       )}
@@ -631,7 +638,9 @@ export default function AdminLoansPage() {
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
                           <span className="text-gray-700">
-                            คืนแล้ว: {new Date(selectedLoan.returnedAt).toLocaleDateString('th-TH')}
+                            คืนแล้ว: {new Date(selectedLoan.returnedAt).toLocaleDateString('th-TH', {
+                              timeZone: 'Asia/Bangkok'
+                            })}
                           </span>
                         </div>
                       )}

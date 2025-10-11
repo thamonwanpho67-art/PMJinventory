@@ -51,7 +51,9 @@ export default function AuthErrorHandler() {
           
           // Reload page as last resort
           setTimeout(() => {
-            window.location.reload();
+            if (typeof window !== 'undefined') {
+              window.location.reload();
+            }
           }, 2000);
         } else if (errorCount >= 3) {
           console.log('Multiple auth errors detected. Clearing auth cache...');

@@ -221,7 +221,9 @@ export default function LoansPage() {
                         <div>
                           <span className="text-pink-600 font-medium">วันที่ยื่นคำขอ:</span>
                           <p className="text-gray-900">
-                            {new Date(loan.createdAt).toLocaleDateString('th-TH')}
+                            {new Date(loan.createdAt).toLocaleDateString('th-TH', {
+                              timeZone: 'Asia/Bangkok'
+                            })}
                           </p>
                         </div>
                         <div>
@@ -234,9 +236,13 @@ export default function LoansPage() {
                           <span className="text-pink-600 font-medium">สถานะ:</span>
                           <p className="text-gray-900">
                             {loan.status === 'APPROVED' && loan.borrowedAt 
-                              ? `ยืมแล้ว (${new Date(loan.borrowedAt).toLocaleDateString('th-TH')})`
+                              ? `ยืมแล้ว (${new Date(loan.borrowedAt).toLocaleDateString('th-TH', {
+                                  timeZone: 'Asia/Bangkok'
+                                })})`
                               : loan.status === 'RETURNED' && loan.returnedAt
-                              ? `คืนแล้ว (${new Date(loan.returnedAt).toLocaleDateString('th-TH')})`
+                              ? `คืนแล้ว (${new Date(loan.returnedAt).toLocaleDateString('th-TH', {
+                                  timeZone: 'Asia/Bangkok'
+                                })})`
                               : statusConfig[loan.status].label
                             }
                           </p>

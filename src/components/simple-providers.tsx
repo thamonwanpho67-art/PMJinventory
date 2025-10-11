@@ -43,7 +43,11 @@ class AuthErrorBoundary extends React.Component<
             <h2 className="text-xl font-semibold mb-2">เกิดข้อผิดพลาด</h2>
             <p className="text-gray-600 mb-4">กรุณาลองรีเฟรชหน้าเว็บใหม่</p>
             <button 
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.reload();
+                }
+              }}
               className="px-4 py-2 bg-blue-500 text-white rounded"
             >
               รีเฟรช

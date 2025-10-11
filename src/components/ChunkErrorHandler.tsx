@@ -19,7 +19,9 @@ export default function ChunkErrorHandler() {
         );
         
         if (shouldReload) {
-          window.location.reload();
+          if (typeof window !== 'undefined') {
+            window.location.reload();
+          }
         }
       }
     };

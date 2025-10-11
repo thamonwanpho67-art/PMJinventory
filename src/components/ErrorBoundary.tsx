@@ -41,7 +41,9 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
   retry = () => {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
-    window.location.reload();
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   };
 
   render() {

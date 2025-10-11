@@ -182,8 +182,11 @@ export default function AdminAssetsPage() {
   };
 
   // QR Code functions
-  const generateQRUrl = (assetId: string) => {
-    return `${window.location.origin}/public/asset/${assetId}`;
+  const generateAssetQRUrl = (assetId: string) => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/public/asset/${assetId}`;
+    }
+    return `/public/asset/${assetId}`;
   };
 
   const handleQRScan = (data: string) => {
@@ -398,7 +401,11 @@ export default function AdminAssetsPage() {
 
               {/* Add Button */}
               <button
-                onClick={() => window.location.href = '/admin/assets/add'}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.href = '/admin/assets/add';
+                  }
+                }}
                 className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-kanit font-medium py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
               >
                 <FaPlus />
@@ -467,7 +474,11 @@ export default function AdminAssetsPage() {
 
                     <div className="flex gap-2">
                       <button
-                        onClick={() => window.location.href = `/admin/assets/edit/${asset.id}`}
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            window.location.href = `/admin/assets/edit/${asset.id}`;
+                          }
+                        }}
                         className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition-colors"
                         title="แก้ไข"
                       >
@@ -492,7 +503,7 @@ export default function AdminAssetsPage() {
                       </div>
                       <div className="w-16 h-16 bg-white p-2 rounded border">
                         <QRCode
-                          value={generateQRUrl(asset.id)}
+                          value={generateAssetQRUrl(asset.id)}
                           size={48}
                           level="M"
                         />
@@ -506,7 +517,12 @@ export default function AdminAssetsPage() {
                       <div className="flex items-center gap-2">
                         <FaClock className="text-orange-500" />
                         <span className="text-sm font-kanit text-orange-800 font-medium">
-                          ครุภัณฑ์เก่าเกิน 7 ปี (จัดหาเมื่อ: {asset.accountingDate ? new Date(asset.accountingDate).toLocaleDateString('th-TH') : 'ไม่ระบุ'})
+                          ครุภัณฑ์เก่าเกิน 7 ปี (จัดหาเมื่อ: {asset.accountingDate ? new Date(asset.accountingDate).toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            timeZone: 'Asia/Bangkok'
+                          }) : 'ไม่ระบุ'})
                         </span>
                       </div>
                     </div>
@@ -557,13 +573,23 @@ export default function AdminAssetsPage() {
                       <div>
                         <p>เพิ่มเมื่อ:</p>
                         <p className="font-medium">
-                          {new Date(asset.createdAt).toLocaleDateString('th-TH')}
+                          {new Date(asset.createdAt).toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'long', 
+                            day: 'numeric',
+                            timeZone: 'Asia/Bangkok'
+                          })}
                         </p>
                       </div>
                       <div>
                         <p>อัปเดต:</p>
                         <p className="font-medium">
-                          {new Date(asset.updatedAt).toLocaleDateString('th-TH')}
+                          {new Date(asset.updatedAt).toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric', 
+                            timeZone: 'Asia/Bangkok'
+                          })}
                         </p>
                       </div>
                     </div>

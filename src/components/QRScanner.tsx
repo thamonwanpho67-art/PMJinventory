@@ -259,7 +259,11 @@ export default function QRScanner({
                   ลองใหม่อีกครั้ง
                 </button>
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.location.reload();
+                    }
+                  }}
                   className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-kanit text-sm"
                 >
                   รีเฟรชหน้า

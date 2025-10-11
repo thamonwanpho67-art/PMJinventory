@@ -436,6 +436,7 @@ export default function UserAssetsPage() {
                     </h3>
                     <p className="text-gray-900 font-kanit">
                       {new Date(selectedAsset.updatedAt).toLocaleDateString('th-TH', {
+                        timeZone: 'Asia/Bangkok',
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'

@@ -489,7 +489,8 @@ export default function UserSuppliesPage() {
                       {new Date(selectedSupply.updatedAt).toLocaleDateString('th-TH', {
                         year: 'numeric',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
+                        timeZone: 'Asia/Bangkok'
                       })}
                     </p>
                   </div>
