@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import AlertService from '@/lib/alert';
+import { DEPARTMENTS } from '@/lib/constants';
 import { 
   FaArrowDown, 
   FaArrowUp, 
@@ -12,7 +13,8 @@ import {
   FaPlus,
   FaMinus,
   FaBox,
-  FaHistory
+  FaHistory,
+  FaBuilding
 } from 'react-icons/fa';
 
 type Supply = {
@@ -376,15 +378,21 @@ export default function SupplyDistributePage() {
                   {formData.transactionType === 'OUT' && (
                     <div>
                       <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                        <FaBuilding className="inline mr-2" />
                         แผนก/หน่วยงาน
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={formData.department}
                         onChange={(e) => setFormData({...formData, department: e.target.value})}
-                        className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
-                        placeholder="เช่น ฝ่ายบัญชี"
-                      />
+                        className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit bg-white"
+                      >
+                        <option value="">เลือกแผนก</option>
+                        {DEPARTMENTS.map((dept) => (
+                          <option key={dept} value={dept}>
+                            {dept}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   )}
 

@@ -120,6 +120,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           name: 'เบิก-จ่ายวัสดุ',
           href: '/admin/supplies/distribute',
         },
+        {
+          name: 'คำขอวัสดุ',
+          href: '/admin/supply-requests',
+        },
       ],
     },
     {

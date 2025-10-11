@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { FaSearch, FaFilter, FaBoxes, FaExclamationTriangle, FaCheckCircle, FaEye, FaClipboard, FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import SupplyRequestModal from '@/components/SupplyRequestModal';
 
 interface Supply {
   id: string;
@@ -32,6 +33,7 @@ export default function UserSuppliesPage() {
   const [quantityFilter, setQuantityFilter] = useState<string>('ALL');
   const [selectedSupply, setSelectedSupply] = useState<Supply | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
 
   const fetchSupplies = async () => {
@@ -131,6 +133,21 @@ export default function UserSuppliesPage() {
   const openDetailModal = (supply: Supply) => {
     setSelectedSupply(supply);
     setShowDetailModal(true);
+  };
+
+  const openRequestModal = (supply: Supply) => {
+    setSelectedSupply(supply);
+    setShowRequestModal(true);
+  };
+
+  const closeRequestModal = () => {
+    setShowRequestModal(false);
+    setSelectedSupply(null);
+  };
+
+  const handleRequestSuccess = () => {
+    closeRequestModal();
+    fetchSupplies(); // Refresh supplies
   };
 
   if (loading) {
@@ -279,6 +296,7 @@ export default function UserSuppliesPage() {
               </div>
 
               <button
+                onClick={() => openRequestModal({ id: '', name: '', unit: '', quantity: 0, code: '', description: '', category: '', minQuantity: 0, createdAt: '', updatedAt: '' })}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
               >
                 <FaClipboard />
@@ -377,6 +395,7 @@ export default function UserSuppliesPage() {
                     {supply.quantity > 0 && (
                       <div className="mt-4">
                         <button
+                          onClick={() => openRequestModal(supply)}
                           className="w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-kanit font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2"
                         >
                           <FaClipboard />
@@ -486,6 +505,10 @@ export default function UserSuppliesPage() {
                 </button>
                 {selectedSupply.quantity > 0 && (
                   <button
+                    onClick={() => {
+                      setShowDetailModal(false);
+                      openRequestModal(selectedSupply);
+                    }}
                     className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white px-4 py-3 rounded-lg hover:from-pink-600 hover:to-rose-700 transition-colors font-kanit text-center"
                   >
                     ยื่นคำขอเบิก
@@ -496,6 +519,16 @@ export default function UserSuppliesPage() {
           </div>
         )}
       </div>
+
+      {/* Supply Request Modal */}
+      {showRequestModal && selectedSupply && (
+        <SupplyRequestModal
+          supply={selectedSupply}
+          isOpen={showRequestModal}
+          onClose={closeRequestModal}
+          onSuccess={handleRequestSuccess}
+        />
+      )}
     </LayoutWrapper>
   );
 }

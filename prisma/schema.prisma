@@ -19,6 +19,7 @@ model User {
   department         String?
   loans              Loan[]
   supplyTransactions SupplyTransaction[]
+  supplyRequests     SupplyRequest[]
 
   @@map("users")
 }
@@ -78,6 +79,7 @@ model Supply {
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   transactions SupplyTransaction[]
+  requests     SupplyRequest[]
 
   @@map("supplies")
 }
@@ -99,6 +101,29 @@ model SupplyTransaction {
   user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("supply_transactions")
+}
+
+model SupplyRequest {
+  id            String               @id @default(cuid())
+  supplyId      String
+  userId        String
+  quantity      Int
+  requesterName String
+  department    String
+  requestDate   DateTime
+  purpose       String?
+  notes         String?
+  status        SupplyRequestStatus  @default(PENDING)
+  approvedBy    String?
+  approvedAt    DateTime?
+  rejectedAt    DateTime?
+  rejectionReason String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  supply        Supply               @relation(fields: [supplyId], references: [id], onDelete: Cascade)
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("supply_requests")
 }
 
 model Notification {
@@ -153,4 +178,11 @@ enum NotificationType {
   LOAN_RETURNED
   LOW_STOCK
   SYSTEM
+}
+
+enum SupplyRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
 }
