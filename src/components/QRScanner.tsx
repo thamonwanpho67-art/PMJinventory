@@ -73,18 +73,46 @@ export default function QRScanner({
   }, []);
 
   useEffect(() => {
-    if (isLibraryLoaded && Html5QrcodeScanner) {
-      startScanner();
+    if (isLibraryLoaded && Html5QrcodeScanner && isOpen) {
+      // รอให้ DOM element พร้อมก่อนเริ่ม scanner
+      const timer = setTimeout(() => {
+        const scannerElement = document.getElementById(scannerElementId);
+        if (scannerElement) {
+          startScanner();
+        } else {
+          console.warn('Scanner element not found, retrying...');
+          // ลองอีกครั้งหลังจาก 500ms
+          setTimeout(() => {
+            if (document.getElementById(scannerElementId)) {
+              startScanner();
+            }
+          }, 500);
+        }
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+        stopScanner();
+      };
     }
     
     return () => {
       stopScanner();
     };
-  }, [isLibraryLoaded]);
+  }, [isLibraryLoaded, isOpen]);
 
   const startScanner = async () => {
     if (!Html5QrcodeScanner || !Html5QrcodeScanType) {
       setError('QR Scanner ยังไม่พร้อมใช้งาน กรุณารอสักครู่');
+      setIsScanning(false);
+      return;
+    }
+
+    // ตรวจสอบว่า DOM element พร้อมหรือไม่
+    const scannerElement = document.getElementById(scannerElementId);
+    if (!scannerElement) {
+      console.error('Scanner element not found:', scannerElementId);
+      setError('ไม่พบ Scanner element กรุณาลองใหม่อีกครั้ง');
       setIsScanning(false);
       return;
     }
@@ -98,6 +126,9 @@ export default function QRScanner({
       if (compatibilityError) {
         throw new Error(compatibilityError);
       }
+
+      // ล้าง scanner element ก่อนเริ่มใหม่
+      scannerElement.innerHTML = '';
 
       const scanner = new Html5QrcodeScanner(
         scannerElementId,
@@ -137,8 +168,8 @@ export default function QRScanner({
 
       // ตั้ง timeout เพื่อตรวจสอบว่า scanner เริ่มทำงานหรือไม่
       setTimeout(() => {
-        const scannerElement = document.getElementById(scannerElementId);
-        if (scannerElement && scannerElement.children.length === 0) {
+        const currentScannerElement = document.getElementById(scannerElementId);
+        if (currentScannerElement && currentScannerElement.children.length === 0) {
           setError('ไม่สามารถเริ่มกล้องได้ กรุณาลองใหม่อีกครั้ง');
           setIsScanning(false);
         }
@@ -149,7 +180,11 @@ export default function QRScanner({
       let errorMsg = 'ไม่สามารถเปิดกล้องได้';
       
       if (err.message) {
-        errorMsg = err.message;
+        if (err.message.includes('HTML Element with id=')) {
+          errorMsg = 'ไม่พบ Scanner element กรุณาลองใหม่อีกครั้ง';
+        } else {
+          errorMsg = err.message;
+        }
       } else if (err.name === 'NotAllowedError') {
         errorMsg = 'กรุณาอนุญาตการใช้งานกล้องในเบราว์เซอร์';
       } else if (err.name === 'NotFoundError') {
