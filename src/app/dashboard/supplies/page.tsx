@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import QRScanner from '@/components/QRScanner';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
-import { FaSearch, FaFilter, FaBoxes, FaExclamationTriangle, FaCheckCircle, FaEye, FaClipboard, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaBoxes, FaExclamationTriangle, FaCheckCircle, FaEye, FaClipboard, FaPlus, FaQrcode } from 'react-icons/fa';
 import Link from 'next/link';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import SupplyRequestModal from '@/components/SupplyRequestModal';
@@ -35,6 +36,48 @@ export default function UserSuppliesPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [qrError, setQRError] = useState<string | null>(null);
+  // Handle QR Scan result
+  const handleQRScan = (result: string) => {
+    setShowQRScanner(false);
+    setQRError(null);
+    let codeOrId = result;
+    // 1. ถ้าเป็น URL เช่น https://.../supply/xxxx ให้ดึง xxxx
+    try {
+      const url = new URL(result);
+      // สมมติ QR เป็น .../supply/xxxx หรือ .../supplies/xxxx
+      const parts = url.pathname.split('/');
+      const idx = parts.findIndex(p => p === 'supply' || p === 'supplies');
+      if (idx !== -1 && parts[idx + 1]) {
+        codeOrId = parts[idx + 1];
+      }
+    } catch (e) {
+      // ไม่ใช่ url, ข้าม
+    }
+    // 2. ถ้าเป็น JSON เช่น {"type":"supply","code":"xxxx"}
+    if (codeOrId === result) {
+      try {
+        const obj = JSON.parse(result);
+        if (obj.code) codeOrId = obj.code;
+        else if (obj.id) codeOrId = obj.id;
+      } catch (e) {
+        // ไม่ใช่ json, ข้าม
+      }
+    }
+    // 3. หาใน supplies
+    const found = supplies.find(s => s.code === codeOrId || s.id === codeOrId);
+    if (found) {
+      setSelectedSupply(found);
+      setShowDetailModal(true);
+    } else {
+      setQRError('ไม่พบวัสดุที่ตรงกับ QR นี้');
+    }
+  };
+
+  const handleQRError = (err: string) => {
+    setQRError(err);
+  };
 
   const fetchSupplies = async () => {
     try {
@@ -295,13 +338,47 @@ export default function UserSuppliesPage() {
                 </div>
               </div>
 
-              <button
-                onClick={() => openRequestModal({ id: '', name: '', unit: '', quantity: 0, code: '', description: '', category: '', minQuantity: 0, createdAt: '', updatedAt: '' })}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
-              >
-                <FaClipboard />
-                ยื่นคำขอเบิก
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowQRScanner(true)}
+                  className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-kanit font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
+                >
+                  <FaQrcode />
+                  สแกน QR
+                </button>
+                <button
+                  onClick={() => openRequestModal({ id: '', name: '', unit: '', quantity: 0, code: '', description: '', category: '', minQuantity: 0, createdAt: '', updatedAt: '' })}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
+                >
+                  <FaClipboard />
+                  ยื่นคำขอเบิก
+                </button>
+              </div>
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <QRScanner
+          isOpen={showQRScanner}
+          onClose={() => setShowQRScanner(false)}
+          onScan={handleQRScan}
+          onError={handleQRError}
+          title="สแกน QR วัสดุสิ้นเปลือง"
+          description="นำกล้องไปส่อง QR Code ของวัสดุที่ต้องการเบิก"
+        />
+      )}
+      {/* QR Scan Error */}
+      {qrError && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-sm w-full mx-4 text-center">
+            <p className="text-red-600 font-kanit text-lg mb-4">{qrError}</p>
+            <button
+              onClick={() => setQRError(null)}
+              className="px-4 py-2 bg-pink-500 text-white rounded-lg font-kanit"
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      )}
             </div>
 
             <div className="mt-4 text-sm text-gray-600 font-kanit">
