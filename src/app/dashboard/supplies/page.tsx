@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import QRScanner from '@/components/QRScanner';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
@@ -26,6 +27,8 @@ interface Supply {
 
 export default function UserSuppliesPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [filteredSupplies, setFilteredSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,26 +49,27 @@ export default function UserSuppliesPage() {
     // 1. ถ้าเป็น URL เช่น https://.../supply/xxxx ให้ดึง xxxx
     try {
       const url = new URL(result);
-      // สมมติ QR เป็น .../supply/xxxx หรือ .../supplies/xxxx
       const parts = url.pathname.split('/');
       const idx = parts.findIndex(p => p === 'supply' || p === 'supplies');
       if (idx !== -1 && parts[idx + 1]) {
         codeOrId = parts[idx + 1];
       }
-    } catch (e) {
-      // ไม่ใช่ url, ข้าม
-    }
+    } catch (e) {}
     // 2. ถ้าเป็น JSON เช่น {"type":"supply","code":"xxxx"}
     if (codeOrId === result) {
       try {
         const obj = JSON.parse(result);
         if (obj.code) codeOrId = obj.code;
         else if (obj.id) codeOrId = obj.id;
-      } catch (e) {
-        // ไม่ใช่ json, ข้าม
-      }
+      } catch (e) {}
     }
-    // 3. หาใน supplies
+    // ถ้ายังไม่ login ให้ redirect ไป login พร้อม supply code
+    if (!session) {
+      const from = encodeURIComponent('/dashboard/supplies?supply=' + encodeURIComponent(codeOrId));
+      router.push(`/login?from=${from}`);
+      return;
+    }
+    // หาใน supplies
     const found = supplies.find(s => s.code === codeOrId || s.id === codeOrId);
     if (found) {
       setSelectedSupply(found);
@@ -135,6 +139,22 @@ export default function UserSuppliesPage() {
   useEffect(() => {
     fetchSupplies();
   }, []);
+
+  // ถ้ามี query supply=xxxx หลัง login ให้เปิด modal รายละเอียดวัสดุนั้นทันที
+  useEffect(() => {
+    const supplyCode = searchParams?.get('supply');
+    if (supplyCode && supplies.length > 0) {
+      const found = supplies.find(s => s.code === supplyCode || s.id === supplyCode);
+      if (found) {
+        setSelectedSupply(found);
+        setShowDetailModal(true);
+        // ลบ query ออกจาก url (optional)
+        const url = new URL(window.location.href);
+        url.searchParams.delete('supply');
+        window.history.replaceState({}, '', url.pathname + url.search);
+      }
+    }
+  }, [searchParams, supplies]);
 
   useEffect(() => {
     filterSupplies();
@@ -340,7 +360,15 @@ export default function UserSuppliesPage() {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => setShowQRScanner(true)}
+                  onClick={() => {
+                    if (!session) {
+                      // ถ้ายังไม่ login ให้ redirect ไป login ก่อน
+                      const from = encodeURIComponent('/dashboard/supplies');
+                      router.push(`/login?from=${from}`);
+                    } else {
+                      setShowQRScanner(true);
+                    }
+                  }}
                   className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-kanit font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center gap-2 shadow-lg"
                 >
                   <FaQrcode />
