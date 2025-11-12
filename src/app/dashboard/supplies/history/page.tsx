@@ -46,8 +46,8 @@ export default function SupplyHistoryPage() {
       if (response.ok) {
         const data = await response.json();
         console.log('Supply requests data:', data);
-        // Ensure data.data is an array, fallback to empty array if not
-        setRequests(Array.isArray(data.data) ? data.data : []);
+        // API returns data.data.requests
+        setRequests(Array.isArray(data.data?.requests) ? data.data.requests : []);
       } else {
         console.error('Failed to fetch supply requests:', response.status);
         await AlertService.error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
