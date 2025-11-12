@@ -556,7 +556,7 @@ export default function UserSuppliesPage() {
                       </div>
                     </div>
 
-                    <div className="text-center">
+                    <div className="text-center mb-4">
                       <p className="text-2xl font-bold text-pink-800 font-kanit mb-1">
                         {supply.quantity} {supply.unit}
                       </p>
@@ -564,6 +564,25 @@ export default function UserSuppliesPage() {
                         คงเหลือ (ขั้นต่ำ: {supply.minQuantity} {supply.unit})
                       </p>
                     </div>
+
+                    {/* Department Inventory */}
+                    {supply.departmentInventory && supply.departmentInventory.length > 0 && (
+                      <div className="border-t border-pink-100 pt-4 mb-4">
+                        <p className="text-xs font-bold text-gray-900 mb-2 font-kanit">
+                          จำนวนคงเหลือแยกตามแผนก:
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {supply.departmentInventory.map((dept) => (
+                            <div key={dept.id} className="text-xs font-kanit">
+                              <span className="text-gray-700">{dept.department}:</span>
+                              <span className="font-bold text-gray-900 ml-1">
+                                {dept.quantity || '-'} {supply.unit}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {supply.quantity > 0 && (
                       <div className="mt-4">
