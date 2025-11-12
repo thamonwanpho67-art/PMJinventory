@@ -231,10 +231,6 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           href: '/dashboard/supplies',
         },
         {
-          name: 'เบิกวัสดุ',
-          href: '/dashboard/supplies/request',
-        },
-        {
           name: 'ประวัติการเบิก',
           href: '/dashboard/supplies/history',
         },
