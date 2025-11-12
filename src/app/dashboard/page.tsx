@@ -210,7 +210,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
-                  <FaClipboardList className="text-orange-600 text-xl" />
+                  <FaBox className="text-orange-600 text-xl" />
                 </div>
                 <div>
                   <h3 className="text-lg font-kanit font-bold text-orange-800">ประวัติการยืม</h3>
