@@ -96,6 +96,7 @@ export default function AdminAssetsPage() {
   const [filteredAssets, setFilteredAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showOldOnly, setShowOldOnly] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [selectedAssetForAction, setSelectedAssetForAction] = useState<Asset | null>(null);
@@ -107,7 +108,7 @@ export default function AdminAssetsPage() {
 
   useEffect(() => {
     filterAssets();
-  }, [assets, searchTerm, showOldOnly]);
+  }, [assets, searchTerm, selectedCategory, showOldOnly]);
 
   const fetchAssets = async () => {
     try {
@@ -141,6 +142,12 @@ export default function AdminAssetsPage() {
           asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           asset.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
           asset.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(asset => 
+        (asset.category || 'ไม่ระบุ') === selectedCategory
       );
     }
 
@@ -374,10 +381,22 @@ export default function AdminAssetsPage() {
                 </div>
               </div>
 
+              {/* Category Filter */}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 font-kanit text-black bg-white min-w-[180px]"
+              >
+                <option value="all">ทุกหมวดหมู่</option>
+                {Array.from(new Set(assets.map(a => a.category || 'ไม่ระบุ'))).sort().map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+
               {/* Old Assets Filter */}
               <button
                 onClick={() => setShowOldOnly(!showOldOnly)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-lg font-kanit font-medium transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg font-kanit font-medium transition-colors whitespace-nowrap ${
                   showOldOnly 
                     ? 'bg-orange-500 text-white shadow-lg' 
                     : 'bg-white border border-orange-300 text-orange-600 hover:bg-orange-50'

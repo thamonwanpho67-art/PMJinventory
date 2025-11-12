@@ -306,7 +306,142 @@ export default function DashboardPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-200 border-t-pink-600 mx-auto mb-4"></div>
             <p className="text-pink-600 font-kanit">กำลังโหลดข้อมูล...</p>
           </div>
+        ) : selectedCategory === 'all' ? (
+          // แสดงแบบแยกหมวดหมู่เมื่อเลือก "ทุกหมวดหมู่"
+          Object.keys(groupedAssets).length > 0 ? (
+            Object.keys(groupedAssets).sort().map((category) => {
+              const categoryAssets = groupedAssets[category].filter(asset => {
+                const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                     asset.description?.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesSearch;
+              });
+
+              if (categoryAssets.length === 0) return null;
+
+              // กำหนดสีตามหมวดหมู่
+              const getCategoryColor = (cat: string) => {
+                const colors: Record<string, { bg: string, border: string, text: string, badge: string }> = {
+                  'อุปกรณ์สำนักงาน': { bg: 'from-blue-50 to-cyan-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700' },
+                  'อุปกรณ์คอมพิวเตอร์': { bg: 'from-purple-50 to-pink-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700' },
+                  'เครื่องใช้ไฟฟ้า': { bg: 'from-yellow-50 to-orange-50', border: 'border-yellow-200', text: 'text-yellow-700', badge: 'bg-yellow-100 text-yellow-700' },
+                  'อุปกรณ์กีฬา': { bg: 'from-green-50 to-emerald-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-100 text-green-700' },
+                  'เครื่องมือช่าง': { bg: 'from-red-50 to-rose-50', border: 'border-red-200', text: 'text-red-700', badge: 'bg-red-100 text-red-700' },
+                  'เฟอร์นิเจอร์': { bg: 'from-amber-50 to-yellow-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700' },
+                  'ไม่ระบุ': { bg: 'from-gray-50 to-slate-50', border: 'border-gray-200', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-700' }
+                };
+                return colors[cat] || colors['ไม่ระบุ'];
+              };
+
+              const colorScheme = getCategoryColor(category);
+
+              return (
+                <div key={category} className="mb-8">
+                  {/* Category Header */}
+                  <div className={`bg-gradient-to-r ${colorScheme.bg} ${colorScheme.border} border-2 rounded-2xl p-6 mb-4`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FaBox className={`text-2xl ${colorScheme.text}`} />
+                        <h2 className={`text-2xl font-kanit font-bold ${colorScheme.text}`}>
+                          {category}
+                        </h2>
+                      </div>
+                      <span className={`px-4 py-2 rounded-full font-kanit font-bold ${colorScheme.badge}`}>
+                        {categoryAssets.length} รายการ
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Assets in this category */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {categoryAssets.map((asset) => (
+                      <div key={asset.id} className="bg-white rounded-2xl shadow-lg border border-pink-100 overflow-hidden hover:shadow-xl transition-shadow">
+                        {asset.imageUrl && (
+                          <div className="h-48 bg-gray-100 flex items-center justify-center relative">
+                            <Image 
+                              src={`${asset.imageUrl}?t=${Date.now()}`} 
+                              alt={asset.name}
+                              fill
+                              className="object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/images/default-asset.svg';
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div className="p-6">
+                          <div className="flex justify-between items-start mb-3">
+                            <h3 className="font-kanit font-bold text-lg text-gray-800">{asset.name}</h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-kanit font-bold ${colorScheme.badge}`}>
+                              {asset.category}
+                            </span>
+                          </div>
+                          
+                          {asset.description && (
+                            <p className="text-gray-600 text-sm font-kanit mb-4 line-clamp-2">{asset.description}</p>
+                          )}
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600 font-kanit text-sm">ทั้งหมด:</span>
+                              <span className="font-kanit font-bold text-gray-800">{asset.quantity} ชิ้น</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600 font-kanit text-sm">พร้อมใช้งาน:</span>
+                              <span className={`font-kanit font-bold ${asset.available > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {asset.available} ชิ้น
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600 font-kanit text-sm">กำลังยืม:</span>
+                              <span className="font-kanit font-bold text-orange-600">{asset.borrowed} ชิ้น</span>
+                            </div>
+                          </div>
+                          
+                          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                            <div 
+                              className="bg-gradient-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${(asset.available / asset.quantity) * 100}%` }}
+                            ></div>
+                          </div>
+                          
+                          <button
+                            onClick={() => {
+                              const assetForBorrow: Asset = {
+                                id: asset.id,
+                                code: asset.id,
+                                name: asset.name,
+                                description: asset.description,
+                                quantity: asset.quantity,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                              };
+                              handleSelectAsset(assetForBorrow);
+                            }}
+                            disabled={!asset.canBorrow}
+                            className={`w-full py-3 px-4 rounded-xl font-kanit font-semibold transition-all duration-200 ${
+                              asset.canBorrow
+                                ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 shadow-lg hover:shadow-xl'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                          >
+                            {asset.canBorrow ? 'ขอยืม' : `หมด (เหลือ ${asset.available} ชิ้น)`}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📦</div>
+              <p className="text-gray-600 font-kanit text-lg">ไม่มีข้อมูลครุภัณฑ์</p>
+            </div>
+          )
         ) : (
+          // แสดงแบบ Grid เมื่อเลือกหมวดหมู่เฉพาะ
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {filteredAssets.map((asset) => (
               <div key={asset.id} className="bg-white rounded-2xl shadow-lg border border-pink-100 overflow-hidden hover:shadow-xl transition-shadow">
@@ -318,7 +453,6 @@ export default function DashboardPage() {
                       fill
                       className="object-contain"
                       onError={(e) => {
-                        // Fallback to a default image if loading fails
                         const target = e.target as HTMLImageElement;
                         target.src = '/images/default-asset.svg';
                       }}
@@ -363,10 +497,9 @@ export default function DashboardPage() {
                   
                   <button
                     onClick={() => {
-                      // Convert UserAsset to Asset type for compatibility
                       const assetForBorrow: Asset = {
                         id: asset.id,
-                        code: asset.id, // Using id as code for now
+                        code: asset.id,
                         name: asset.name,
                         description: asset.description,
                         quantity: asset.quantity,
