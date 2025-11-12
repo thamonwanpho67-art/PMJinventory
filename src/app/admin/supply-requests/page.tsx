@@ -329,14 +329,14 @@ export default function SupplyRequestsPage() {
                     <tr key={request.id} className="border-t border-pink-100 hover:bg-pink-25">
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-kanit font-semibold text-gray-800">{request.supply.name}</div>
-                          <div className="text-sm text-gray-600 font-kanit">{request.supply.category}</div>
+                          <div className="font-kanit font-semibold text-gray-900">{request.supply.name}</div>
+                          <div className="text-sm text-gray-900 font-kanit">{request.supply.category}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-kanit font-semibold text-gray-800">{request.requesterName}</div>
-                          <div className="text-sm text-gray-600 font-kanit">{request.user.email}</div>
+                          <div className="font-kanit font-semibold text-gray-900">{request.requesterName}</div>
+                          <div className="text-sm text-gray-900 font-kanit">{request.user.email}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 font-kanit">{request.department}</td>
@@ -389,7 +389,7 @@ export default function SupplyRequestsPage() {
         {filteredRequests.length === 0 && !loading && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📋</div>
-            <p className="text-gray-600 font-kanit text-lg">ไม่พบคำขอเบิกวัสดุ</p>
+            <p className="text-gray-900 font-kanit text-lg">ไม่พบคำขอเบิกวัสดุ</p>
           </div>
         )}
 
@@ -434,18 +434,18 @@ export default function SupplyRequestsPage() {
                 {/* Requester Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="font-kanit font-bold text-gray-800 mb-3">ข้อมูลผู้ขอ</h3>
+                    <h3 className="font-kanit font-bold text-gray-900 mb-3">ข้อมูลผู้ขอ</h3>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <FaUser className="text-gray-500" />
+                        <FaUser className="text-gray-900" />
                         <span className="font-kanit">{selectedRequest.requesterName}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <FaBuilding className="text-gray-500" />
+                        <FaBuilding className="text-gray-900" />
                         <span className="font-kanit">{selectedRequest.department}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <FaCalendar className="text-gray-500" />
+                        <FaCalendar className="text-gray-900" />
                         <span className="font-kanit">
                           {new Date(selectedRequest.requestDate).toLocaleDateString('th-TH', {
                             year: 'numeric',
@@ -458,7 +458,7 @@ export default function SupplyRequestsPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-kanit font-bold text-gray-800 mb-3">สถานะ</h3>
+                    <h3 className="font-kanit font-bold text-gray-900 mb-3">สถานะ</h3>
                     <div className="space-y-2">
                       <div>{getStatusBadge(selectedRequest.status)}</div>
                       {selectedRequest.approvedAt && (
@@ -472,7 +472,7 @@ export default function SupplyRequestsPage() {
                         </p>
                       )}
                       {selectedRequest.approvedBy && (
-                        <p className="text-sm text-gray-600 font-kanit">
+                        <p className="text-sm text-gray-900 font-kanit">
                           ผู้อนุมัติ: {selectedRequest.approvedBy}
                         </p>
                       )}
@@ -483,16 +483,16 @@ export default function SupplyRequestsPage() {
                 {/* Purpose and Notes */}
                 {(selectedRequest.purpose || selectedRequest.notes) && (
                   <div>
-                    <h3 className="font-kanit font-bold text-gray-800 mb-3">รายละเอียดเพิ่มเติม</h3>
+                    <h3 className="font-kanit font-bold text-gray-900 mb-3">รายละเอียดเพิ่มเติม</h3>
                     {selectedRequest.purpose && (
                       <div className="mb-3">
-                        <span className="text-sm text-gray-700 font-kanit">วัตถุประสงค์:</span>
+                        <span className="text-sm text-gray-900 font-kanit">วัตถุประสงค์:</span>
                         <p className="font-kanit bg-gray-50 p-2 rounded">{selectedRequest.purpose}</p>
                       </div>
                     )}
                     {selectedRequest.notes && (
                       <div>
-                        <span className="text-sm text-gray-700 font-kanit">หมายเหตุ:</span>
+                        <span className="text-sm text-gray-900 font-kanit">หมายเหตุ:</span>
                         <p className="font-kanit bg-gray-50 p-2 rounded">{selectedRequest.notes}</p>
                       </div>
                     )}
@@ -511,7 +511,7 @@ export default function SupplyRequestsPage() {
               <div className="flex gap-4 mt-8">
                 <button
                   onClick={() => setShowDetailModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-kanit"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-kanit"
                 >
                   ปิด
                 </button>

@@ -76,6 +76,11 @@ export default function NotificationDropdownSimple() {
         case 'LOAN_RETURNED':
           router.push('/admin/loans');
           break;
+        case 'SUPPLY_REQUEST':
+        case 'SUPPLY_APPROVED':
+        case 'SUPPLY_REJECTED':
+          router.push('/admin/supply-requests');
+          break;
         case 'LOW_STOCK':
           router.push('/admin/assets');
           break;
@@ -138,6 +143,12 @@ export default function NotificationDropdownSimple() {
         return 'border-l-green-500 bg-green-50';
       case 'LOAN_RETURNED':
         return 'border-l-purple-500 bg-purple-50';
+      case 'SUPPLY_REQUEST':
+        return 'border-l-orange-500 bg-orange-50';
+      case 'SUPPLY_APPROVED':
+        return 'border-l-green-500 bg-green-50';
+      case 'SUPPLY_REJECTED':
+        return 'border-l-red-500 bg-red-50';
       case 'LOW_STOCK':
         return 'border-l-yellow-500 bg-yellow-50';
       default:

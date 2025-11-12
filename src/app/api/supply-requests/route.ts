@@ -162,6 +162,28 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // สร้างการแจ้งเตือนให้ admin ทุกคนทราบว่ามีคำขอเบิกวัสดุใหม่
+    const admins = await prisma.user.findMany({
+      where: { role: 'ADMIN' }
+    });
+
+    // สร้างการแจ้งเตือนสำหรับแต่ละ admin
+    await Promise.all(
+      admins.map(admin => 
+        prisma.notification.create({
+          data: {
+            userId: admin.id,
+            title: `🔔 คำขอเบิกวัสดุใหม่`,
+            message: `${requesterName} ต้องการเบิก ${supply.name} จำนวน ${quantity} ${supply.unit}`,
+            type: 'SUPPLY_REQUEST',
+            relatedId: supplyRequest.id,
+            relatedType: 'supply_request',
+            isRead: false
+          }
+        })
+      )
+    );
+
     return NextResponse.json({
       success: true,
       data: supplyRequest
