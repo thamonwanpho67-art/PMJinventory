@@ -128,6 +128,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           href: '/admin/supplies',
         },
         {
+          name: 'วัสดุแยกตามแผนก',
+          href: '/admin/supplies/departments',
+        },
+        {
           name: 'เบิก-จ่ายวัสดุ',
           href: '/admin/supplies/distribute',
         },

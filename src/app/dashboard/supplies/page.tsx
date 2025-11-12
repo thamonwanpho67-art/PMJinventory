@@ -23,6 +23,11 @@ interface Supply {
   imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
+  departmentInventory?: {
+    id: string;
+    department: string;
+    quantity: number;
+  }[];
 }
 
 export default function UserSuppliesPage() {
@@ -665,6 +670,25 @@ export default function UserSuppliesPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Department Inventory */}
+                {selectedSupply.departmentInventory && selectedSupply.departmentInventory.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-sm font-semibold text-gray-700 font-kanit mb-3">
+                      จำนวนคงเหลือแยกตามแผนก
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                      {selectedSupply.departmentInventory.map((dept) => (
+                        <div key={dept.id} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
+                          <span className="text-gray-700 font-kanit font-medium">{dept.department}</span>
+                          <span className="text-gray-900 font-kanit font-bold">
+                            {dept.quantity} {selectedSupply.unit}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4 mt-8">

@@ -80,8 +80,22 @@ model Supply {
   updatedAt    DateTime            @updatedAt
   transactions SupplyTransaction[]
   requests     SupplyRequest[]
+  departmentInventory SupplyDepartmentInventory[]
 
   @@map("supplies")
+}
+
+model SupplyDepartmentInventory {
+  id          String   @id @default(cuid())
+  supplyId    String
+  department  String
+  quantity    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  supply      Supply   @relation(fields: [supplyId], references: [id], onDelete: Cascade)
+
+  @@unique([supplyId, department])
+  @@map("supply_department_inventory")
 }
 
 model SupplyTransaction {
