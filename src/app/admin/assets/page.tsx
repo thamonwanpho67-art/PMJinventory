@@ -460,9 +460,10 @@ export default function AdminAssetsPage() {
                 {asset.imageUrl ? (
                   <div className="h-48 bg-gray-100 overflow-hidden">
                     <img 
-                      src={`${asset.imageUrl}${asset.imageUrl.includes('?') ? '&' : '?'}v=${Date.now()}`} 
+                      src={asset.imageUrl} 
                       alt={asset.name}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';

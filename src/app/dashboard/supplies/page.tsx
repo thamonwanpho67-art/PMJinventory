@@ -494,10 +494,12 @@ export default function UserSuppliesPage() {
                   {supply.imageUrl && (
                     <div className="h-48 bg-pink-50 flex items-center justify-center relative">
                       <Image 
-                        src={`${supply.imageUrl}?t=${Date.now()}`} 
+                        src={supply.imageUrl} 
                         alt={supply.name}
                         fill
                         className="object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={false}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = '/images/default-supply.png';
@@ -584,10 +586,12 @@ export default function UserSuppliesPage() {
               {selectedSupply.imageUrl && (
                 <div className="h-48 bg-pink-50 flex items-center justify-center relative rounded-lg mb-6">
                   <Image 
-                    src={`${selectedSupply.imageUrl}?t=${Date.now()}`} 
+                    src={selectedSupply.imageUrl} 
                     alt={selectedSupply.name}
                     fill
                     className="object-contain rounded-lg"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={false}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = '/images/default-supply.png';

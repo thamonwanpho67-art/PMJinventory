@@ -358,10 +358,12 @@ export default function DashboardPage() {
                         {asset.imageUrl && (
                           <div className="h-48 bg-gray-100 flex items-center justify-center relative">
                             <Image 
-                              src={`${asset.imageUrl}?t=${Date.now()}`} 
+                              src={asset.imageUrl} 
                               alt={asset.name}
                               fill
                               className="object-contain"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              priority={false}
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.src = '/images/default-asset.svg';
@@ -448,10 +450,12 @@ export default function DashboardPage() {
                 {asset.imageUrl && (
                   <div className="h-48 bg-gray-100 flex items-center justify-center relative">
                     <Image 
-                      src={`${asset.imageUrl}?t=${Date.now()}`} 
+                      src={asset.imageUrl} 
                       alt={asset.name}
                       fill
                       className="object-contain"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      priority={false}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/images/default-asset.svg';
