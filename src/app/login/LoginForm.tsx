@@ -48,9 +48,13 @@ export default function LoginForm() {
       // Get the updated session to check role
       const session = await getSession();
       
-      // Redirect to callbackUrl if provided, otherwise redirect based on role
-      if (callbackUrl && callbackUrl !== '/dashboard') {
-        router.push(callbackUrl);
+      // Decode callbackUrl if it's URL encoded
+      const decodedCallbackUrl = decodeURIComponent(callbackUrl);
+      
+      // Redirect to callbackUrl if provided and not default dashboard
+      if (searchParams.get('from') && decodedCallbackUrl !== '/dashboard') {
+        console.log('Redirecting to:', decodedCallbackUrl);
+        router.push(decodedCallbackUrl);
       } else if (session?.user?.role === 'ADMIN') {
         router.push('/admin');
       } else {
