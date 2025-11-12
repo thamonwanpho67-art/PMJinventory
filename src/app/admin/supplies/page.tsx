@@ -68,6 +68,8 @@ export default function SuppliesPage() {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [selectedSupplyForAction, setSelectedSupplyForAction] = useState<Supply | null>(null);
   const [showSupplyModal, setShowSupplyModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('');
 
   const [formData, setFormData] = useState<SupplyFormData>({
     name: '',
@@ -156,6 +158,7 @@ export default function SuppliesPage() {
       imageUrl: supply.imageUrl || '',
       department: ''
     });
+    setImagePreview(supply.imageUrl || '');
     setShowModal(true);
   };
 
@@ -201,6 +204,57 @@ export default function SuppliesPage() {
     });
     setEditingSupply(null);
     setShowModal(false);
+    setImagePreview('');
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      await AlertService.error('รองรับเฉพาะไฟล์รูปภาพ (JPG, PNG, WebP)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      await AlertService.error('ไฟล์ใหญ่เกินไป (สูงสุด 5MB)');
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      // Create FormData
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      // Upload to server
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      
+      // Update form data with uploaded image URL
+      setFormData(prev => ({ ...prev, imageUrl: data.url }));
+      setImagePreview(data.url);
+      
+      await AlertService.success('อัปโหลดรูปภาพสำเร็จ');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      await AlertService.error('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+    } finally {
+      setUploading(false);
+    }
   };
 
   // QR Code functions
@@ -655,15 +709,62 @@ export default function SuppliesPage() {
 
                 <div>
                   <label className="block text-gray-700 font-kanit font-semibold mb-2">
-                    URL รูปภาพ
+                    รูปภาพ
                   </label>
-                  <input
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  
+                  {/* Image Preview */}
+                  {(imagePreview || formData.imageUrl) && (
+                    <div className="mb-4 relative">
+                      <img 
+                        src={imagePreview || formData.imageUrl} 
+                        alt="Preview" 
+                        className="w-full h-48 object-cover rounded-xl border border-pink-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({...formData, imageUrl: ''});
+                          setImagePreview('');
+                        }}
+                        className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        title="ลบรูปภาพ"
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Upload Button */}
+                  <div className="flex gap-2">
+                    <label className="flex-1 cursor-pointer">
+                      <div className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                        <FaCamera />
+                        {uploading ? 'กำลังอัปโหลด...' : 'อัปโหลดรูปภาพ'}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Manual URL Input */}
+                  <div className="mt-3">
+                    <input
+                      type="url"
+                      value={formData.imageUrl}
+                      onChange={(e) => {
+                        setFormData({...formData, imageUrl: e.target.value});
+                        setImagePreview(e.target.value);
+                      }}
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
+                      placeholder="หรือใส่ URL รูปภาพ"
+                      disabled={uploading}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex space-x-4 pt-6 border-t border-pink-100">
