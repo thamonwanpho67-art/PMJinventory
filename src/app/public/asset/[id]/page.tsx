@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { FaBox, FaCalendarAlt, FaHashtag, FaInfoCircle, FaSpinner, FaTimes, FaSyncAlt } from 'react-icons/fa';
+import { useParams, useRouter } from 'next/navigation';
+import { FaBox, FaCalendarAlt, FaHashtag, FaInfoCircle, FaSpinner, FaTimes, FaSyncAlt, FaHandHoldingHeart } from 'react-icons/fa';
 
 interface AssetData {
   id: string;
@@ -23,6 +23,7 @@ interface Loan {
 
 export default function PublicAssetInfoPage() {
   const params = useParams();
+  const router = useRouter();
   const assetId = params.id as string;
   
   const [asset, setAsset] = useState<AssetData | null>(null);
@@ -101,11 +102,16 @@ export default function PublicAssetInfoPage() {
     fetchAssetData();
   };
 
+  const handleBorrowClick = () => {
+    // Redirect to borrow page with asset ID as query parameter
+    router.push(`/dashboard/borrow?assetId=${assetId}`);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full">
-          <FaSpinner className="text-5xl text-blue-600 mx-auto mb-6 animate-spin" />
+          <FaSpinner className="text-5xl text-pink-600 mx-auto mb-6 animate-spin" />
           <h2 className="text-2xl font-kanit font-bold text-gray-900 mb-2">กำลังโหลดข้อมูล</h2>
           <p className="text-gray-600 font-kanit">กรุณารอสักครู่...</p>
         </div>
@@ -115,7 +121,7 @@ export default function PublicAssetInfoPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-pink-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaTimes className="text-3xl text-red-600" />
@@ -124,7 +130,7 @@ export default function PublicAssetInfoPage() {
           <p className="text-red-600 font-kanit mb-6">{error}</p>
           <button
             onClick={refreshData}
-            className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 font-kanit font-bold"
+            className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all duration-300 font-kanit font-bold"
           >
             <FaSyncAlt className="inline mr-2" />
             ลองใหม่อีกครั้ง
@@ -136,7 +142,7 @@ export default function PublicAssetInfoPage() {
 
   if (!asset) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center max-w-md w-full">
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaBox className="text-3xl text-gray-600" />
@@ -151,15 +157,15 @@ export default function PublicAssetInfoPage() {
   const status = getAvailabilityStatus();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
           <div className="text-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FaBox className="text-3xl text-blue-600" />
+            <div className="w-20 h-20 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaBox className="text-3xl text-pink-600" />
             </div>
-            <h1 className="text-3xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-kanit font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
               ข้อมูลครุภัณฑ์
             </h1>
             <p className="text-gray-600 font-kanit">ข้อมูลสถานะและจำนวนคงเหลือแบบเรียลไทม์</p>
@@ -177,7 +183,7 @@ export default function PublicAssetInfoPage() {
             อัปเดตล่าสุด: {lastUpdated.toLocaleTimeString('th-TH')}
             <button
               onClick={refreshData}
-              className="ml-2 text-blue-600 hover:text-blue-700 transition-colors"
+              className="ml-2 text-pink-600 hover:text-pink-700 transition-colors"
               title="รีเฟรชข้อมูล"
             >
               <FaSyncAlt className="inline" />
@@ -188,13 +194,13 @@ export default function PublicAssetInfoPage() {
         {/* Asset Details */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
           <h2 className="text-xl font-kanit font-bold text-gray-900 mb-6 flex items-center">
-            <FaInfoCircle className="mr-3 text-blue-600" />
+            <FaInfoCircle className="mr-3 text-pink-600" />
             รายละเอียดครุภัณฑ์
           </h2>
 
           <div className="space-y-6">
             {/* Asset Name */}
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4">
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4">
               <label className="text-sm font-medium text-gray-600 font-kanit block mb-2">ชื่อครุภัณฑ์</label>
               <h3 className="text-2xl font-kanit font-bold text-gray-900">{asset.name}</h3>
             </div>
@@ -226,17 +232,17 @@ export default function PublicAssetInfoPage() {
 
               <div className={`rounded-xl p-4 text-center ${
                 asset.availableQuantity > 0 
-                  ? 'bg-gradient-to-r from-blue-50 to-cyan-50' 
+                  ? 'bg-gradient-to-r from-pink-50 to-purple-50' 
                   : 'bg-gradient-to-r from-red-50 to-pink-50'
               }`}>
                 <label className="text-sm font-medium text-gray-600 font-kanit block mb-2">จำนวนพร้อมใช้</label>
                 <div className={`text-3xl font-bold font-kanit ${
-                  asset.availableQuantity > 0 ? 'text-blue-600' : 'text-red-600'
+                  asset.availableQuantity > 0 ? 'text-pink-600' : 'text-red-600'
                 }`}>
                   {asset.availableQuantity}
                 </div>
                 <div className={`text-sm font-kanit ${
-                  asset.availableQuantity > 0 ? 'text-blue-600' : 'text-red-600'
+                  asset.availableQuantity > 0 ? 'text-pink-600' : 'text-red-600'
                 }`}>
                   ชิ้น
                 </div>
@@ -257,7 +263,7 @@ export default function PublicAssetInfoPage() {
               <div className="mt-3">
                 <div className="bg-gray-200 rounded-full h-3">
                   <div 
-                    className="bg-gradient-to-r from-orange-500 to-yellow-500 h-3 rounded-full transition-all duration-500"
+                    className="bg-gradient-to-r from-pink-500 to-purple-500 h-3 rounded-full transition-all duration-500"
                     style={{ 
                       width: `${asset.quantity > 0 ? ((asset.quantity - asset.availableQuantity) / asset.quantity) * 100 : 0}%` 
                     }}
@@ -292,6 +298,27 @@ export default function PublicAssetInfoPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Borrow Button */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <button
+            onClick={handleBorrowClick}
+            disabled={asset.availableQuantity <= 0}
+            className={`w-full py-4 px-6 rounded-xl font-kanit font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
+              asset.availableQuantity > 0
+                ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 hover:shadow-lg transform hover:scale-105'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <FaHandHoldingHeart className="text-2xl" />
+            {asset.availableQuantity > 0 ? 'ยืมครุภัณฑ์ชิ้นนี้' : 'ไม่สามารถยืมได้ในขณะนี้'}
+          </button>
+          {asset.availableQuantity > 0 && (
+            <p className="text-center text-sm text-gray-600 font-kanit mt-3">
+              คลิกเพื่อเข้าสู่หน้ายืมครุภัณฑ์
+            </p>
+          )}
         </div>
 
         {/* Footer */}

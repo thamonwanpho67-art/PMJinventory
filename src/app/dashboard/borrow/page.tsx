@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
+import { redirect, useSearchParams } from 'next/navigation';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import ClientOnly from '@/components/ClientOnly';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -22,8 +22,26 @@ type Asset = {
 
 export default function BorrowPage() {
   const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [showBorrowForm, setShowBorrowForm] = useState(false);
+
+  // Check if assetId is provided in URL
+  useEffect(() => {
+    const assetId = searchParams.get('assetId');
+    if (assetId && status === 'authenticated') {
+      // Fetch the asset and open the borrow form
+      fetch(`/api/assets/${assetId}`)
+        .then(res => res.json())
+        .then(asset => {
+          setSelectedAsset(asset);
+          setShowBorrowForm(true);
+        })
+        .catch(err => {
+          console.error('Error fetching asset:', err);
+        });
+    }
+  }, [searchParams, status]);
 
   if (status === 'loading') {
     return <LoadingSpinner fullScreen color="pink" text="กำลังโหลดข้อมูล..." />;
