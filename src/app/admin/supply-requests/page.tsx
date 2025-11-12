@@ -217,15 +217,23 @@ export default function SupplyRequestsPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl border border-yellow-200">
-            <div className="flex items-center space-x-3">
-              <FaClock className="text-yellow-600 text-2xl" />
-              <div>
-                <p className="text-yellow-800 font-kanit font-bold text-2xl">
-                  {requests.filter(r => r.status === 'PENDING').length}
-                </p>
-                <p className="text-yellow-600 text-sm font-kanit">รอดำเนินการ</p>
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex items-center space-x-3">
+                <FaClock className="text-yellow-600 text-2xl" />
+                <div>
+                  <p className="text-yellow-800 font-kanit font-bold text-2xl">
+                    {requests.filter(r => r.status === 'PENDING').length}
+                  </p>
+                  <p className="text-yellow-600 text-sm font-kanit">รอดำเนินการ</p>
+                </div>
               </div>
+              <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-xs font-kanit font-medium">
+                รอดำเนินการ
+              </span>
             </div>
+            <p className="text-yellow-600 text-xs font-kanit mt-2 text-right">
+              วันที่อัพเดท {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </p>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200">
             <div className="flex items-center space-x-3">
