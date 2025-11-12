@@ -64,16 +64,25 @@ export default function UserSuppliesPage() {
       }
     } catch (e) {}
     
-    // 2. ถ้าเป็น JSON เช่น {"type":"supply","code":"xxxx"} หรือ {"type":"asset","id":"xxxx"}
+    // 2. ถ้าเป็น JSON เช่น {"type":"supply","code":"xxxx"} หรือ {"type":"asset","assetId":"xxxx"}
     if (itemType === 'unknown') {
       try {
         const obj = JSON.parse(result);
+        // ตรวจสอบ type จาก JSON
         if (obj.type === 'supply' || obj.type === 'supplies') {
           itemType = 'supply';
-          codeOrId = obj.code || obj.id || codeOrId;
+          codeOrId = obj.supplyId || obj.code || obj.id || codeOrId;
         } else if (obj.type === 'asset' || obj.type === 'assets') {
           itemType = 'asset';
-          codeOrId = obj.code || obj.id || codeOrId;
+          codeOrId = obj.assetId || obj.code || obj.id || codeOrId;
+        } else if (obj.assetId) {
+          // มี assetId แต่ไม่ระบุ type
+          itemType = 'asset';
+          codeOrId = obj.assetId;
+        } else if (obj.supplyId) {
+          // มี supplyId แต่ไม่ระบุ type
+          itemType = 'supply';
+          codeOrId = obj.supplyId;
         } else if (obj.code) {
           codeOrId = obj.code;
         } else if (obj.id) {
