@@ -45,14 +45,16 @@ export default function SupplyHistoryPage() {
       const response = await fetch('/api/supply-requests');
       if (response.ok) {
         const data = await response.json();
-        // Filter requests for current user
-        setRequests(data.data);
+        // Ensure data.data is an array, fallback to empty array if not
+        setRequests(Array.isArray(data.data) ? data.data : []);
       } else {
         await AlertService.error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+        setRequests([]);
       }
     } catch (error) {
       console.error('Error fetching requests:', error);
       await AlertService.error('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -127,9 +129,9 @@ export default function SupplyHistoryPage() {
     );
   };
 
-  const pendingCount = requests.filter(r => r.status === 'PENDING').length;
-  const approvedCount = requests.filter(r => r.status === 'APPROVED').length;
-  const rejectedCount = requests.filter(r => r.status === 'REJECTED').length;
+  const pendingCount = Array.isArray(requests) ? requests.filter(r => r.status === 'PENDING').length : 0;
+  const approvedCount = Array.isArray(requests) ? requests.filter(r => r.status === 'APPROVED').length : 0;
+  const rejectedCount = Array.isArray(requests) ? requests.filter(r => r.status === 'REJECTED').length : 0;
 
   return (
     <LayoutWrapper>

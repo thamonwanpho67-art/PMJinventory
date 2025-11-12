@@ -73,6 +73,16 @@ export default function SupplyRequestPage() {
       return;
     }
 
+    if (!formData.quantity || parseInt(formData.quantity) < 1) {
+      await AlertService.error('กรุณาระบุจำนวนที่ต้องการเบิก');
+      return;
+    }
+
+    if (!formData.department) {
+      await AlertService.error('กรุณาเลือกแผนก');
+      return;
+    }
+
     try {
       setSubmitting(true);
 
@@ -84,7 +94,10 @@ export default function SupplyRequestPage() {
         body: JSON.stringify({
           supplyId: selectedSupply.id,
           quantity: parseInt(formData.quantity),
+          requesterName: session?.user?.name || 'ผู้ใช้งาน',
           department: formData.department,
+          requestDate: new Date().toISOString(),
+          purpose: formData.notes,
           notes: formData.notes,
         }),
       });
@@ -271,12 +284,16 @@ export default function SupplyRequestPage() {
                         className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                         min="1"
                         max={selectedSupply.quantity}
+                        placeholder="ระบุจำนวน"
                         required
                       />
                       <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-900 font-kanit">
                         {selectedSupply.unit}
                       </span>
                     </div>
+                    <p className="text-xs text-pink-600 font-kanit mt-1">
+                      สามารถเบิกได้สูงสุด {selectedSupply.quantity} {selectedSupply.unit}
+                    </p>
                   </div>
 
                   {/* Department */}
