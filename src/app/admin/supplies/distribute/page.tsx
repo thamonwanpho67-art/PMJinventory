@@ -249,10 +249,10 @@ export default function SupplyDistributePage() {
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <h3 className="font-kanit font-semibold text-gray-800">{supply.name}</h3>
-                          <p className="text-sm text-gray-600 font-kanit">{supply.category}</p>
+                          <h3 className="font-kanit font-semibold text-gray-900">{supply.name}</h3>
+                          <p className="text-sm text-gray-900 font-kanit">{supply.category}</p>
                           {supply.description && (
-                            <p className="text-sm text-gray-500 font-kanit mt-1">{supply.description}</p>
+                            <p className="text-sm text-gray-900 font-kanit mt-1">{supply.description}</p>
                           )}
                         </div>
                         <div className="text-right ml-4">
@@ -263,7 +263,7 @@ export default function SupplyDistributePage() {
                             }`}>
                               {supply.quantity}
                             </span>
-                            <span className="text-gray-500 font-kanit">{supply.unit}</span>
+                            <span className="text-gray-900 font-kanit">{supply.unit}</span>
                           </div>
                           {getStatusBadge(supply.status)}
                         </div>
@@ -276,7 +276,7 @@ export default function SupplyDistributePage() {
               {filteredSupplies.length === 0 && !loading && (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">📦</div>
-                  <p className="text-gray-600 font-kanit">ไม่พบวัสดุที่ตรงกับการค้นหา</p>
+                  <p className="text-gray-900 font-kanit">ไม่พบวัสดุที่ตรงกับการค้นหา</p>
                 </div>
               )}
             </div>
@@ -305,8 +305,8 @@ export default function SupplyDistributePage() {
 
                   {/* Transaction Type */}
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-3">
-                      ประเภทรายการ
+                    <label className="block text-pink-900 font-kanit font-semibold mb-3">
+                      ประเภทรายการ *
                     </label>
                     <div className="flex space-x-4">
                       <label className="flex items-center">
@@ -317,7 +317,7 @@ export default function SupplyDistributePage() {
                           onChange={(e) => setFormData({...formData, transactionType: e.target.value as 'OUT'})}
                           className="mr-2"
                         />
-                        <span className="flex items-center space-x-2 font-kanit">
+                        <span className="flex items-center space-x-2 font-kanit text-gray-900">
                           <FaMinus className="text-red-500" />
                           <span>เบิกออก</span>
                         </span>
@@ -330,7 +330,7 @@ export default function SupplyDistributePage() {
                           onChange={(e) => setFormData({...formData, transactionType: e.target.value as 'IN'})}
                           className="mr-2"
                         />
-                        <span className="flex items-center space-x-2 font-kanit">
+                        <span className="flex items-center space-x-2 font-kanit text-gray-900">
                           <FaPlus className="text-green-500" />
                           <span>นำเข้า</span>
                         </span>
@@ -340,7 +340,7 @@ export default function SupplyDistributePage() {
 
                   {/* Quantity */}
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-pink-900 font-kanit font-semibold mb-2">
                       จำนวน *
                     </label>
                     <div className="relative">
@@ -348,12 +348,12 @@ export default function SupplyDistributePage() {
                         type="number"
                         value={formData.quantity}
                         onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                        className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                        className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                         min="1"
                         max={formData.transactionType === 'OUT' ? selectedSupply.quantity : undefined}
                         required
                       />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-kanit">
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-900 font-kanit">
                         {selectedSupply.unit}
                       </span>
                     </div>
@@ -361,30 +361,31 @@ export default function SupplyDistributePage() {
 
                   {/* Unit Price */}
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-pink-900 font-kanit font-semibold mb-2">
                       ราคาต่อหน่วย (บาท)
                     </label>
                     <input
                       type="number"
                       value={formData.unitPrice}
                       onChange={(e) => setFormData({...formData, unitPrice: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       step="0.01"
                       min="0"
+                      placeholder="250"
                     />
                   </div>
 
                   {/* Department */}
                   {formData.transactionType === 'OUT' && (
                     <div>
-                      <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                      <label className="block text-pink-900 font-kanit font-semibold mb-2">
                         <FaBuilding className="inline mr-2" />
                         แผนก/หน่วยงาน
                       </label>
                       <select
                         value={formData.department}
                         onChange={(e) => setFormData({...formData, department: e.target.value})}
-                        className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit bg-white"
+                        className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit bg-white text-gray-900"
                       >
                         <option value="">เลือกแผนก</option>
                         {DEPARTMENTS.map((dept) => (
@@ -398,13 +399,13 @@ export default function SupplyDistributePage() {
 
                   {/* Notes */}
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-pink-900 font-kanit font-semibold mb-2">
                       หมายเหตุ
                     </label>
                     <textarea
                       value={formData.notes}
                       onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       rows={3}
                       placeholder="รายละเอียดเพิ่มเติม..."
                     />
@@ -412,14 +413,14 @@ export default function SupplyDistributePage() {
 
                   {/* Approved By */}
                   <div>
-                    <label className="block text-pink-700 font-kanit font-semibold mb-2">
+                    <label className="block text-pink-900 font-kanit font-semibold mb-2">
                       ผู้อนุมัติ
                     </label>
                     <input
                       type="text"
                       value={formData.approvedBy}
                       onChange={(e) => setFormData({...formData, approvedBy: e.target.value})}
-                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit"
+                      className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 font-kanit text-gray-900"
                       placeholder="ชื่อผู้อนุมัติ"
                     />
                   </div>
@@ -445,7 +446,7 @@ export default function SupplyDistributePage() {
               ) : (
                 <div className="text-center py-8">
                   <FaBox className="text-6xl text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 font-kanit">กรุณาเลือกวัสดุที่ต้องการทำรายการ</p>
+                  <p className="text-gray-900 font-kanit">กรุณาเลือกวัสดุที่ต้องการทำรายการ</p>
                 </div>
               )}
             </div>
