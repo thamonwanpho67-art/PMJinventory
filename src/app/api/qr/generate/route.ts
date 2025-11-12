@@ -3,25 +3,23 @@ import QRCode from 'qrcode';
 
 export async function POST(request: NextRequest) {
   try {
-    const { assetId, type = 'asset' } = await request.json();
+    const { assetId, supplyId, type = 'asset' } = await request.json();
 
-    if (!assetId) {
+    const itemId = assetId || supplyId;
+    if (!itemId) {
       return NextResponse.json(
-        { error: 'Asset ID is required' },
+        { error: 'Asset ID or Supply ID is required' },
         { status: 400 }
       );
     }
 
-    // สร้าง QR Code data object
-    const qrData = {
-      assetId,
-      type, // 'asset', 'borrow', 'inventory', 'public'
-      timestamp: new Date().toISOString(),
-      baseUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    };
+    // สร้าง URL สำหรับ QR Code (ไปที่หน้า public)
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'http://localhost:3000';
+    const itemType = supplyId ? 'supply' : 'asset';
+    const qrUrl = `${baseUrl}/public/${itemType}/${itemId}`;
 
-    // สร้าง QR Code string
-    const qrCodeString = await QRCode.toDataURL(JSON.stringify(qrData), {
+    // สร้าง QR Code จาก URL โดยตรง
+    const qrCodeString = await QRCode.toDataURL(qrUrl, {
       errorCorrectionLevel: 'M',
       margin: 1,
       color: {
@@ -34,7 +32,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       qrCode: qrCodeString,
-      data: qrData
+      url: qrUrl,
+      data: {
+        itemId,
+        type: itemType,
+        timestamp: new Date().toISOString()
+      }
     });
 
   } catch (error) {
