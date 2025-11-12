@@ -67,13 +67,20 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
         const response = await fetch('/api/user-assets');
-        if (response.ok) {
-          const data = await response.json();
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          data = null;
+        }
+        if (response.ok && data && data.success) {
           setUserAssets(data.data.assets || []);
           setGroupedAssets(data.data.groupedAssets || {});
           setSummary(data.data.summary || null);
         } else {
-          throw new Error('Failed to fetch user assets');
+          console.error('API user-assets error:', { status: response.status, text, data });
+          throw new Error(data?.error || 'Failed to fetch user assets');
         }
       } catch (error) {
         console.error('Error fetching user assets:', error);
