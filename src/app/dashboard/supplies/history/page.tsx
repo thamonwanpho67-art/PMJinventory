@@ -45,9 +45,11 @@ export default function SupplyHistoryPage() {
       const response = await fetch('/api/supply-requests');
       if (response.ok) {
         const data = await response.json();
+        console.log('Supply requests data:', data);
         // Ensure data.data is an array, fallback to empty array if not
         setRequests(Array.isArray(data.data) ? data.data : []);
       } else {
+        console.error('Failed to fetch supply requests:', response.status);
         await AlertService.error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
         setRequests([]);
       }
@@ -219,6 +221,22 @@ export default function SupplyHistoryPage() {
           </div>
         </div>
 
+        {/* Results Info */}
+        {!loading && requests.length > 0 && (
+          <div className="mb-4 flex justify-between items-center">
+            <p className="text-gray-900 font-kanit">
+              พบ <span className="font-bold text-pink-600">{filteredRequests.length}</span> รายการ
+              {filterStatus !== 'ALL' && ` (กรอง: ${
+                filterStatus === 'PENDING' ? 'รอดำเนินการ' :
+                filterStatus === 'APPROVED' ? 'อนุมัติ' : 'ไม่อนุมัติ'
+              })`}
+            </p>
+            <p className="text-sm text-gray-900 font-kanit">
+              ทั้งหมด {requests.length} รายการ
+            </p>
+          </div>
+        )}
+
         {/* Requests List */}
         {loading ? (
           <div className="text-center py-12">
@@ -228,7 +246,22 @@ export default function SupplyHistoryPage() {
         ) : filteredRequests.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg border border-pink-100 p-12 text-center">
             <FaBox className="text-6xl text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-900 font-kanit text-lg">ไม่พบประวัติการเบิกวัสดุ</p>
+            <p className="text-gray-900 font-kanit text-lg mb-2">
+              {requests.length === 0 ? 'คุณยังไม่มีประวัติการเบิกวัสดุ' : 'ไม่พบรายการที่ตรงกับการค้นหา'}
+            </p>
+            {requests.length === 0 && (
+              <>
+                <p className="text-gray-600 font-kanit text-sm mb-6">
+                  เริ่มต้นเบิกวัสดุสิ้นเปลืองได้เลย
+                </p>
+                <a
+                  href="/dashboard/supplies/request"
+                  className="inline-block px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-kanit font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  เบิกวัสดุ
+                </a>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
