@@ -8,7 +8,7 @@ import { FaSpinner } from 'react-icons/fa';
 const QRScannerComponent = dynamic(() => import('./QRScanner'), {
   ssr: false,
   loading: () => (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-55 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-md w-full mx-auto shadow-2xl p-8">
         <div className="text-center">
           <FaSpinner className="text-4xl text-pink-600 mx-auto mb-4 animate-spin" />
