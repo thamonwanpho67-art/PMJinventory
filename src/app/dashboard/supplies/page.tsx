@@ -42,40 +42,90 @@ export default function UserSuppliesPage() {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [qrError, setQRError] = useState<string | null>(null);
   // Handle QR Scan result
-  const handleQRScan = (result: string) => {
+  const handleQRScan = async (result: string) => {
     setShowQRScanner(false);
     setQRError(null);
     let codeOrId = result;
-    // 1. ถ้าเป็น URL เช่น https://.../supply/xxxx ให้ดึง xxxx
+    let itemType = 'unknown'; // 'supply' or 'asset'
+    
+    // 1. ถ้าเป็น URL เช่น https://.../supply/xxxx หรือ .../asset/xxxx
     try {
       const url = new URL(result);
       const parts = url.pathname.split('/');
-      const idx = parts.findIndex(p => p === 'supply' || p === 'supplies');
-      if (idx !== -1 && parts[idx + 1]) {
-        codeOrId = parts[idx + 1];
+      const supplyIdx = parts.findIndex(p => p === 'supply' || p === 'supplies');
+      const assetIdx = parts.findIndex(p => p === 'asset' || p === 'assets');
+      
+      if (supplyIdx !== -1 && parts[supplyIdx + 1]) {
+        codeOrId = parts[supplyIdx + 1];
+        itemType = 'supply';
+      } else if (assetIdx !== -1 && parts[assetIdx + 1]) {
+        codeOrId = parts[assetIdx + 1];
+        itemType = 'asset';
       }
     } catch (e) {}
-    // 2. ถ้าเป็น JSON เช่น {"type":"supply","code":"xxxx"}
-    if (codeOrId === result) {
+    
+    // 2. ถ้าเป็น JSON เช่น {"type":"supply","code":"xxxx"} หรือ {"type":"asset","id":"xxxx"}
+    if (itemType === 'unknown') {
       try {
         const obj = JSON.parse(result);
-        if (obj.code) codeOrId = obj.code;
-        else if (obj.id) codeOrId = obj.id;
+        if (obj.type === 'supply' || obj.type === 'supplies') {
+          itemType = 'supply';
+          codeOrId = obj.code || obj.id || codeOrId;
+        } else if (obj.type === 'asset' || obj.type === 'assets') {
+          itemType = 'asset';
+          codeOrId = obj.code || obj.id || codeOrId;
+        } else if (obj.code) {
+          codeOrId = obj.code;
+        } else if (obj.id) {
+          codeOrId = obj.id;
+        }
       } catch (e) {}
     }
-    // ถ้ายังไม่ login ให้ redirect ไป login พร้อม supply code
+    
+    // 3. ถ้ายังไม่รู้ชนิด ให้ลองหาใน supplies ก่อน
+    if (itemType === 'unknown') {
+      const foundSupply = supplies.find(s => s.code === codeOrId || s.id === codeOrId);
+      if (foundSupply) {
+        itemType = 'supply';
+      } else {
+        // ลอง fetch asset จาก API
+        try {
+          const assetRes = await fetch(`/api/assets/code/${encodeURIComponent(codeOrId)}`);
+          if (assetRes.ok) {
+            itemType = 'asset';
+          }
+        } catch (e) {}
+      }
+    }
+    
+    // ถ้ายังไม่ login ให้ redirect ไป login พร้อมข้อมูล
     if (!session) {
-      const from = encodeURIComponent('/dashboard/supplies?supply=' + encodeURIComponent(codeOrId));
+      let redirectUrl = '/dashboard/supplies';
+      if (itemType === 'asset') {
+        redirectUrl = `/dashboard/borrow?asset=${encodeURIComponent(codeOrId)}`;
+      } else if (itemType === 'supply') {
+        redirectUrl = `/dashboard/supplies?supply=${encodeURIComponent(codeOrId)}`;
+      }
+      const from = encodeURIComponent(redirectUrl);
       router.push(`/login?from=${from}`);
       return;
     }
-    // หาใน supplies
-    const found = supplies.find(s => s.code === codeOrId || s.id === codeOrId);
-    if (found) {
-      setSelectedSupply(found);
-      setShowDetailModal(true);
+    
+    // 4. Redirect/แสดงข้อมูลตามชนิด
+    if (itemType === 'asset') {
+      // Redirect ไปหน้ายืมครุภัณฑ์
+      router.push(`/dashboard/borrow?asset=${encodeURIComponent(codeOrId)}`);
+    } else if (itemType === 'supply') {
+      // แสดง modal วัสดุสิ้นเปลือง
+      const found = supplies.find(s => s.code === codeOrId || s.id === codeOrId);
+      if (found) {
+        setSelectedSupply(found);
+        setShowDetailModal(true);
+      } else {
+        setQRError('ไม่พบวัสดุที่ตรงกับ QR นี้');
+      }
     } else {
-      setQRError('ไม่พบวัสดุที่ตรงกับ QR นี้');
+      setQRError('ไม่พบข้อมูลที่ตรงกับ QR นี้');
     }
   };
 

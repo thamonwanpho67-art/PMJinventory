@@ -11,7 +11,8 @@ import Alert from '@/lib/alert';
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('from') || '/dashboard';
+  const fromParam = searchParams.get('from');
+  const callbackUrl = fromParam || '/dashboard';
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -48,14 +49,16 @@ export default function LoginForm() {
       // Get the updated session to check role
       const session = await getSession();
       
-      // Decode callbackUrl if it's URL encoded
-      const decodedCallbackUrl = decodeURIComponent(callbackUrl);
+      // Always use callbackUrl if from parameter exists
+      if (fromParam) {
+        console.log('Redirecting to callback:', callbackUrl);
+        router.push(callbackUrl);
+        router.refresh();
+        return;
+      }
       
-      // Redirect to callbackUrl if provided and not default dashboard
-      if (searchParams.get('from') && decodedCallbackUrl !== '/dashboard') {
-        console.log('Redirecting to:', decodedCallbackUrl);
-        router.push(decodedCallbackUrl);
-      } else if (session?.user?.role === 'ADMIN') {
+      // Otherwise redirect based on role
+      if (session?.user?.role === 'ADMIN') {
         router.push('/admin');
       } else {
         router.push('/dashboard');
@@ -76,8 +79,8 @@ export default function LoginForm() {
         <div className="bg-white/80 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-pink-200">
           <div className="text-center mb-8">
             <div className="mx-auto h-16 w-16 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
             <div className="flex items-center justify-center space-x-2">
