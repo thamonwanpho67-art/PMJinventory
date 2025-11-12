@@ -50,6 +50,36 @@ export async function POST(
       );
     }
 
+    // ตรวจสอบและหักจำนวนในแผนก
+    // @ts-ignore - Prisma client will be regenerated
+    const departmentInventory = await prisma.supplyDepartmentInventory.findFirst({
+      where: {
+        supplyId: supplyRequest.supplyId,
+        department: supplyRequest.department
+      }
+    });
+
+    if (departmentInventory) {
+      // ตรวจสอบว่าแผนกมีวัสดุพอหรือไม่
+      if (departmentInventory.quantity < supplyRequest.quantity) {
+        return NextResponse.json(
+          { error: `วัสดุในแผนก${supplyRequest.department}ไม่เพียงพอ (มีเพียง ${departmentInventory.quantity} ${supplyRequest.supply.unit})` },
+          { status: 400 }
+        );
+      }
+
+      // หักจำนวนในแผนก
+      // @ts-ignore - Prisma client will be regenerated
+      await prisma.supplyDepartmentInventory.update({
+        where: { id: departmentInventory.id },
+        data: {
+          quantity: {
+            decrement: supplyRequest.quantity
+          }
+        }
+      });
+    }
+
     // อัปเดตสถานะคำขอเป็น APPROVED
     // @ts-ignore - Prisma client will be regenerated
     const updatedRequest = await prisma.supplyRequest.update({
