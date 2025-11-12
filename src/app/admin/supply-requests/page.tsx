@@ -339,13 +339,13 @@ export default function SupplyRequestsPage() {
                           <div className="text-sm text-gray-900 font-kanit">{request.user.email}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-kanit">{request.department}</td>
+                      <td className="px-6 py-4 font-kanit text-gray-900 font-medium">{request.department}</td>
                       <td className="px-6 py-4">
                         <span className="font-kanit font-bold text-gray-900">
                           {request.quantity} {request.supply.unit}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-kanit">
+                      <td className="px-6 py-4 font-kanit text-gray-900 font-medium">
                         {new Date(request.requestDate).toLocaleDateString('th-TH')}
                       </td>
                       <td className="px-6 py-4">{getStatusBadge(request.status)}</td>
