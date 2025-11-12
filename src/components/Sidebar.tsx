@@ -39,7 +39,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
   // Auto-expand supply menu if on supply-related pages
   useEffect(() => {
-    if (pathname.startsWith('/admin/supplies')) {
+    if (pathname.startsWith('/admin/supplies') || pathname.startsWith('/dashboard/supplies')) {
       setExpandedItems(prev => prev.includes('วัสดุสิ้นเปลือง') ? prev : [...prev, 'วัสดุสิ้นเปลือง']);
     }
   }, [pathname]);
@@ -132,6 +132,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           href: '/admin/supplies/distribute',
         },
         {
+          name: 'ประวัติการเบิก',
+          href: '/admin/supplies/history',
+        },
+        {
           name: 'คำขอวัสดุ',
           href: '/admin/supply-requests',
         },
@@ -221,6 +225,20 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
       ),
+      children: [
+        {
+          name: 'รายการวัสดุ',
+          href: '/dashboard/supplies',
+        },
+        {
+          name: 'เบิกวัสดุ',
+          href: '/dashboard/supplies/request',
+        },
+        {
+          name: 'ประวัติการเบิก',
+          href: '/dashboard/supplies/history',
+        },
+      ],
     },
     // บัญชี
     {
