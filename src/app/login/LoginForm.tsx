@@ -47,7 +47,11 @@ export default function LoginForm() {
 
       // Get the updated session to check role
       const session = await getSession();
-      if (session?.user?.role === 'ADMIN') {
+      
+      // Redirect to callbackUrl if provided, otherwise redirect based on role
+      if (callbackUrl && callbackUrl !== '/dashboard') {
+        router.push(callbackUrl);
+      } else if (session?.user?.role === 'ADMIN') {
         router.push('/admin');
       } else {
         router.push('/dashboard');
