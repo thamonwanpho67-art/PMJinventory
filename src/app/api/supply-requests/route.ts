@@ -170,16 +170,16 @@ export async function POST(request: NextRequest) {
     // สร้างการแจ้งเตือนสำหรับแต่ละ admin
     await Promise.all(
       admins.map(async (adminUser) => {
-        return await prisma.notification.create({
+        return await (prisma.notification.create as any)({
           data: {
             userId: adminUser.id,
             title: `🔔 คำขอเบิกวัสดุใหม่`,
             message: `${requesterName} ต้องการเบิก ${supplyRequest.supply.name} จำนวน ${quantity} ${supplyRequest.supply.unit}`,
-            type: 'SUPPLY_REQUEST' as any,
+            type: 'SUPPLY_REQUEST',
             relatedId: supplyRequest.id,
             relatedType: 'supply_request',
             isRead: false
-          } as any
+          }
         });
       })
     );
