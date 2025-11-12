@@ -82,19 +82,47 @@ export default function UserSuppliesPage() {
       } catch (e) {}
     }
     
-    // 3. ถ้ายังไม่รู้ชนิด ให้ลองหาใน supplies ก่อน
+    // 3. ถ้ายังไม่รู้ชนิด ให้ลองหาใน supplies ก่อน (ค้นหาด้วย code, id, หรือ name)
     if (itemType === 'unknown') {
-      const foundSupply = supplies.find(s => s.code === codeOrId || s.id === codeOrId);
+      const foundSupply = supplies.find(s => 
+        s.code === codeOrId || 
+        s.id === codeOrId || 
+        s.name === codeOrId ||
+        s.name.includes(codeOrId) ||
+        codeOrId.includes(s.name)
+      );
       if (foundSupply) {
         itemType = 'supply';
+        codeOrId = foundSupply.id; // ใช้ id แทน
       } else {
-        // ลอง fetch asset จาก API
+        // ลอง fetch asset จาก API (ค้นหาด้วย code หรือ name)
         try {
           const assetRes = await fetch(`/api/assets/code/${encodeURIComponent(codeOrId)}`);
           if (assetRes.ok) {
-            itemType = 'asset';
+            const assetData = await assetRes.json();
+            if (assetData.success && assetData.data) {
+              itemType = 'asset';
+              codeOrId = assetData.data.id || codeOrId;
+            }
+          } else {
+            // ลองค้นหา asset ด้วย name
+            const assetsRes = await fetch('/api/assets');
+            if (assetsRes.ok) {
+              const assetsData = await assetsRes.json();
+              const foundAsset = assetsData.data?.find((a: any) => 
+                a.name === codeOrId || 
+                a.name.includes(codeOrId) ||
+                codeOrId.includes(a.name)
+              );
+              if (foundAsset) {
+                itemType = 'asset';
+                codeOrId = foundAsset.id;
+              }
+            }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error('Error fetching asset:', e);
+        }
       }
     }
     
@@ -116,8 +144,8 @@ export default function UserSuppliesPage() {
       // Redirect ไปหน้ายืมครุภัณฑ์
       router.push(`/dashboard/borrow?asset=${encodeURIComponent(codeOrId)}`);
     } else if (itemType === 'supply') {
-      // แสดง modal วัสดุสิ้นเปลือง
-      const found = supplies.find(s => s.code === codeOrId || s.id === codeOrId);
+      // แสดง modal วัสดุสิ้นเปลือง (ค้นหาด้วย id ที่ได้จากการค้นหาข้างต้น)
+      const found = supplies.find(s => s.id === codeOrId || s.code === codeOrId);
       if (found) {
         setSelectedSupply(found);
         setShowDetailModal(true);
@@ -125,7 +153,7 @@ export default function UserSuppliesPage() {
         setQRError('ไม่พบวัสดุที่ตรงกับ QR นี้');
       }
     } else {
-      setQRError('ไม่พบข้อมูลที่ตรงกับ QR นี้');
+      setQRError(`ไม่พบข้อมูลที่ตรงกับ QR นี้ (${codeOrId.substring(0, 50)}...)`);
     }
   };
 
