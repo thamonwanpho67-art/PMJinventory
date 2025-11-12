@@ -487,9 +487,9 @@ export default function SuppliesPage() {
                     <tr key={supply.id} className="border-t border-pink-100 hover:bg-pink-25">
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-kanit font-semibold text-gray-800">{supply.name}</div>
+                          <div className="font-kanit font-semibold text-gray-900">{supply.name}</div>
                           {supply.description && (
-                            <div className="text-sm text-gray-600 font-kanit">{supply.description}</div>
+                            <div className="text-sm text-gray-900 font-kanit">{supply.description}</div>
                           )}
                         </div>
                       </td>
@@ -502,7 +502,7 @@ export default function SuppliesPage() {
                           />
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-kanit">{supply.category}</td>
+                      <td className="px-6 py-4 font-kanit text-gray-900">{supply.category}</td>
                       <td className="px-6 py-4">
                         <span className={`font-kanit font-bold ${
                           supply.quantity <= 0 ? 'text-red-600' : 
@@ -511,8 +511,8 @@ export default function SuppliesPage() {
                           {supply.quantity}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-kanit">{supply.unit}</td>
-                      <td className="px-6 py-4 font-kanit">{supply.minStock}</td>
+                      <td className="px-6 py-4 font-kanit text-gray-900">{supply.unit}</td>
+                      <td className="px-6 py-4 font-kanit text-gray-900">{supply.minStock}</td>
                       <td className="px-6 py-4">{getStatusBadge(supply.status)}</td>
                       <td className="px-6 py-4">
                         <div className="flex space-x-2">
