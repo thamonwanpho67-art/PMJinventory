@@ -33,7 +33,7 @@ export default function SupplyDepartmentsPage() {
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState<{ [key: string]: boolean }>({});
-  const [editValues, setEditValues] = useState<{ [key: string]: number }>({});
+  const [editValues, setEditValues] = useState<{ [key: string]: number | string }>({});
 
   const fetchSupplies = async () => {
     try {
@@ -78,7 +78,9 @@ export default function SupplyDepartmentsPage() {
     
     const supply = supplies.find(s => s.id === supplyId);
     const deptInventory = supply?.departmentInventory?.find(d => d.department === department);
-    setEditValues({ ...editValues, [key]: deptInventory?.quantity || 0 });
+    const currentQty = deptInventory?.quantity || 0;
+    // ถ้าเป็น 0 ให้แสดงช่องว่าง ไม่แสดง 0
+    setEditValues({ ...editValues, [key]: currentQty > 0 ? currentQty : '' as any });
   };
 
   const handleSaveClick = async (supplyId: string, department: string) => {
@@ -180,9 +182,10 @@ export default function SupplyDepartmentsPage() {
                                 <input
                                   type="number"
                                   min="0"
-                                  value={editValues[key] || 0}
+                                  value={editValues[key] || ''}
                                   onChange={(e) => setEditValues({ ...editValues, [key]: parseInt(e.target.value) || 0 })}
-                                  className="w-20 px-2 py-1 border border-pink-300 rounded-lg text-center font-kanit focus:ring-2 focus:ring-pink-500"
+                                  placeholder="0"
+                                  className="w-20 px-2 py-1 border border-pink-300 rounded-lg text-center font-kanit font-bold text-gray-900 focus:ring-2 focus:ring-pink-500"
                                 />
                                 <button
                                   onClick={() => handleSaveClick(supply.id, dept)}
@@ -201,8 +204,8 @@ export default function SupplyDepartmentsPage() {
                               </div>
                             ) : (
                               <div className="flex items-center justify-center gap-2">
-                                <span className="font-kanit font-bold text-gray-900">
-                                  {quantity} {supply.unit}
+                                <span className="font-kanit font-bold text-gray-900 text-base">
+                                  {quantity > 0 ? `${quantity} ${supply.unit}` : '-'}
                                 </span>
                                 <button
                                   onClick={() => handleEditClick(supply.id, dept)}
