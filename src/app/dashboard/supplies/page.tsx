@@ -45,124 +45,98 @@ export default function UserSuppliesPage() {
   const handleQRScan = async (result: string) => {
     setShowQRScanner(false);
     setQRError(null);
-    let codeOrId = result;
-    let itemType = 'unknown'; // 'supply' or 'asset'
     
-    // 1. ถ้าเป็น URL เช่น https://.../supply/xxxx หรือ .../asset/xxxx
+    // 1. ลองแปลง QR เป็น JSON ก่อน (รูปแบบใหม่ของระบบ)
+    try {
+      const obj = JSON.parse(result);
+      
+      // ถ้ามี baseUrl และ assetId/supplyId ให้ redirect ตาม URL เลย
+      if (obj.baseUrl && obj.assetId) {
+        const targetUrl = `${obj.baseUrl}/public/asset/${obj.assetId}`;
+        console.log('Redirecting to QR URL:', targetUrl);
+        window.location.href = targetUrl;
+        return;
+      } else if (obj.baseUrl && obj.supplyId) {
+        const targetUrl = `${obj.baseUrl}/public/supply/${obj.supplyId}`;
+        console.log('Redirecting to QR URL:', targetUrl);
+        window.location.href = targetUrl;
+        return;
+      }
+      
+      // ถ้าไม่มี baseUrl แต่มี assetId/supplyId ให้ redirect ภายในเว็บ
+      if (obj.assetId || obj.type === 'asset') {
+        const assetId = obj.assetId || obj.id;
+        const targetUrl = `/public/asset/${assetId}`;
+        console.log('Redirecting to asset:', targetUrl);
+        router.push(targetUrl);
+        return;
+      } else if (obj.supplyId || obj.type === 'supply') {
+        const supplyId = obj.supplyId || obj.id;
+        const targetUrl = `/public/supply/${supplyId}`;
+        console.log('Redirecting to supply:', targetUrl);
+        router.push(targetUrl);
+        return;
+      }
+    } catch (e) {
+      // ไม่ใช่ JSON หรือ parse ไม่ได้ ให้ดำเนินการแบบเดิมต่อ
+      console.log('QR is not JSON, trying other methods');
+    }
+    
+    // 2. ถ้าเป็น URL โดยตรง
     try {
       const url = new URL(result);
-      const parts = url.pathname.split('/');
-      const supplyIdx = parts.findIndex(p => p === 'supply' || p === 'supplies');
-      const assetIdx = parts.findIndex(p => p === 'asset' || p === 'assets');
-      
-      if (supplyIdx !== -1 && parts[supplyIdx + 1]) {
-        codeOrId = parts[supplyIdx + 1];
-        itemType = 'supply';
-      } else if (assetIdx !== -1 && parts[assetIdx + 1]) {
-        codeOrId = parts[assetIdx + 1];
-        itemType = 'asset';
-      }
-    } catch (e) {}
-    
-    // 2. ถ้าเป็น JSON เช่น {"type":"supply","code":"xxxx"} หรือ {"type":"asset","assetId":"xxxx"}
-    if (itemType === 'unknown') {
-      try {
-        const obj = JSON.parse(result);
-        // ตรวจสอบ type จาก JSON
-        if (obj.type === 'supply' || obj.type === 'supplies') {
-          itemType = 'supply';
-          codeOrId = obj.supplyId || obj.code || obj.id || codeOrId;
-        } else if (obj.type === 'asset' || obj.type === 'assets') {
-          itemType = 'asset';
-          codeOrId = obj.assetId || obj.code || obj.id || codeOrId;
-        } else if (obj.assetId) {
-          // มี assetId แต่ไม่ระบุ type
-          itemType = 'asset';
-          codeOrId = obj.assetId;
-        } else if (obj.supplyId) {
-          // มี supplyId แต่ไม่ระบุ type
-          itemType = 'supply';
-          codeOrId = obj.supplyId;
-        } else if (obj.code) {
-          codeOrId = obj.code;
-        } else if (obj.id) {
-          codeOrId = obj.id;
-        }
-      } catch (e) {}
-    }
-    
-    // 3. ถ้ายังไม่รู้ชนิด ให้ลองหาใน supplies ก่อน (ค้นหาด้วย code, id, หรือ name)
-    if (itemType === 'unknown') {
-      const foundSupply = supplies.find(s => 
-        s.code === codeOrId || 
-        s.id === codeOrId || 
-        s.name === codeOrId ||
-        s.name.includes(codeOrId) ||
-        codeOrId.includes(s.name)
-      );
-      if (foundSupply) {
-        itemType = 'supply';
-        codeOrId = foundSupply.id; // ใช้ id แทน
-      } else {
-        // ลอง fetch asset จาก API (ค้นหาด้วย code หรือ name)
-        try {
-          const assetRes = await fetch(`/api/assets/code/${encodeURIComponent(codeOrId)}`);
-          if (assetRes.ok) {
-            const assetData = await assetRes.json();
-            if (assetData.success && assetData.data) {
-              itemType = 'asset';
-              codeOrId = assetData.data.id || codeOrId;
-            }
-          } else {
-            // ลองค้นหา asset ด้วย name
-            const assetsRes = await fetch('/api/assets');
-            if (assetsRes.ok) {
-              const assetsData = await assetsRes.json();
-              const foundAsset = assetsData.data?.find((a: any) => 
-                a.name === codeOrId || 
-                a.name.includes(codeOrId) ||
-                codeOrId.includes(a.name)
-              );
-              if (foundAsset) {
-                itemType = 'asset';
-                codeOrId = foundAsset.id;
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Error fetching asset:', e);
-        }
-      }
-    }
-    
-    // ถ้ายังไม่ login ให้ redirect ไป login พร้อมข้อมูล
-    if (!session) {
-      let redirectUrl = '/dashboard/supplies';
-      if (itemType === 'asset') {
-        redirectUrl = `/dashboard/borrow?asset=${encodeURIComponent(codeOrId)}`;
-      } else if (itemType === 'supply') {
-        redirectUrl = `/dashboard/supplies?supply=${encodeURIComponent(codeOrId)}`;
-      }
-      const from = encodeURIComponent(redirectUrl);
-      router.push(`/login?from=${from}`);
+      console.log('QR is URL, redirecting:', result);
+      window.location.href = result;
       return;
+    } catch (e) {
+      // ไม่ใช่ URL
     }
     
-    // 4. Redirect/แสดงข้อมูลตามชนิด
-    if (itemType === 'asset') {
-      // Redirect ไปหน้ายืมครุภัณฑ์
-      router.push(`/dashboard/borrow?asset=${encodeURIComponent(codeOrId)}`);
-    } else if (itemType === 'supply') {
-      // แสดง modal วัสดุสิ้นเปลือง (ค้นหาด้วย id ที่ได้จากการค้นหาข้างต้น)
-      const found = supplies.find(s => s.id === codeOrId || s.code === codeOrId);
-      if (found) {
-        setSelectedSupply(found);
-        setShowDetailModal(true);
-      } else {
-        setQRError('ไม่พบวัสดุที่ตรงกับ QR นี้');
-      }
+    // 3. ถ้าไม่ใช่ JSON หรือ URL ให้ทำแบบเดิม (ค้นหาด้วยชื่อ/code)
+    let codeOrId = result;
+    let itemType = 'unknown';
+    
+    // หาใน supplies (ค้นหาด้วย code, id, หรือ name)
+    const foundSupply = supplies.find(s => 
+      s.code === codeOrId || 
+      s.id === codeOrId || 
+      s.name === codeOrId ||
+      s.name.includes(codeOrId) ||
+      codeOrId.includes(s.name)
+    );
+    if (foundSupply) {
+      itemType = 'supply';
+      codeOrId = foundSupply.id;
     } else {
-      setQRError(`ไม่พบข้อมูลที่ตรงกับ QR นี้ (${codeOrId.substring(0, 50)}...)`);
+      // ลอง fetch asset
+      try {
+        const assetsRes = await fetch('/api/assets');
+        if (assetsRes.ok) {
+          const assetsData = await assetsRes.json();
+          const foundAsset = assetsData.data?.find((a: any) => 
+            a.code === codeOrId ||
+            a.id === codeOrId ||
+            a.name === codeOrId || 
+            a.name.includes(codeOrId) ||
+            codeOrId.includes(a.name)
+          );
+          if (foundAsset) {
+            itemType = 'asset';
+            codeOrId = foundAsset.id;
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching assets:', e);
+      }
+    }
+    
+    // Redirect ตามชนิดที่หาเจอ
+    if (itemType === 'asset') {
+      router.push(`/public/asset/${codeOrId}`);
+    } else if (itemType === 'supply') {
+      router.push(`/public/supply/${codeOrId}`);
+    } else {
+      setQRError(`ไม่พบข้อมูลที่ตรงกับ QR นี้`);
     }
   };
 
