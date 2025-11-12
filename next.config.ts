@@ -7,28 +7,28 @@ const nextConfig: NextConfig = {
   },
   // Configure image domains if needed
   images: {
-    domains: ['localhost', 'pmj-inventory.vercel.app'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '*.vercel.app',
-        port: '',
-        pathname: '**',
       },
       {
         protocol: 'https',
         hostname: '*.public.blob.vercel-storage.com',
-        port: '',
-        pathname: '**',
       },
       {
         protocol: 'https',
         hostname: 'public.blob.vercel-storage.com',
-        port: '',
-        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'blob.vercel-storage.com',
       },
     ],
-    unoptimized: process.env.NODE_ENV === 'development',
   },
   // Production output configuration
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
