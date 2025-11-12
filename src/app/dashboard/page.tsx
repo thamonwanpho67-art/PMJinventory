@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import ClientOnly from '@/components/ClientOnly';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch, FaQrcode, FaClipboardList, FaPlus } from 'react-icons/fa';
+import { FaUserCircle, FaBox, FaCheckCircle, FaExclamationCircle, FaSearch, FaQrcode, FaPlus } from 'react-icons/fa';
 import Link from 'next/link';
 
 // Dynamic imports to reduce chunk size
@@ -185,21 +185,6 @@ export default function DashboardPage() {
                 <div>
                   <h3 className="text-lg font-kanit font-bold text-blue-800">ยื่นคำขอยืม</h3>
                   <p className="text-blue-600 text-sm font-kanit">ยื่นคำขอยืมอุปกรณ์</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link 
-              href="/dashboard/supplies"
-              className="bg-white rounded-2xl shadow-lg border border-green-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-100 to-green-200 rounded-full flex items-center justify-center">
-                  <FaClipboardList className="text-green-600 text-xl" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-kanit font-bold text-green-800">วัสดุสิ้นเปลือง</h3>
-                  <p className="text-green-600 text-sm font-kanit">ดูและเบิกวัสดุสิ้นเปลือง</p>
                 </div>
               </div>
             </Link>
