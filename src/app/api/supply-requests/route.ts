@@ -131,6 +131,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ตรวจสอบและหักจำนวนในแผนกทันที
+    // @ts-ignore - Prisma client will be regenerated
+    const departmentInventory = await prisma.supplyDepartmentInventory.findFirst({
+      where: {
+        supplyId: supplyId,
+        department: department
+      }
+    });
+
+    if (departmentInventory) {
+      // ตรวจสอบว่าแผนกมีวัสดุพอหรือไม่
+      if (departmentInventory.quantity < quantity) {
+        return NextResponse.json(
+          { error: `วัสดุในแผนก ${department} ไม่เพียงพอ (มีเพียง ${departmentInventory.quantity} ${supply.unit})` },
+          { status: 400 }
+        );
+      }
+
+      // หักจำนวนในแผนกทันที
+      // @ts-ignore - Prisma client will be regenerated
+      await prisma.supplyDepartmentInventory.update({
+        where: { id: departmentInventory.id },
+        data: {
+          quantity: {
+            decrement: quantity
+          }
+        }
+      });
+    }
+
+    // หักสต็อกวัสดุทันที
+    await prisma.supply.update({
+      where: { id: supplyId },
+      data: {
+        quantity: {
+          decrement: quantity
+        }
+      }
+    });
+
     // Create supply request
     // @ts-ignore - Prisma client will be regenerated
     const supplyRequest = await prisma.supplyRequest.create({
@@ -159,6 +199,20 @@ export async function POST(request: NextRequest) {
             email: true
           }
         }
+      }
+    });
+
+    // สร้าง transaction record
+    await prisma.supplyTransaction.create({
+      data: {
+        supplyId: supplyId,
+        userId: session.user.id,
+        transactionType: 'OUT',
+        quantity: quantity,
+        remainingStock: supply.quantity - quantity,
+        notes: `ยื่นคำขอเบิก: ${purpose || '-'}`,
+        department: department,
+        approvedBy: session.user.id
       }
     });
 

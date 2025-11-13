@@ -67,11 +67,42 @@ export async function POST(
       }
     });
 
+    // คืนจำนวนกลับเข้าสต็อก
+    await prisma.supply.update({
+      where: { id: supplyRequest.supplyId },
+      data: {
+        quantity: {
+          increment: supplyRequest.quantity
+        }
+      }
+    });
+
+    // คืนจำนวนกลับเข้าแผนก
+    // @ts-ignore - Prisma client will be regenerated
+    const departmentInventory = await prisma.supplyDepartmentInventory.findFirst({
+      where: {
+        supplyId: supplyRequest.supplyId,
+        department: supplyRequest.department
+      }
+    });
+
+    if (departmentInventory) {
+      // @ts-ignore - Prisma client will be regenerated
+      await prisma.supplyDepartmentInventory.update({
+        where: { id: departmentInventory.id },
+        data: {
+          quantity: {
+            increment: supplyRequest.quantity
+          }
+        }
+      });
+    }
+
     // สร้างการแจ้งเตือนให้ผู้ขอ
     await prisma.notification.create({
       data: {
         title: 'คำขอวัสดุสิ้นเปลืองถูกปฏิเสธ',
-        message: `คำขอวัสดุสิ้นเปลืองของคุณถูกปฏิเสธ\nเหตุผล: ${rejectionReason}`,
+        message: `คำขอวัสดุสิ้นเปลืองของคุณถูกปฏิเสธ\nเหตุผล: ${rejectionReason}\nจำนวนวัสดุถูกคืนกลับเข้าสต็อกแล้ว`,
         type: 'SYSTEM',
         relatedId: id,
         relatedType: 'supply_request'

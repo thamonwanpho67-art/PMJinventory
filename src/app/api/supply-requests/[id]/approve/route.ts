@@ -42,43 +42,15 @@ export async function POST(
       );
     }
 
-    // ตรวจสอบวัสดุพอในสต็อก
-    if (supplyRequest.supply.quantity < supplyRequest.quantity) {
-      return NextResponse.json(
-        { error: 'วัสดุในสต็อกไม่เพียงพอ' },
-        { status: 400 }
-      );
-    }
+    // ตรวจสอบวัสดุพอในสต็อก (เพียงเช็คสถานะ ไม่ต้องหัก เพราะหักไปแล้วตอนยื่นคำขอ)
+    // if (supplyRequest.supply.quantity < supplyRequest.quantity) {
+    //   return NextResponse.json(
+    //     { error: 'วัสดุในสต็อกไม่เพียงพอ' },
+    //     { status: 400 }
+    //   );
+    // }
 
-    // ตรวจสอบและหักจำนวนในแผนก
-    // @ts-ignore - Prisma client will be regenerated
-    const departmentInventory = await prisma.supplyDepartmentInventory.findFirst({
-      where: {
-        supplyId: supplyRequest.supplyId,
-        department: supplyRequest.department
-      }
-    });
-
-    if (departmentInventory) {
-      // ตรวจสอบว่าแผนกมีวัสดุพอหรือไม่
-      if (departmentInventory.quantity < supplyRequest.quantity) {
-        return NextResponse.json(
-          { error: `วัสดุในแผนก${supplyRequest.department}ไม่เพียงพอ (มีเพียง ${departmentInventory.quantity} ${supplyRequest.supply.unit})` },
-          { status: 400 }
-        );
-      }
-
-      // หักจำนวนในแผนก
-      // @ts-ignore - Prisma client will be regenerated
-      await prisma.supplyDepartmentInventory.update({
-        where: { id: departmentInventory.id },
-        data: {
-          quantity: {
-            decrement: supplyRequest.quantity
-          }
-        }
-      });
-    }
+    // ไม่ต้องหักจำนวนในแผนกอีก เพราะหักไปแล้วตอนยื่นคำขอ
 
     // อัปเดตสถานะคำขอเป็น APPROVED
     // @ts-ignore - Prisma client will be regenerated
@@ -95,15 +67,15 @@ export async function POST(
       }
     });
 
-    // อัปเดตสต็อกวัสดุ
-    await prisma.supply.update({
-      where: { id: supplyRequest.supplyId },
-      data: {
-        quantity: {
-          decrement: supplyRequest.quantity
-        }
-      }
-    });
+    // ไม่ต้องหักสต็อกวัสดุอีก เพราะหักไปแล้วตอนยื่นคำขอ
+    // await prisma.supply.update({
+    //   where: { id: supplyRequest.supplyId },
+    //   data: {
+    //     quantity: {
+    //       decrement: supplyRequest.quantity
+    //     }
+    //   }
+    // });
 
     // สร้าง transaction record
     await prisma.supplyTransaction.create({
