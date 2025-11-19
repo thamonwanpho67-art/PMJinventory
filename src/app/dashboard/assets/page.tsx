@@ -280,30 +280,22 @@ export default function UserAssetsPage() {
               </div>
             ) : (
               filteredAssets.map((asset) => (
-                <div key={asset.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden border border-pink-100 hover:border-pink-200">
+                <div key={asset.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
                   {/* Asset Image */}
-                  {asset.imageUrl ? (
-                    <div className="h-48 bg-gray-100 overflow-hidden">
+                  {asset.imageUrl && (
+                    <div className="h-48 bg-gray-100 flex items-center justify-center relative">
                       <Image 
                         src={asset.imageUrl} 
                         alt={asset.name}
-                        width={400}
-                        height={192}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         priority={false}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          const parent = target.parentElement;
-                          if (parent) {
-                            parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"><svg class="text-gray-400 w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg></div>';
-                          }
+                          target.src = '/images/default-asset.svg';
                         }}
                       />
-                    </div>
-                  ) : (
-                    <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                      <FaBox className="text-gray-400 text-6xl" />
                     </div>
                   )}
                   
@@ -314,7 +306,7 @@ export default function UserAssetsPage() {
                           <FaBox className="text-white text-xl" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900 font-kanit">
+                          <h3 className="text-lg font-bold text-gray-900 font-kanit">
                             {asset.name}
                           </h3>
                           <p className="text-sm text-gray-600 font-kanit">
