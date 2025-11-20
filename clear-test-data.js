@@ -10,9 +10,9 @@ async function clearTestData() {
     const deletedNotifications = await prisma.notification.deleteMany({});
     console.log(`✅ ลบการแจ้งเตือน: ${deletedNotifications.count} รายการ`);
 
-    // ลบ Supply Transactions
+    // ลบ Supply Transactions (ประวัติการเบิก-นำเข้า)
     const deletedSupplyTransactions = await prisma.supplyTransaction.deleteMany({});
-    console.log(`✅ ลบประวัติการเบิกวัสดุ: ${deletedSupplyTransactions.count} รายการ`);
+    console.log(`✅ ลบประวัติการเบิก-นำเข้าวัสดุ: ${deletedSupplyTransactions.count} รายการ`);
 
     // ลบ Supply Requests
     const deletedSupplyRequests = await prisma.supplyRequest.deleteMany({});
@@ -22,13 +22,9 @@ async function clearTestData() {
     const deletedLoans = await prisma.loan.deleteMany({});
     console.log(`✅ ลบคำขอยืมครุภัณฑ์: ${deletedLoans.count} รายการ`);
 
-    // รีเซ็ต Supply Department Inventory (ไม่ลบ แต่รีเซ็ตเป็น 0)
-    const resetDeptInventory = await prisma.supplyDepartmentInventory.updateMany({
-      data: {
-        quantity: 0
-      }
-    });
-    console.log(`✅ รีเซ็ตจำนวนวัสดุแยกตามแผนก: ${resetDeptInventory.count} รายการ`);
+    // ลบ Supply Department Inventory ทั้งหมด
+    const deletedDeptInventory = await prisma.supplyDepartmentInventory.deleteMany({});
+    console.log(`✅ ลบข้อมูลวัสดุแยกตามแผนก: ${deletedDeptInventory.count} รายการ`);
 
     console.log('\n✨ เคลียร์ข้อมูลทดสอบเสร็จสิ้น!');
     console.log('ℹ️  ข้อมูล Assets และ Supplies ยังคงอยู่ในระบบ');
