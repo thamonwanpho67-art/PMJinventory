@@ -4,17 +4,22 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
-import { FaSearch, FaFilter, FaBox, FaExclamationTriangle, FaCheckCircle, FaEye, FaClipboard } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaBox, FaExclamationTriangle, FaCheckCircle, FaEye, FaClipboard, FaQrcode, FaClock } from 'react-icons/fa';
 import Link from 'next/link';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import QRCode from 'react-qr-code';
 
 interface Asset {
   id: string;
   code: string;
   name: string;
   description: string | null;
+  category: string | null;
+  location: string | null;
+  status: 'AVAILABLE' | 'DAMAGED' | 'OUT_OF_STOCK';
   quantity: number;
   imageUrl?: string | null;
+  accountingDate: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +33,60 @@ export default function UserAssetsPage() {
   const [quantityFilter, setQuantityFilter] = useState<string>('ALL');
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  const generateAssetQRUrl = (assetId: string) => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/public/asset/${assetId}`;
+    }
+    return `http://localhost:3000/public/asset/${assetId}`;
+  };
+
+  const isAssetOld = (accountingDate: string | null) => {
+    if (!accountingDate) return false;
+    const assetDate = new Date(accountingDate);
+    const currentDate = new Date();
+    const diffYears = (currentDate.getTime() - assetDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
+    return diffYears > 7;
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'AVAILABLE':
+        return <FaCheckCircle className="text-green-500" />;
+      case 'DAMAGED':
+        return <FaExclamationTriangle className="text-yellow-500" />;
+      case 'OUT_OF_STOCK':
+        return <FaBox className="text-red-500" />;
+      default:
+        return <FaBox className="text-gray-500" />;
+    }
+  };
+
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'DAMAGED':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'OUT_OF_STOCK':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'ว่าง';
+      case 'DAMAGED':
+        return 'ชำรุด';
+      case 'OUT_OF_STOCK':
+        return 'หมดสต็อก';
+      default:
+        return 'ไม่ทราบสถานะ';
+    }
+  };
 
   const fetchAssets = async () => {
     try {
@@ -282,20 +341,24 @@ export default function UserAssetsPage() {
               filteredAssets.map((asset) => (
                 <div key={asset.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
                   {/* Asset Image */}
-                  {asset.imageUrl && (
-                    <div className="h-48 bg-gray-100 flex items-center justify-center relative">
+                  {asset.imageUrl ? (
+                    <div className="h-48 bg-gray-100 overflow-hidden">
                       <Image 
                         src={asset.imageUrl} 
                         alt={asset.name}
-                        fill
-                        className="object-contain"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        width={400}
+                        height={192}
+                        className="w-full h-full object-cover"
                         priority={false}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = '/images/default-asset.svg';
+                          target.style.display = 'none';
                         }}
                       />
+                    </div>
+                  ) : (
+                    <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                      <FaBox className="text-gray-400 text-6xl" />
                     </div>
                   )}
                   
@@ -306,7 +369,7 @@ export default function UserAssetsPage() {
                           <FaBox className="text-white text-xl" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 font-kanit">
+                          <h3 className="text-lg font-semibold text-gray-900 font-kanit">
                             {asset.name}
                           </h3>
                           <p className="text-sm text-gray-600 font-kanit">
@@ -324,28 +387,100 @@ export default function UserAssetsPage() {
                       </button>
                     </div>
 
+                    {/* QR Code Section */}
+                    <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FaQrcode className="text-gray-600" />
+                          <span className="text-sm font-kanit text-gray-700">QR Code</span>
+                        </div>
+                        <div className="w-16 h-16 bg-white p-2 rounded border">
+                          <QRCode
+                            value={generateAssetQRUrl(asset.id)}
+                            size={48}
+                            level="M"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Age Warning Badge */}
+                    {isAssetOld(asset.accountingDate) && (
+                      <div className="bg-orange-100 border border-orange-200 rounded-lg p-3 mb-4">
+                        <div className="flex items-center gap-2">
+                          <FaClock className="text-orange-500" />
+                          <span className="text-sm font-kanit text-orange-800 font-medium">
+                            ครุภัณฑ์เก่าเกิน 7 ปี
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     {asset.description && (
                       <p className="text-sm text-gray-600 mb-4 font-kanit line-clamp-2">
                         {asset.description}
                       </p>
                     )}
 
+                    {/* Status and Quantity */}
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        {getQuantityIcon(asset.quantity)}
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getQuantityStatusClass(asset.quantity)} font-kanit`}>
-                          {getQuantityStatusText(asset.quantity)}
+                        {getStatusIcon(asset.status)}
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusClass(asset.status)} font-kanit`}>
+                          {getStatusText(asset.status)}
                         </span>
                       </div>
+                      
+                      {/* Quantity Display */}
+                      {asset.quantity !== undefined && (
+                        <div className="flex items-center gap-2">
+                          {getQuantityIcon(asset.quantity)}
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getQuantityStatusClass(asset.quantity)} font-kanit`}>
+                            {asset.quantity}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-gray-900 font-kanit mb-1">
-                        {asset.quantity} ชิ้น
-                      </p>
-                      <p className="text-sm text-gray-500 font-kanit">
-                        คงเหลือ
-                      </p>
+                    {/* Category and Location */}
+                    <div className="flex items-center gap-2 mb-4 flex-wrap">
+                      {asset.category && (
+                        <span className="text-xs text-gray-500 font-kanit bg-gray-100 px-2 py-1 rounded">
+                          หมวดหมู่: {asset.category}
+                        </span>
+                      )}
+                      {asset.location && (
+                        <span className="text-xs text-gray-500 font-kanit bg-blue-100 px-2 py-1 rounded">
+                          สถานที่: {asset.location}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-100">
+                      <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 font-kanit">
+                        <div>
+                          <p>เพิ่มเมื่อ:</p>
+                          <p className="font-medium">
+                            {new Date(asset.createdAt).toLocaleDateString('th-TH', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              timeZone: 'Asia/Bangkok'
+                            })}
+                          </p>
+                        </div>
+                        <div>
+                          <p>อัปเดต:</p>
+                          <p className="font-medium">
+                            {new Date(asset.updatedAt).toLocaleDateString('th-TH', {
+                              year: 'numeric',
+                              month: 'short', 
+                              day: 'numeric',
+                              timeZone: 'Asia/Bangkok'
+                            })}
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
                     {asset.quantity > 0 && (
