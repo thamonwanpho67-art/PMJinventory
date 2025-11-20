@@ -14,7 +14,8 @@ import {
   FaFilter,
   FaBox,
   FaUser,
-  FaBuilding
+  FaBuilding,
+  FaFileExcel
 } from 'react-icons/fa';
 
 type SupplyTransaction = {
@@ -125,6 +126,52 @@ export default function SupplyHistoryPage() {
     }).format(price);
   };
 
+  const exportToExcel = () => {
+    // สร้างข้อมูลสำหรับ Excel
+    const excelData = filteredTransactions.map(transaction => ({
+      'วันที่': formatDate(transaction.createdAt),
+      'ประเภท': transaction.transactionType === 'IN' ? 'นำเข้า' : 'เบิกออก',
+      'ชื่อวัสดุ': transaction.supply.name,
+      'หมวดหมู่': transaction.supply.category,
+      'จำนวน': `${transaction.quantity} ${transaction.supply.unit}`,
+      'ราคาต่อหน่วย': transaction.unitPrice || '-',
+      'ราคารวม': transaction.totalPrice || '-',
+      'แผนก': transaction.department || '-',
+      'ผู้ทำรายการ': transaction.user.name,
+      'หมายเหตุ': transaction.notes || '-'
+    }));
+
+    // แปลงเป็น CSV
+    const headers = Object.keys(excelData[0] || {});
+    const csvContent = [
+      '\uFEFF' + headers.join(','), // เพิ่ม BOM สำหรับ UTF-8
+      ...excelData.map(row => 
+        headers.map(header => {
+          const value = row[header as keyof typeof row];
+          // ใส่ "" ถ้ามี comma หรือ newline
+          return typeof value === 'string' && (value.includes(',') || value.includes('\n'))
+            ? `"${value.replace(/"/g, '""')}"` 
+            : value;
+        }).join(',')
+      )
+    ].join('\n');
+
+    // สร้าง Blob และดาวน์โหลด
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const filename = `supply-history-${new Date().toISOString().split('T')[0]}.csv`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    AlertService.success('ดาวน์โหลดไฟล์สำเร็จ');
+  };
+
   return (
     <LayoutWrapper>
       <div className="p-6">
@@ -138,7 +185,15 @@ export default function SupplyHistoryPage() {
               ติดตามและจัดการประวัติการทำรายการวัสดุสิ้นเปลือง
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={exportToExcel}
+              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-kanit font-medium py-2 px-4 rounded-lg transition duration-300 shadow-lg"
+              disabled={filteredTransactions.length === 0}
+            >
+              <FaFileExcel />
+              ดาวน์โหลด Excel
+            </button>
             <FaHistory className="text-pink-500 text-3xl" />
           </div>
         </div>
