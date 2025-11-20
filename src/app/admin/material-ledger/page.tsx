@@ -84,48 +84,7 @@ export default function MaterialLedgerPage() {
 
   // Mock data for development
   useEffect(() => {
-    const mockData: MaterialLedgerEntry[] = [
-      {
-        id: '1',
-        type: 'สำนักงาน',
-        materialName: 'กระดาษ A4',
-        unit: 'รีม',
-        code: 'P001',
-        maxQuantity: 100,
-        minQuantity: 10,
-        date: '2025-10-01',
-        fromTo: 'บริษัท เอบีซี จำกัด',
-        documentNumber: 'PO-2025-001',
-        unitPrice: 120,
-        receiveQuantity: 50,
-        issueQuantity: 0,
-        balanceQuantity: 50,
-        totalAmount: 6000,
-        remarks: 'รับเข้าครั้งแรก',
-        createdAt: '2025-10-01T10:00:00Z',
-        updatedAt: '2025-10-01T10:00:00Z'
-      },
-      {
-        id: '2',
-        type: 'สำนักงาน',
-        materialName: 'กระดาษ A4',
-        unit: 'รีม',
-        code: 'P001',
-        maxQuantity: 100,
-        minQuantity: 10,
-        date: '2025-10-02',
-        fromTo: 'แผนกบัญชี',
-        documentNumber: 'REQ-2025-001',
-        unitPrice: 120,
-        receiveQuantity: 0,
-        issueQuantity: 5,
-        balanceQuantity: 45,
-        totalAmount: 600,
-        remarks: 'จ่ายให้แผนกบัญชี',
-        createdAt: '2025-10-02T14:00:00Z',
-        updatedAt: '2025-10-02T14:00:00Z'
-      }
-    ];
+    const mockData: MaterialLedgerEntry[] = [];
     
     setEntries(mockData);
     setLoading(false);
